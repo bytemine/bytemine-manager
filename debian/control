@@ -1,0 +1,15 @@
+Source: bytemine-manager
+Section: unknown
+Priority: extra
+Maintainer: bytemine GmbH <info@bytemine.net>
+Build-Depends: cdbs, debhelper (>= 7), ant
+Standards-Version: 3.8.3
+Homepage: http://www.bytemine.net
+
+Package: bytemine-manager
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: bytemine manager 
+ The "bytemine manager" is a graphical Desktop-Application
+ to manage OpenVPN Servers as well as users and certificates 
+ involved in the process.

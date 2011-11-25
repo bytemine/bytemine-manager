@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<css>
+    <!--
+    bg: #DAD9A6
+    dunkler bg logo #A9A97A
+    headline #BDBC8C
+    navi bg #EBEAC6
+    -->
+    
+    <rule class="JPanel" property="background" value="#DAD9A6"/>
+    <rule class="JButton" property="background" value="#A9A97A"/>
+    <rule class="JButton" property="font-style" value="plain"/>
+    <rule class="JMenuBar" property="background" value="#BDBC8C"/>
+    <rule class="JMenuItem" property="background" value="#BDBC8C"/>
+    <rule class="JTabbedPane" property="background" value="#BDBC8C"/>
+    <rule class="JTabbedPane" property="font-style" value="plain"/>
+    <rule class="JTable" property="background" value="#EBEAC6"/>
+    <rule class="JRadioButton" property="background" value="#DAD9A6"/>
+    <rule class="JCheckBox" property="background" value="#DAD9A6"/>
+    <rule class="JOptionPane" property="background" value="#DAD9A6"/>
+    <rule class="net.bytemine.manager.gui.CustomTableCellRenderer" property="background1" value="#BDBC8C"/>
+    <rule class="net.bytemine.manager.gui.CustomTableCellRenderer" property="background2" value="#DAD9A6"/>
+</css>

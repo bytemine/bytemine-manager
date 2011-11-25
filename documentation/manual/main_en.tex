@@ -1,0 +1,171 @@
+%
+%       main.tex                  -- FRE10
+%
+%       [ readme for bytemine manager application ]
+%
+%
+
+
+\documentclass[12pt]{article}
+
+\usepackage{lmodern}
+\usepackage[width=15cm,height=225mm,top=25mm]{geometry}
+\usepackage[final]{graphicx}
+\usepackage{color}
+\usepackage{fancyhdr}
+%\usepackage{english}
+\usepackage{fix-cm}
+\usepackage[colorlinks=true,
+linkcolor=black,
+citecolor=black,
+filecolor=black,
+pagecolor=black,
+urlcolor=black,
+bookmarks=true,
+bookmarksopen=true,
+bookmarksopenlevel=3,
+plainpages=false,
+pdfpagelabels=true]{hyperref}
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\newcommand{\bmVERSION}	{	version 2.2	}
+\newcommand{\bmDATE}	{	October 2011	}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\newcommand{\Nbtm}{\textsl{bytemine}}
+\newcommand{\Nboa}{\textsl{bytemine openbsd appliance}}
+\newcommand{\Nbms}{\textsl{bytemine manager }}
+\newcommand{\Nbm}{\textsl{bytemine manager}}
+\newcommand{\Nbn}{\textit{\texttt{NN}}}
+\newcommand{\Nvma}{\mbox{\texttt{bytemine-manager-}\Nbn\texttt{.zip}}}
+\newcommand{\Nvmj}{\mbox{\texttt{bytemine-manager-}\Nbn\texttt{.jar}}}
+\newcommand{\Nvms}{\mbox{\texttt{start-manager.jar}}}
+\newcommand{\Nvmw}{\mbox{\texttt{bytemine-manager-}\Nbn\texttt{.exe}}}
+\newcommand{\code}{\texttt}
+\newcommand{\nl}{\smallskip\noindent}
+\newcommand{\Npwf}{\textsl{passwd} file}
+%
+\definecolor{headc}{gray}{.8}
+\makeatletter
+\newcommand{\colhead}[1]%
+ {\colorbox{headc}{\parbox[c]{\hcbw}{\bfseries#1}}%
+  \rule[-2ex]{0pt}{0pt}\@afterindentfalse}
+\makeatother
+%
+\newcommand{\btmlogo}{%
+ \begin{picture}(0,0)(0,0)%
+  \put(10,-195){\includegraphics[width=15cm]{logo.png}}%
+ \end{picture}%
+}
+%
+\newcommand{\subpoint}[1]
+{
+	\bigskip\nl\textbf{\underline{#1}}
+}
+\newenvironment{items}{\begin{itemize}
+\setlength{\itemsep}{1pt}
+\setlength{\parskip}{0pt}
+\setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+
+
+% redefining subsection to have a fancy output when using
+% it with newitem (see below)
+\makeatletter
+ \renewcommand\subsection{\@startsection{subsection}{3}{\z@}%
+                        {-2\p@ \@plus -4\p@ \@minus -4\p@}%
+                        {2\p@ \@plus 4\p@ \@minus 4\p@}%
+                        {\normalfont\normalsize\bfseries\boldmath
+                         \rightskip=\z@ \@plus 5em
+ \pretolerance=10000 }}
+\makeatother
+\newcommand{\newitem}[1]
+{
+\bigskip\nl\colhead{\subsection{\textbf{#1}}}\medskip
+}
+%
+
+
+\begin{document} % ===========================================================
+%
+\setlength\unitlength{1mm}
+\newlength{\hcbw}
+\setlength{\hcbw}{-\columnsep}
+\advance\hcbw-1pt\divide\hcbw by 2\advance\hcbw\columnwidth
+%
+\setlength{\headheight}{22pt}
+\setlength{\headsep}{2.5ex}
+\fancyhead{}\fancyfoot{}
+\fancyhead[LO]{\small\sffamily%
+\textbf{brief instruction} \ -- \ installation and usage of bytemine manager}
+\fancyhead[RO]{\LARGE\sffamily\bfseries\thepage }
+\fancyfoot[RO]{\small\sffamily www.bytemine.net}
+\renewcommand{\headrulewidth}{.2pt}
+\renewcommand{\footrulewidth}{.2pt}
+\fontfamily{cmss}\fontsize{9}{10.6}\selectfont
+\renewcommand{\descriptionlabel}[1]{\hspace{12pt}\textbf{#1}}
+
+  \setlength{\itemsep}{55pt}
+
+\begin{titlepage}
+ \begin{center}
+  \fontfamily{cmss}\fontsize{46}{50}\selectfont
+  bytemine manager
+  \vskip17mm
+  \Huge\bmVERSION
+  \vskip10mm
+  \begin{picture}(0,0)(0,0)
+   \put(-40,-100){\includegraphics[width=8cm]{logo.pdf}}
+  \end{picture}
+  \vskip\fill
+  \large\bmDATE
+ \end{center}
+\end{titlepage}
+%
+\pagestyle{fancy}
+
+\fontsize{4.2mm}{7.0mm}\selectfont
+%\section*{}\vspace{25pt}
+%\section*{}
+\tableofcontents
+\newpage
+\input{body_en}
+
+\newpage
+\thispagestyle{empty}
+\begin{center}
+%  \fontfamily{cmss}\fontsize{46}{50}\selectfont
+%  bytemine manager
+  \vskip17mm
+%  \Huge\bmVERSION
+  \vskip10mm
+  \begin{picture}(0,0)(0,0)
+   \put(-80,-175){\includegraphics[width=17cm]{logo.pdf}}
+  \end{picture}
+  \vskip\fill
+ % \large\bmDATE
+   \hrule
+ \end{center}
+\fontsize{4.1mm}{2.5mm}\selectfont
+
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxxxxxx \= xxxxxxxxxxx \= xxxxx \kill
+%\begin{textit}
+\textit
+\small
+	bytemine GmbH \> Telephone: \> +49-(0)441-309197-0\\
+	Marie-Curie-Stra\ss e 1 \> Fax: \> +49-(0)441-309197-99\\
+	26129 Oldenburg \> Email: \> info@bytemine.net\\
+	Germany\\
+%\end{textit}
+\end{tabbing}
+
+%
+\end{document} % =============================================================
+%
+%%% end %%%
+

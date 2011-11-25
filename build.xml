@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="bytemine-manager" default="build-release" basedir=".">
+	<description>Builds the project Manager.</description>
+
+	<property name="creator" value="bytemine"/>
+	<property name="Customer" value="bytemine"/>
+	<property name="version" value="2.2.3"/>
+	<property name="lib-dir" value="${basedir}/extlib"/>
+	<property name="src-dir" value="${basedir}/src"/>
+	<property name="build-dir" value="${basedir}/build"/>
+	<property name="dist-dir-name" value="dist"/>
+	<property name="dist-dir" value="${basedir}/${dist-dir-name}"/>
+	<property name="dist-temp-dir" value="${dist-dir}/temp"/>
+	<property name="dist-tempdir-name" value="dist/temp"/>
+	<property name="dist-lib-dir" value="${dist-temp-dir}/lib"/>
+	<property name="src-temp-dir" value="bytemine-manager-${version}-src"/>
+	<property name="dist-customer-dir" value="${dist-dir}/${Customer}"/>
+	<property name="theme-dir" value="${basedir}/themes"/>
+	<property name="export-dir" value="export"/>
+	<property name="db-dir" value="db"/>
+	<property name="template-dir" value="templates"/>
+	<property name="db-name" value="manager.db"/>
+	<property name="name" value="bytemine-manager"/>
+	<property name="starter-name" value="start-manager"/>
+	<property name="zip-dir" value="${name}-${version}"/>
+	<property name="zip-extension" value=".zip"/>
+	<property name="tar-extension" value=".tar"/>
+	<property name="tar.gz-extension" value=".tar.gz"/>
+	<property name="jar-extension" value=".jar"/>
+	<property name="manager.properties" value="manager.properties"/>
+	<property name="manifest-name" value="MANIFEST.MF"/>
+	<property name="manifest-starter-name" value="MANIFEST-STARTER.MF"/>
+	<property name="manifest-dir" value="${build-dir}/META-INF"/>
+	<property name="git-revision-file" value="${dist-temp-dir}/git.revision"/>
+	<property name="main-class" value="net.bytemine.manager.ManagerApp"/>
+	<property name="starter-main" value="net.bytemine.manager.ManagerStarter"/>
+	<property name="launch4j.dir" location="/opt/launch4j" />
+	<property name="configuration-class" value="net/bytemine/manager/Configuration.java"/>
+	<property name="schema-xml-file" value="src/net/bytemine/manager/db/schema/schema.xml"/>
+	<property name="manual-build" value="documentation/manual"/>
+	<property name="manual-de" value="documentation/manual/manual-de.pdf"/>
+	<property name="manual-en" value="documentation/manual/manual-en.pdf"/>
+	<property name="vpn-user-template" value="templates/client.ovpn.tpl"/>
+	<property name="vpn-server-template" value="templates/server.ovpn.tpl"/>
+	<property name="readme" value="README"/>
+	<property name="doc" value="javadoc/"/>
+	<property name="doc_packages" 
+		value="
+		net.bytemine.manager,
+		net.bytemine.manager.action,
+		net.bytemine.manager.bean,
+		net.bytemine.manager.cli,
+		net.bytemine.manager.css,
+		net.bytemine.manager.db,
+		net.bytemine.manager.db.schema,
+		net.bytemine.manager.db.test,
+		net.bytemine.manager.exception,
+		net.bytemine.manager.gui,
+		net.bytemine.manager.i18n,
+		net.bytemine.manager.model,
+		net.bytemine.manager.update,
+		net.bytemine.openvpn,
+		net.bytemine.openvpn.config,
+		net.bytemine.openvpn.ssh,
+		net.bytemine.openvpn.test,
+		net.bytemine.utility,
+		net.bytemine.utility.test
+		"
+	/>
+
+
+
+	<!-- all classes and libraries needed for compilation -->
+	<path id="classpath4Compile">
+		<pathelement path="${build-dir}"/>
+
+		<fileset dir="${lib-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
+	
+	<path id="classpath4Tests">
+		<pathelement path="${build-dir}"/>
+		
+		<fileset dir="${lib-dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+
+
+	<!-- creates a list of all libraries, used in manifest file -->
+	<pathconvert property="lib-list" pathsep=" ">
+		<mapper>
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</mapper>
+
+		<path>
+			<fileset dir="${lib-dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</pathconvert>
+	
+	
+	<!-- prepares build directories -->
+	<target name="pre-clean" description="cleans output directories">
+		<delete dir="${build-dir}" failonerror="false"/>
+		<delete dir="${dist-dir}" failonerror="false"/>
+		<delete dir="${dist-temp-dir}" failonerror="false"/>
+		<delete dir="${manifest-dir}" failonerror="false"/>
+
+		<mkdir dir="${build-dir}"/>
+		<mkdir dir="${dist-dir}"/>
+		<mkdir dir="${dist-temp-dir}"/>
+		<mkdir dir="${dist-customer-dir}"/>
+		<mkdir dir="${dist-lib-dir}"/>
+		<mkdir dir="${manifest-dir}"/>
+	</target>
+	
+	
+	
+	<!-- compiles the application -->
+	<target name="compile" depends="pre-clean, set-version" description="Compiles the project">
+		
+		<javac srcdir="${src-dir}"
+			destdir="${build-dir}"
+			debug="off"
+			target="1.6"
+			source="1.6">
+
+			<classpath refid="classpath4Compile"/>
+		</javac>
+
+		<copy todir="${build-dir}">
+			<fileset dir="${src-dir}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/.git"/>
+			</fileset>
+		</copy>
+		
+		<replaceregexp file="${build-dir}/manager.properties"
+			match="jdbc_url=(.*)"
+			replace='jdbc_url=jdbc:sqlite:${db-dir}/${db-name}'
+			byline="true"/>
+		
+	</target>
+
+
+	<!-- builds a manifest.mf file -->
+	<target name="manifest" description="builds manifest.mf file">
+		<touch file="${manifest-dir}/${manifest-name}"/>
+
+		<manifest file="${manifest-dir}/${manifest-name}">
+			<attribute name="Manifest-Version" value="1.0"/>
+			<attribute name="Built-By" value="${creator}"/>
+			<attribute name="Created-By" value="${creator}"/>
+			<attribute name="Main-Class" value="${main-class}"/>
+			<attribute name="Class-Path" value="${lib-list} ${template-dir}" />
+		</manifest>
+	</target>
+
+
+	<!-- builds a manifest.mf file -->
+	<target name="manifest-starter" description="builds manifest.mf file">
+		<touch file="${manifest-dir}/${manifest-starter-name}"/>
+
+		<manifest file="${manifest-dir}/${manifest-starter-name}">
+			<attribute name="Manifest-Version" value="1.0"/>
+			<attribute name="Built-By" value="${creator}"/>
+			<attribute name="Created-By" value="${creator}"/>
+			<attribute name="Main-Class" value="${starter-main}"/>
+			<attribute name="Class-Path" value="${lib-list} ${template-dir}" />
+		</manifest>
+	</target>
+
+
+	<!-- builds a jar from the from the build classes -->
+	<target name="jar" depends="pre-clean, manifest, compile"
+	        description="Builds jar-file from classes">
+		<jar destfile="${dist-temp-dir}/${name}-${version}${jar-extension}"
+			basedir="${build-dir}"
+			manifest="${manifest-dir}/${manifest-name}"
+			excludes="**/.git"
+		/>
+	</target>
+
+
+	<!-- builds a jar from the from the build classes -->
+	<target name="starter-jar" depends="pre-clean, manifest-starter, compile"
+	        description="Builds jar-file from classes">
+		<jar destfile="${dist-temp-dir}/${starter-name}${jar-extension}"
+			basedir="${build-dir}"
+			manifest="${manifest-dir}/${manifest-starter-name}"
+			includes="**/ManagerStarter.class"
+			excludes="**/.git"
+		/>
+	</target>
+
+	<!-- creates a new database with an empty schema -->
+	<target name="prepare-db" depends="compile" description="prepares the release DB">
+		<delete dir="${dist-temp-dir}/${db-dir}" failonerror="false"/>
+		<mkdir dir="${dist-temp-dir}/${db-dir}"/>
+		<touch file="${dist-temp-dir}/${db-dir}/${db-name}"/>
+
+		<property file="${build-dir}/${manager.properties}" prefix="manager"/>
+
+		<java classname="net.bytemine.manager.cli.DBScripts" fork="true" failonerror="true">
+			<classpath refid="classpath4Compile"/>
+			<arg value="prepareDB"/>
+			<arg value="false"/>
+			<arg value="${manager.jdbc_driver}"/>
+			<arg value="jdbc:sqlite:${dist-tempdir-name}/${db-dir}/${db-name}"/>
+		</java>
+	</target>
+
+
+	<target name="export-schema" depends="compile" description="exports the schema as a XStream-SchemaModel">
+		<touch file="${schema-xml-file}"/>
+		<java classname="net.bytemine.manager.cli.DBScripts" fork="true" failonerror="true">
+			<classpath refid="classpath4Compile"/>
+			<arg value="export-schema"/>
+			<arg value="${schema-xml-file}"/>
+			<arg value="${manager.jdbc_driver}"/>
+			<arg value="jdbc:sqlite:${dist-tempdir-name}/${db-dir}/${db-name}"/>
+		</java>
+		<echo message="Writing new database schema to ${schema-xml-file}"/>
+	</target>
+
+	
+	<!-- creates an Windows executable file -->
+	<!-- to use this feature launch4j has to be installed and the path to the 
+		installation has to be specified in launch4j.dir -->
+	<target name="create-exe" depends="launch4j-check" if="launch4j-exists" description="create the Windows exe file">
+		<taskdef name="launch4j"
+			    classname="net.sf.launch4j.ant.Launch4jTask"
+			    classpath="${launch4j.dir}/launch4j.jar
+			        :${launch4j.dir}/lib/xstream.jar" />
+		
+		<launch4j>
+			<config
+				headerType="gui" 
+				icon="./logo.ico"
+				dontWrapJar="true"
+				outfile="${dist-temp-dir}/${zip-dir}/${name}-${version}.exe">
+				<classPath mainClass="${main-class}">
+					<cp>./*.jar</cp>
+			        <cp>./lib/*.jar</cp>
+			    </classPath>
+				<jre minVersion="1.6.0">
+					<opt>-Dlaunch4j.exedir="%EXEDIR%"</opt>
+				    <opt>-Dlaunch4j.exefile="%EXEFILE%"</opt>
+				</jre>
+			</config>
+		</launch4j>
+	</target>
+	
+	<!--- check whether launch4j is installed -->
+	<target name="launch4j-check" description="check if launch4j is installed and available">
+		<condition property="launch4j-exists">
+	      <available file="${launch4j.dir}" type="dir"/>
+	    </condition>
+	</target>
+
+
+	<!-- create the manual pdfs -->
+	<target name="build-doc" description="creates the manual">
+		<exec dir="${manual-build}" executable="/usr/bin/make"> 
+		        <arg value="Makefile" line="all"/> 
+		</exec>
+		<exec dir="${manual-build}" executable="/usr/bin/make"> 
+                	<arg value="Makefile" line="all"/> 
+        	</exec>
+		<exec dir="${manual-build}" executable="/usr/bin/make"> 
+		        <arg value="Makefile" line="clean"/> 
+		</exec>
+	</target>
+
+	<!-- builds the complete release zip file -->
+	<target name="build-release" depends="set-release, prepare-db, export-schema, jar, starter-jar, build-doc" description="builds a complete release zip file">
+		<antcall target="theme">
+			<param name="Customer" value="${Customer}"/>
+		</antcall>
+		
+		<!-- copy libraries -->
+		<copy todir="${dist-lib-dir}">
+			<fileset dir="${lib-dir}"/>
+		</copy>
+
+		<!-- copy templates -->
+		<copy file="${vpn-user-template}" todir="${dist-temp-dir}/${template-dir}" />
+		<copy file="${vpn-server-template}" todir="${dist-temp-dir}/${template-dir}" />
+
+		<mkdir dir="${dist-temp-dir}/${export-dir}"/>
+
+		<!-- copy documentation -->
+		<copy file="${readme}" todir="${dist-temp-dir}"/>
+		<copy file="${manual-de}" tofile="${dist-temp-dir}/manual-de.pdf"/>
+		<copy file="${manual-en}" tofile="${dist-temp-dir}/manual-en.pdf"/>
+
+		<!-- move everything into a new directory to zip -->
+		<move todir="${dist-temp-dir}/${zip-dir}">
+			<fileset dir="${dist-temp-dir}"/>
+		</move>
+		
+		<!-- create the exe file -->
+		<antcall target="create-exe"/>
+		
+		<!-- zip the created directory -->
+		<zip
+			destfile="${dist-customer-dir}/${name}-${version_filename}${zip-extension}"
+			basedir="${dist-temp-dir}"
+			compress="false"
+		/>
+		
+		<!-- create an archive containing all sources -->
+		<antcall target="build-release-src-archive"/>
+		
+		<!-- clean up -->
+		<antcall target="clean"></antcall>
+	
+		<antcall target="theme_reset"></antcall>
+	</target>
+
+	<!-- creates an archive containing all sources to build the app -->
+	<target name="build-release-src-archive" description="creates an archive containing all sources to build the app">
+		<mkdir dir="${dist-temp-dir}/${src-temp-dir}"/>
+		
+		<mkdir dir="${dist-temp-dir}/${src-temp-dir}/db"/>
+		
+		<copy todir="${dist-temp-dir}/${src-temp-dir}">
+		    <fileset dir=".">
+		        <include name="debian/**"/> 
+		    	<include name="extlib/**"/>
+		    	<include name="documentation/manual/**"/>
+		    	<include name="documentation/quickstart guide/**"/>
+		    	<include name="javadoc/**"/>
+		    	<include name="SPECS/**"/>
+		    	<include name="src/**"/>
+		    	<include name="templates/**"/>
+		    	<include name="themes/bytemine/**"/>
+		    	<include name="ChangeLog"/>
+		    	<include name="README"/>
+		    	<include name="logo.ico"/>
+		    	<include name="bytemine-manager.*"/>
+		    	<include name="*.sh"/>
+		    	<include name="*.xml"/>
+			</fileset>
+        </copy>
+		
+		<!-- gzip the created directory -->
+		<tar destfile="${dist-temp-dir}/${name}-${version}-src${tar-extension}" basedir="${dist-temp-dir}/${src-temp-dir}"/>
+		<gzip destfile="${dist-customer-dir}/${name}-${version}-src${tar.gz-extension}" src="${dist-temp-dir}/${name}-${version}-src${tar-extension}"/>
+	</target>
+
+
+	<!-- deletes the temp build directories -->
+	<target name="clean" description="cleans the build directory">
+		<delete dir="${dist-temp-dir}/${db-dir}" failonerror="false"/>
+		<delete dir="${dist-temp-dir}/${zip-dir}" failonerror="false"/>
+		<delete dir="${dist-temp-dir}" failonerror="false"/>
+		
+		<replaceregexp file="${src-dir}/${configuration-class}"
+									match="MANAGER_BUILD = &quot;.*&quot;"
+									replace='MANAGER_BUILD = &quot;&quot;'/>
+		<replaceregexp file="${src-dir}/${configuration-class}"
+									match="MANAGER_VERSION = &quot;.*&quot;"
+									replace='MANAGER_VERSION = &quot;&quot;'/>
+	</target>
+	
+	<!-- sets a release flag -->
+	<target name="set-release" description="Sets the 'release' property to 'true'">
+		<property name="release" value="true"/>		
+	</target>
+	
+	<!-- Retrieves the git revision -->
+	<target name="git-revision" description="Retrieves the git revision">
+		<!-- retrieve the revision -->
+		<exec executable="git" output="${git-revision-file}">
+			<arg line="log --format=%H -1"/>
+		</exec>
+		
+		<!-- remove the line separator at the end of the file
+		     use unix style linefeeds
+		-->
+        <replaceregexp file="${git-revision-file}"
+                       match="\n"
+                       replace=""
+                       flags="g"
+        />
+
+        <loadfile property="git.revision" srcFile="${git-revision-file}" failonerror="false">
+			<filterchain>
+		    	<headfilter lines="1"/>
+		  	</filterchain>
+		</loadfile>
+		
+		<delete file="${git-revision-file}" failonerror="false"/>
+	</target>
+
+	<!-- sets the build number and version for the application -->
+	<target name="set-version" depends="git-revision" description="sets the build number and version for the application">
+		<tstamp>
+			<format property="TIMESTAMP" pattern="dd-MM-yyyy HH:mm" locale="de,DE"/>
+			<format property="TIMESTAMP_FILENAME" pattern="dd-MM-yyyy" locale="de,DE"/>
+		</tstamp>
+
+		<condition property="version_filename" value="${TIMESTAMP_FILENAME}">
+			<not>
+				<isset property="release" />
+			</not>
+		</condition>
+		<property name="version_filename" value="${version}"/>
+
+		<replaceregexp file="${src-dir}/${configuration-class}"
+					match="MANAGER_VERSION = &quot;.*&quot;"
+					replace='MANAGER_VERSION = &quot;${version}&quot;'/>
+
+		<replaceregexp file="${src-dir}/${configuration-class}"
+							match="MANAGER_BUILD = &quot;.*&quot;"
+							replace='MANAGER_BUILD = &quot;${git.revision}&quot;'/>
+
+		<!-- remove the line separator after the git revision -->
+		<replaceregexp file="${src-dir}/${configuration-class}"
+		               match="${line.separator}&quot;;"
+		               replace="&quot;;"
+		/>
+	</target>
+
+
+
+	<!-- generates javadoc -->
+	<target name="docs" description="Generates JavaDoc">
+		<javadoc 
+			sourcepath="${src-dir}" 
+			classpath="${lib-dir}" 
+			packagenames="${doc_packages}" 
+			destdir="${doc}" 
+			Private="yes" 
+		/>
+	</target>
+
+	<!-- target to switch to various themed versions
+		call: ... theme -DCustomer=xyz
+	-->
+	<target name="theme" description="Prepare for themed build">
+		<echo message="Using theme of customer: ${Customer}"/>
+		
+		<property file="${src-dir}/${manager.properties}" prefix="manager"/>
+
+		<copy file="${theme-dir}/${Customer}/${Customer}_css.xml"
+			  tofile="${src-dir}/css.xml" verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/${Customer}/${Customer}_banner.png"
+			  tofile="${src-dir}/${manager.banner}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/${Customer}/${Customer}_icon.png"
+			  tofile="${src-dir}/${manager.icon}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/${Customer}/${Customer}_css.xml"
+			  tofile="${build-dir}/css.xml" verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/${Customer}/${Customer}_banner.png"
+			  tofile="${build-dir}/${manager.banner}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/${Customer}/${Customer}_icon.png"
+			  tofile="${build-dir}/${manager.icon}"
+			  verbose="yes" overwrite="yes"/>
+	</target>
+
+	<target name="theme_reset" description="Reset the themed files to bytemine default">
+		<property file="${src-dir}/${manager.properties}" prefix="manager"/>
+		
+		<copy file="${theme-dir}/bytemine/bytemine_css.xml"
+			  tofile="${src-dir}/css.xml" verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/bytemine/bytemine_banner.png"
+			  tofile="${src-dir}/${manager.banner}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/bytemine/bytemine_icon.png"
+			  tofile="${src-dir}/${manager.icon}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/bytemine/bytemine_css.xml"
+			  tofile="${build-dir}/css.xml" verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/bytemine/bytemine_banner.png"
+			  tofile="${build-dir}/${manager.banner}"
+			  verbose="yes" overwrite="yes"/>
+		<copy file="${theme-dir}/bytemine/bytemine_icon.png"
+			  tofile="${build-dir}/${manager.icon}"
+			  verbose="yes" overwrite="yes"/>
+	</target>
+
+	<target name="test" depends="compile" description="Run automatic test suite">
+		<junit fork="true">
+			<classpath refid="classpath4Tests" />
+			<formatter type="brief" usefile="false" />
+			<test name="net.bytemine.manager.tests.ManagerTestSuite" haltonfailure="true" />
+		</junit>
+	</target>	
+
+</project>

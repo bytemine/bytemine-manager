@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="bytemine-manager-rpm" default="build-tar" basedir=".">
+	<description>Builds the project Manager.</description>
+
+	<property name="rpm-build-dir" value="${basedir}/RPM_BUILD"/>
+
+	
+	<import file="build.xml"/>
+	
+	
+	<target name="prepare-rpm-dirs" description="Creates the directories needed to build the RPM">
+		<mkdir dir="${rpm-build-dir}"/>
+	</target>	
+	
+	
+	<target name="build-tar" depends="prepare-rpm-dirs, set-release, prepare-db, export-schema, jar, starter-jar" description="builds a complete release zip file">
+		<antcall target="prepare-db"></antcall>
+
+		<!-- copy libraries -->
+		<copy todir="${dist-lib-dir}">
+			<fileset dir="${lib-dir}"/>
+		</copy>
+
+		<mkdir dir="${dist-temp-dir}/${export-dir}"/>
+
+		<!-- copy documentation -->
+		<copy file="${readme}" todir="${dist-temp-dir}"/>
+		<copy file="${pdf-doc-de}" tofile="${dist-temp-dir}/instructions-de.pdf"/>
+		<copy file="${pdf-doc-en}" tofile="${dist-temp-dir}/instructions-en.pdf"/>
+
+		<!-- move everything into a new directory to zip -->
+		<move todir="${dist-temp-dir}/${zip-dir}">
+			<fileset dir="${dist-temp-dir}"/>
+		</move>
+		
+		<!-- tar the created directory -->
+		<tar destfile="${rpm-build-dir}/${name}-${version_filename}.tar" basedir="${dist-temp-dir}/${name}-${version_filename}" excludes="${svn.properties}"/>
+		
+		<!-- clean up -->
+		<antcall target="clean"></antcall>
+	</target>
+
+</project>

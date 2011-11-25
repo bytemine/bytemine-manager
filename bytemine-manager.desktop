@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=bytemine manager
+GenericName=bytemine manager
+Comment=Management tool for administering OpenVPN concentrators
+Icon=bytemine-manager
+Exec=java -jar /usr/share/java/bytemine-manager/bytemine-manager.jar
+Terminal=false
+StartupNotify=false
+

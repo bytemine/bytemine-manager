@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="bytemine-manager-deb" default="build-release" basedir=".">
+	<description>Builds the project Manager.</description>
+
+	<property name="install-dir" location="/usr/share/java"/>
+
+	
+	<import file="build.xml"/>
+	
+
+	<!-- builds the complete release zip file -->
+	<target name="build-release" depends="set-release, prepare-db, export-schema, jar, copy-jar, clean" description="builds a complete release zip file">
+		<antcall target="prepare-db"></antcall>
+
+		<!-- copy libraries -->
+		<copy todir="${dist-lib-dir}">
+			<fileset dir="${lib-dir}"/>
+		</copy>
+
+		<mkdir dir="${dist-temp-dir}/${export-dir}"/>
+
+		<!-- copy documentation -->
+		<copy file="${readme}" todir="${dist-temp-dir}"/>
+		<copy file="${pdf-doc-de}" tofile="${dist-temp-dir}/instructions-de.pdf"/>
+		<copy file="${pdf-doc-en}" tofile="${dist-temp-dir}/instructions-en.pdf"/>
+
+		<!-- move everything into a new directory to zip -->
+		<move todir="${dist-temp-dir}/${zip-dir}">
+			<fileset dir="${dist-temp-dir}"/>
+		</move>
+		
+		<!-- zip the created directory -->
+		<zip
+			destfile="${dist-customer-dir}/${name}-${version_filename}-${licence}${zip-extension}"
+			basedir="${dist-temp-dir}"
+			compress="false"
+			excludes="${svn.properties}"
+		/>
+	</target>
+	
+	
+	<!-- copies the created jar to main dir. gets removed by the clean task in debian/rules -->
+	<target name="copy-jar" description="copies the created jar to main dir. gets removed by the clean task in debian/rules">
+		<copy file="${dist-temp-dir}/${name}-${version}${jar-extension}" tofile="${name}${jar-extension}"/>
+	</target>
+	
+</project>

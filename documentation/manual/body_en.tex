@@ -1,0 +1,452 @@
+
+\section{Installation}
+\newitem{Installing \& Starting}
+
+%
+Unzip \Nvma{}. \Nbn{} is the version respectively the build number in
+development versions.
+%
+\nl The zip archive contains:
+%
+\begin{items}
+ \item   \Nvmj{}: main application in JAR archive.
+ \item   \Nvmw{}: executable file in Windows and Mac OS X
+ \item   \Nvms{}: executable JAR archive.
+ \item   \code{db/}: directory where the application database is stored.
+ Due to this fact the installation should be stored on a crypted volume.
+ \item   \code{lib/}: external program libraries.
+\end{items}
+
+%
+A Java Runtime Environment version 6 or 7 is necessary for running the
+application.
+%
+%
+On Microsoft Windows and Mac OS X (from version 10.5.x) the application can
+be started by
+doubleclicking \Nvms{}.
+%
+
+On a command line the follwoing has to be entered:
+
+\nl{\small\texttt{\ \ \ java -jar\ }\Nvms{}}
+
+\newitem{Getting started}
+%
+Upon the first start a dialog for configuring the application will appear.
+These settings are the foundation for working with the \Nbms.
+Besides choosing the application language, the active modules in the
+application can be selected.
+
+\nl Following modules are available:
+
+\begin{items}
+ \item management of certificates, including user management
+ \item control center: An interface for controlling running OpenVPN
+       servers
+\end{items}
+
+\nl Additionally in this dialog the format of certificates can be
+    choosen:
+	\code{PKCS\#12} and \code{Base64} encoding are the options.
+%
+Furthermore there is the option to specify an export directory, where
+imported and generated certificates and their keys are stored.
+
+%
+There is also the option to generate OpenVPN configuration files for servers
+and users. If activated these files would be created on any change made to a 
+server or user and get written into the corresponding directory in the file 
+system.
+
+\newpage
+
+\newitem{Import of existing data}
+
+\nl If there is already an existing \Nbms with data to reuse the path to this
+database can be specified within the configuration dialog. When changing the
+database, a restart is required. All changes prior to restart will be discarded.
+
+\nl Once the initial configuration has been saved the user is prompted
+whether he wants
+to import existing OpenVPN data (Root CA, certificates and users). Later the
+importer is
+also available from the menu ``File$\,\rightarrow\,$User Import''. Further
+it is possible to import data from the filesystem as well as from an
+LDAP directory structure.
+%
+
+Afterwards there will be a dialog asking the operator if users shall be
+created from the CNs\footnote{%
+\sffamily ``Common Name'' -- identifiying textcomponent of a certificate} of
+the
+certificates subjects. User and certificate will automatically get
+connected.
+%
+
+\nl If an initial import is skipped, the user is prompted with the
+configuration of
+the certificate authority.
+
+\nl\textbf{Caution: }\begin{quote} Due to export limitations inside the Java
+runtime environment it can occur in some cases that a higher key strength
+than 1024 Bit will produce errors.  To avoid this you should install new
+Java policy files to your system, before you create even one certificate.
+\footnote{If you are affected by this problem, for Java 6 and Java 7 the 
+"Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy 
+Files 6" are available at:
+\url{http://www.oracle.com/technetwork/java/javase/downloads/index.html}.
+Afterwards these files have to be copied to JAVA\_HOME/lib/security.  The
+old files will be automatically overwritten.} \end{quote}
+
+%
+\newpage
+%
+
+\section{Administration}
+
+\newitem{Within the application}
+%
+After configuring the application for the first time the following
+tabs, depending on which module you have activated, will appear.
+
+\begin{items}
+   \item X509: Overview over certificates
+   \item Server: Overview and interface for managing the servers
+   \item User: Overview and interface for managing the users
+   \item Server/User: Alternative, tree-based view on servers and users.
+\end{items}
+
+%
+%\subpoint{Updates}	- currently not supported
+%
+
+\subpoint{Import}
+
+\nl With ``File$\,\rightarrow\,$User import'' the import can be triggered
+(multiple times if needed). A dialog will appear, in which the generation of
+users from the certificates CNs can be activated.
+
+\newitem{Administration of certificates}
+
+\nl All managed certificates can be viewed from the ``X509'' tab by
+selecting the certificate in the overview and double-click the entry. In
+the following dialog all details are shown. With an option under
+ ``Edit$\rightarrow$Show revoked certificates'' it is possible just to view
+ all valid certificates.
+
+\nl To get direct access to the certificate of a user or a server the
+detailed view can also be opened from the users or servers details.  By
+clicking the ``show'' button in the certificate section in user and server
+view the certificates details will appear.
+
+
+\subpoint{Root certificate}
+
+\nl The application is designed to manage one single root certificate. Every
+server
+and user certificate is created from this root certificate.
+
+\nl If more than one root certificate shall be managed by the \Nbm{} there
+has to
+be a separate database for each root certificate. Databases can be switched
+easily from the general configuration dialog.
+
+\newitem{Administration of servers}
+
+\nl With ``Edit$\,\rightarrow\,$Create new server`` servers can be added to
+the application. In the appearing dialog the following settings can be made:
+
+\begin{items}
+	\item Name: Any name can be given
+	\item Hostname: Hostname or IP address of the server
+	\item Common name: The common name for the server certificate
+    \item Organizational unit: The organizational unit for the server certificate
+	\item Server type: Choose whether this server is a \Nboa{} or a regular
+          OpenVPN server. To connect with a regular OpenVPN server please
+          read the chapter ''connect to a regular OpenVPN server''.
+	\item Type of authentication: The \Nbm{} communicates with the server
+          via the SecureShell (SSH) protocol. Authentication can be done
+          via password or with an ssh key.
+	\item Username: Username to use for the ssh connection. In case of a
+          \Nboa{} this is 'manager'.
+	\item Keyfile: Path to the ssh key file
+	\item Socket command: The program used for socket communication has to
+          be specified with full qualified path. In case of a \Nboa{} the
+          default value should be kept.
+	\item SSH port: Serverside port on which the ssh-daemon is listening
+	\item Valid: Validity of the server certificate
+	\item Server path to passwd file: Serverside path to the passwd file,
+          if dual factor authentication is used.
+	\item Server path to certificates: Server-side path to the directory
+	containing the root and server certificate
+	\item OpenVPN port: The port the OpenVPN server is listeing
+	\item OpenVPN protocol: The protocol the OpenVPN server is using
+	\item Network address: 	The network address the server is using
+	\item OpenVPN device: The OpenVPN device the server is using
+	\item Redirect gateway: All IP network traffic from the client is
+	redirected to this server
+	\item OpenVPN static IP for users: Assign static IP to users
+	\item Server path to configuration directory: Serverside path to the
+	client configuration directory. This field is necessary if you want to
+	assign static IPs to your clients.
+\end{items}
+
+\nl By clicking the plus button further server data can be entered:
+
+\begin{items}
+	\item Duplicate-CN: Two connections with same common name are allowed, so
+	one certificate can be used by more than one users
+	\item User: Reduce the OpenVPN daemon's privileges after initialization
+	\item Group: Reduce the OpenVPN daemon's privileges after initialization
+	\item Keep alive: The first field states the intervall (in seconds) in
+	which the server will ping his clients. The second field is the time
+	(in seconds) the server will wait for a response.
+\end{items}
+
+
+
+
+%	\label{OpenVpn-Configuration setting}
+\nl Another way of adding new servers is through the ``Server/User'' tab. Is
+this tab active, the toolbar will show a button labeled ``New server''.
+
+
+\newitem{Administration of users}
+
+\nl With ``Edit$\,\rightarrow\,$Create new user'' users can be added to the
+database. These settings can be made in the following dialog:
+
+\begin{items}
+    \item username: Any name can be given to the user
+    \item password: Has to be at least six (6) characters long
+\end{items}
+
+\nl By clicking the plus button further user data can be entered:
+
+\begin{items}
+    \item Common name: The common name for the users certificate
+    \item Organizational unit: The organizational unit for the users
+certificate
+\end{items}
+
+\nl If there are already servers created in \Nbm{} the user can be directly
+connected to them during creation.
+
+\nl Another way of adding new users is through the ``Server/User'' tab. Is
+this tab active, the toolbar will show a button labeled ``New user''.
+
+\subpoint{Connecting users to servers}
+
+\nl Users can be assigned to OpenVPN servers which they should be able to
+connect to in two different ways:
+
+\begin{items}
+   \item Via drag'n'drop in the ``Server/User`` tab
+   \item Via the sidebar included in the details view of the user
+   \item Via the sidebar included in the details view of the server
+\end{items}
+
+\subpoint{Synchronisation of user and certificate data}
+
+\nl If there is one or more servers already created it can be sychronised
+with the data from the application. A synchronisation will update the server
+by uploading the following files to the server:
+\begin{items}
+\item Root and server certificate
+\item Certificate revocation list
+\item \Npwf{}
+\end{items}
+The \Npwf{} contains the users who are currently connected to the server.
+
+\newpage
+\newitem{Network managment}
+
+
+\subpoint{Open server in control center}
+
+\nl By rightclicking a server in the server overview and choosing the entry
+``Open in control center'' in the appearing context menue the control center
+for the choosen OpenVPN server is opened. Depending on the selected
+authentication method
+a login password or the passphrase for the chosen ssh key, if secured by a
+passphrase, has to be entered.\\
+
+\noindent
+\begin{center}
+ \parbox[b]{84mm}{\textbf{\small
+  bytemine recommends the use of\\
+  passphrase secured ssh keys.
+ }}{\Huge\bfseries!}
+\end{center}
+
+\nl In case of successful authentication a new tab is opened in the main
+view of the \Nbm{}
+
+At first only the lower part of the tab is active where the available
+channels are displayed with the option to open each channel.
+%
+For each OpenVPN service on the selected server there is a channel,
+providing access to the OpenVPN management interface.
+%
+After opening a channel with the ''Connect'' button various information
+sent via the channel are displayed in the according tab.
+
+\subpoint{Display of connected users}
+
+\nl This information is shown:
+
+\begin{description}
+   \item [CN]: Common name from the users certificate
+   \item [IP]: The source IP address, from where the user is connected
+   \item [VPN IP]: The IP address of the user within the VPN
+   \item [Received]: Amount of data the user received from the VPN server
+   \item [Sent]: Amount of data the user sent to the VPN server
+   \item [Connected since]: Time since the user is connected to the VPN
+server
+\end{description}
+
+\nl Is the VPN of type 'bridged', the \textbf{Virtual MAC} will be displayed
+instead of the \textbf{VPN IP}.
+
+\nl Furthermore there are four buttons to perform the following actions:
+
+\begin{description}
+   \item [Status]: Updates the current status. The status will be automatically
+updated every 30 seconds.
+   \item [Version]: Shows the current OpenVPN server version.
+   \item [Show/Hide server log]: For switching on and off a real-time logging.
+   \item [Send command]: To send any command to the OpenVPN management interface.
+        \footnote{The documentation of the OpenVPN management interface can be found here:
+	    \url{http://openvpn.net/index.php/open-source/documentation/miscellaneous/79-management-interface.html}}
+        \\ For example: ''verb 5'' sets detailled output verbosity
+\end{description}
+
+\subpoint{Disconnect user from a server}
+
+\nl By right-clicking a user from the list of the connected users the action
+''disconnect user'' can be chosen. The user will be disconnected from the
+server.
+
+\newpage
+
+
+\newitem{Configure OpenVPN servers}
+
+\subpoint{Connect to a regular OpenVPN server}
+
+\nl One of the advantages of the \Nboa{} is the preparation for
+using it with the \Nbm{}. But the \Nbm{} is also designed to work with
+regular OpenVPN servers.
+
+Therefor the following components have to be installed on the OpenVPN
+server:
+
+\begin{items}
+    \item The software package \textsl{socket-wrapper}
+        (is shipped with the \Nbm{})
+    \item The software package \textsl{bytemine-manager-integration}
+        (also shipped with the \Nbm{})
+   \item OpenVPN version 2.1rc14 or newer
+\end{items}
+
+
+
+\subpoint{Prepare an OpenVPN server}
+
+\nl Since version 2.1rc14 OpenVPN supports Unix domain sockets for
+communication with the management interface. Therefor the config file of the
+OpenVPN server needs to be configured as following:
+
+\nl\code{\ \ \ management /var/run/management-udp unix}
+
+\nl In this case the socket would be configured as \code{management-udp} in
+directory \code{/var/run}.
+%
+This Unix domain socket is accessed from the manager via an ssh connection.
+Therefor we created the application \code{ut} from the software package
+\textsl{socket-wrapper}.
+
+For enabling the \Nbm{} to synchronize users the corresponding directories
+on server side have to be writable to the user the \Nbm{} connects with.
+
+\newpage
+
+
+\subpoint{Installation of \textsl{socket-wrapper}}
+
+\nl The installation of the
+\textsl{socket-wrapper}\footnote{http://www.bytemine.net/en/bytemine-download}
+is quite easy. Extract the package with\\
+\textit{\code{tar -xzf (socket-wrapper-package)}}\\
+Afterwards switch into the unextracted directory and install \textit{ut}
+with \\
+\textit{\code{make install}}\\
+
+After the installation there will be the application \code{/usr/local/sbin/ut},
+and also the manual pages \code{ut(8)} and \code{ut.conf(8)}.
+
+
+\subpoint{Configuration of \textsl{socket-wrapper}}
+
+\nl Configuration of the socket wrapper is done in \code{/etc/btm/ut.conf}.
+In this file the Unix domain sockets of the single OpenVPN services are linked
+to the channels the \Nbm{} has access to.
+
+For each OpenVPN service a \code{channel} command is written. The
+\code{type} command defines the type of the channel (to access the OpenVPN
+management port this is \code{VPNM}). With the \code{method} keyword the way
+to access the socket is defined by OpenVPN.
+
+\begin{verbatim}
+channel "mgmt udp" {
+    type VPNM
+	     method { unix "/var/run/management-udp" }
+		  }
+		  \end{verbatim}
+
+\newpage
+
+\section{Miscellaneous}
+
+\newitem{Having problems with \Nbm ?}
+If you experience some difficulties when using the \Nbms, please send us a
+detailled error description to \textsl{support@bytemine.net}.
+It would be helpful if you send us the version and build number of the \Nbms
+you are using. You can find this information in ``Menu$\,\rightarrow\,$Info''.\\
+
+\newitem{OpenVPN configuration}\label{OpenVPN configuration setting}
+The \Nbm{} automatically creates OpenVPN onfigurations for each user. You can find
+these configuratons in the export directory.
+Generally the \Nbm{} creates for every server, the user is connected with, a
+configuration. These configurations are based on a template which you can
+find in the project directory under ``templates''.
+\newpage
+
+\newitem{OpenVPN client configuration}
+It is possible to assign static IP addresses to OpenVPN clients with the
+\Nbm{}. In order to use this feature you have to activate it in the
+ServerDetails tab and include the following option into your
+OpenVPN server configuration file:\\[2mm]
+\textit{client-config-dir (path to cc-directory)}\\[2mm]
+However, the static IP addresses have to be taken from successive /30 subnets in
+order to be compatible with Windows. \textit{``Specifically, the last octet in the IP
+address of each endpoint pair must be taken from this
+set:''}\footnote{\url{http://openvpn.net/index.php/open-source/documentation/howto.html\#policy}}
+\begin{verbatim}
+[1 ]  [ 5]  [ 9]  [13]  [17]
+[21]  [25]  [29]  [33]  [37]
+[41]  [45]  [49]  [53]  [57]
+[61]  [65]  [69]  [73]  [77]
+[81]  [85]  [89]  [93]  [97]
+[101] [105] [109] [113] [117]
+[121] [125] [129] [133] [137]
+[141] [145] [149] [153] [157]
+[161] [165] [169] [173] [177]
+[181] [185] [189] [193] [197]
+[201] [205] [209] [213] [217]
+[221] [225] [229] [233] [237]
+[241] [245] [249] [253]
+\end{verbatim}
+The \Nbm{} automatically sets the end-point (IP address for the server).
+

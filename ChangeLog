@@ -1,0 +1,209 @@
+ChangeLog for bytemine manager 2.2.3
+=======================================
+- Remove licence restrictions.
+
+ChangeLog for bytemine manager 2.2.2
+=======================================
+- Fix a problem preventing the control center from opening any available channel.
+
+
+ChangeLog for bytemine manager 2.2.1
+=======================================
+- Fix a potential problem that might generate an invalid certificate revocation list.
+- The creation of OpenVPN configuration files is switched off by default. 
+
+
+ChangeLog for bytemine manager 2.2.0
+=======================================
+- This application can also be run with Java version 7.
+- Sending a custom command via control center has been improved, and is now
+  able to display the resulting output.
+- Static IPs can be assigned to users that are connected with an OpenVPN 
+  concentrator.
+- Opening an OpenVPN concentrator multiple times parallel is prohibited.
+- The manual has been improved and updated.
+- Revoked certificates can be re-enabled and therefor be re-used with a new user.
+- Some problems with the user import have been fixed.
+- OpenVPN concentrator configuration files are automatically created at create
+  and update of a server.
+- SSH communication has been improved, some minor issues with timeouts have been
+  fixed.
+- The summary dialog on user import is now showing the correct amount of 
+  imported users and certificates.
+- A servers CN and OU fields can be manually set with the server configuration 
+  dialog. Until now the values from the root certificate were used.
+- Server certificates can be renewed like user certificates.
+
+
+ChangeLog for bytemine manager 2.1.4
+=======================================
+
+- Fix a potential problem with known_hosts file on Windows 7 systems. #2014
+- Adjust height of status window for Windows systems.
+
+
+ChangeLog for bytemine manager 2.1.3
+=======================================
+
+- The mass-export no longer quits on certificates without a private key for PKCS#12 
+  certificates, instead it shows an error message and continues with new next
+  certificate. #1994
+
+
+ChangeLog for bytemine manager 2.1.2
+=======================================
+
+- Fix potential problem on mass-export of PKCS#12 certificates.
+ 
+
+ChangeLog for bytemine manager 2.1.1
+=======================================
+
+- Certificate reassignment button without function. #1988 
+- Fix two potential bugs on writing OpenVPN client configuration files into
+  filesystem. #1986, #1987
+- Improved synchronisation summary. #1900
+- Bring the synchronisation summary to foreground. 
+- Better licence restriction message on server synchronisation. #1975
+- The CRL export button might have appeared on using the control center. #1971
+- Add more tooltips on buttons, that are not self explaining. #1970
+
+
+ChangeLog for bytemine manager 2.1.0
+=======================================
+
+- Option to hide revoked certificates. #1799
+- The certificate export mechanism might have created broken certificate files.
+  #1893
+- Fix some problems with screen size and positioning of the application. #1658
+- OpenVPN configuration files are created for every server a user is connected 
+  to. #703
+- Common input fields like ssh password and passphrase are automatically
+  focussed. #1973
+- Add the option to hide revoked certificates from the user. #1799
+- Server details are shown with tabs. #1789
+- Warn the user if he quits with unsynced (modified) users. #1819
+- The sorting is now consistent (alphabetical). #1724
+- Including openvpn options in server details. 
+- known_hosts-file now saved in the directory containing the database. #1717
+
+
+ChangeLog for bytemine manager 1.3.8
+=======================================
+
+- Upon configuring an external database, the export path is greyed out. #1746
+- Stacked status frames, don't cause "lower" ones to become unusable any longer.
+  #1733
+- Database snapshots are being done during launch. For manual snapshots there is
+  a menu entry. #1574
+- User is now prompted for extra caution, if the user wants to
+  skip setting a password on pkcs#12 certificate and if passwords are enabled in
+  configuration.
+- Menu entry added for completely clearing the certificate revocation list.
+
+
+ChangeLog for bytemine manager 1.3.7
+=======================================
+
+- The "Renew" function for certificates now prompts for a PKCS#12 password if
+  single passwords are chosen within the configuration.
+- The CN and OU fields of a user are no longer read-only.
+- Mandatory, empty fields are no longer focussed and highlighted on cancel 
+  action in user and server dialogs.
+- Scrollbar is added to Server/User tab if needed
+
+ChangeLog for bytemine manager 1.3.6
+=======================================
+- Update JSch 0.1.42 -> 0.1.43: Minor bugfixes, add support for aes128-cbc
+  encrypted keypairs on server synchronisation.
+- Some certificate settings could not been saved properly.
+- Restarting the application by itself leads to various errors on write accessing the database. Manual restart is required.
+- Manual export of PKCS#12 certificate works for now.
+
+
+ChangeLog for bytemine manager 1.3.5
+=======================================
+- On SSH connections after 3 false login attempts the connection gets aborted.
+- Windows executable file is delivered for easier startup on Windows systems.
+- The panel widths in the server/user overview can be changed by the user. This
+  setting is saved and restored on every startup of the application.
+- For new users and servers an individual expiration period can be specified.
+- Blank passwords in PKCS#12 certificates can now be handled.
+- Cancel the decoding of PKCS#12 certificates after 3 false password attempts
+- Database gets stored in USER_HOME by default
+- Via FileChooser hidden files and .directories can be selected.
+- Debian package can easily be built by calling "build-deb.sh" on a system with debian build system
+- RPM package can easily be built by calling "build-rpm.sh" on a system with RPM build system
+- On synchronising a server the scp call does not use the '-p' option anymore.
+
+
+ChangeLog for bytemine manager 1.3.4
+=======================================
+- Users are no longer imported from the passwd file on synchronisation. Only
+  users existing in the manager connected to the server are exported into the
+  passwd file. Use the global import function to import users from a passwd file.
+
+
+ChangeLog for bytemine manager 1.3.3
+=======================================
+UI:
+  - Revoked users are more visible on first sight.
+
+- Client certificates are no longer copied on the concentrators.
+
+
+ChangeLog for bytemine manager 1.3.2
+=======================================
+- New function to renew existing, non-revoked certificates
+
+
+ChangeLog for bytemine manager 1.3.0.10
+=======================================
+
+UI:
+  - Mostly reworked user experience
+  - Tree based configuration and assignment of users to servers
+    (and vice versa)
+  - Simplified configuration
+  - Dialogs became more explicit
+  - Behaviour of User and Server handling has been made more alike
+  - More clear user feedback
+  - Statusbar has been made more userfriendly
+  - UI elements are now persistent across sessions
+  - Many icons were replaced by better ones
+  - A toolbar has been added to the control center
+  - User has to uncheck a checkbox 'use default database' to switch to an external database. (#896)
+  - Add servername to the 'issued for' column.
+  - Many tooltips have been added
+  - Tables have correctly aligned content
+  - Table-rows have alternating colors, to be more readable
+  - Status bar shows number of messages in the queue. (#888)
+  - Better context menues
+  - PKCS12 password dialog is called immediately after validation from the GUI, password is delivered down to the PKCS12Exporter and X509Generator.
+  - Rename 'Actions' ("Aktionen") to 'Edit' ('Bearbeiten'), as this is standard across usual GUI applications.
+  - Move Configuration and x509Configuration to File Menue.
+
+- For each connected user, the IP within the VPN is now displayed. In
+case of bridged users the Virtual MAC is displayed
+- It is now possible to print tables and user data
+- One-click synchronization of all configured servers added
+- The manager does an automatic restart after changing the database.
+- Certificate Revocation List (CRL) can now be opened in a separate tab
+- The importer has turned into a real import wizard
+- Add the option to re-enable a revoked certificate. (#961)
+- Allow spaces in username in update validation.
+- Menu item for exporting all certificates into the EXPORT_PATH. (#932)
+- new way to start the application
+
+Fixed issues/bugs:
+- Root CA is not created anymore, if the X509 configuration is aborted
+- Serial is properly read and displayed from existing certificates
+- Various fixes to the importer
+- Connection Tester used the name field of the server instead of the hostname/ip field. (#1001)
+- Always take care that the export path is existing. (#994)
+- On first startup the default language of the VM was not correctly handled in the configuration dialog. (#983)
+- LDAP settings are always visible, but disabled if not chosen. (#896)
+- Correct wrong naming of server certificate files. Was always '00' as sequential number...
+- After closing a tab the last open CC tab is selected. If no open CC tabs then select the server table.
+- PKCS12 contents is no more displayed as binary, but as x509 content instead. (#930)
+

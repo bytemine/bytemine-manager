@@ -1,0 +1,481 @@
+\section{Installation}
+\newitem{Installieren \& Starten}
+
+%
+Die \Nvma{} ist zu entpacken. Dabei ist \Nbn{} die Versions-Nummer bzw. die
+Build-Nummer bei Entwicklerversionen.
+%
+\nl Das Archiv enth"alt folgenden Inhalt:
+%
+\begin{items}
+ \item	\Nvmj{}: Hauptanwendung als JAR Archiv.
+ \item	\Nvmw{}: dies ist die ausf"uhrbare Datei f"ur Windows und Mac OS X
+ \item	\Nvms{}: dies ist das ausf"uhrbare JAR Archiv.
+ \item	\code{db/}: in diesem Verzeichnis wird die Datenbank des
+	Programms gespeichert. Aus diesem Grund sollte die
+	Installation auf einem verschl"usseltem Datentr"ager
+	aufbewahrt werden.
+ \item	\code{lib/}: externe Programmbibliotheken.
+\end{items}
+%
+Zum Ausf"uhren der Anwendung ist ein Java Runtime Environment
+der Version 6 oder 7 notwendig.
+%
+Auf den Plattformen Microsoft Windows und Mac OS X (ab Version 10.5.x)
+kann die Applikation "uber einen Doppelklick auf die \Nvmw{} bzw. \Nvms{}
+gestartet werden.
+%
+"Uber die Kommandozeile auf allen Plattformen geht dies mittels:
+
+\nl{\small\texttt{\ \ \ java -jar\ }\Nvms{}}\\
+
+\newitem{Erste Anwendungsschritte}
+%
+Die Anwendung startet mit einem Konfigurationsdialog. Die hier getroffenen
+Einstellungen bilden die Basis zur Arbeit mit dem \Nbm.
+Beispielsweise kann man die Module, welche in der
+Anwendung aktiv sein sollen, w"ahlen.
+
+\nl Folgende Module stehen zur Auswahl:
+
+\begin{items}
+	\item Zertifikatsverwaltung (dies beinhaltet auch das Benutzermanagement)
+	\item Leitstand: eine Verwaltungsschnittstelle zur Kontrolle laufender OpenVPN-Server.
+\end{items}
+
+\nl Zus"atzlich kann in der Konfiguration die Kodierung der Zertifikate
+(\code{PKCS\#12} oder \code{Base64}) sowie ein Exportverzeichnis angegeben werden,
+in welchem erzeugte oder importierte Zertifikate und Schl"ussel gespeichert werden.
+
+%
+Weiterhin kann festgelegt werden, ob zu Konzentratoren und Benutzern
+passende Konfigurationsdateien zur Verwendung mit OpenVPN erzeugt werden sollen.
+Diese werden bei Aktivierung der Funktion bei jeder "Anderung an einem Server
+oder Benutzer automatisch generiert und im zugeh"origen Verzeichnis im 
+Dateisystem gespeichert.
+
+
+\newitem{Import bestehender Daten}
+
+\nl Sollte bereits eine Datenbank f"ur den \Nbm{} vorhanden sein,
+kann diese im
+Konfigurationsdialog angegeben werden. Sollte man seine Datenbank wechseln,
+so ist ein Neustart des \Nbm{} erfordlich. Noch vor dem Neustart gemachte
+"Anderungen werden nicht "ubernommen, beziehungsweise zugelassen.\\
+W"ahrend des Dialoges wird
+desweiteren gefragt, ob ein Import bestehender Daten, z.B.
+ Root-CAs, bestehende Benutzerzertifikate, etc., stattfinden soll.
+Der Importer
+kann auch jederzeit "uber den Men"ueintrag ``Datei$\,\rightarrow\,$Benutzer Import''
+erneut angestossen werden.
+
+\nl Es ist m"oglich sowohl aus dem Dateisystem, als auch aus einer
+LDAP-Verzeichnisstruktur heraus, zu importieren.
+%
+Anschlie"send kann der Bediener entscheiden, ob aus den CNs\footnote{%
+\sffamily ``Common Name'' -- spezifischer Textteil eines Zertifikats}
+der Subjects der Zertifikate Benutzer erzeugt werden sollen.
+Diese werden dann automatisch miteinander verkn"upft.
+
+
+\nl Wurde sich gegen einen Import entschieden, besteht die M"oglichkeit, die
+Basiskonfiguration f"ur die sogenannte \emph{Certificate Authority} zu erstellen.
+
+\nl\textbf{Achtung: }\begin{quote}In manchen F"allen kann es aufgrund von
+Exportbeschr"ankungen in der Java Umgebung vorkommen, dass eine h"ohere
+Schl"usselst"arke als 1024 Bit zu Fehlern f"uhrt.  Sicherheitshalber
+sollten Sie in diesem Fall vor dem Erzeugen von Zertifikaten neue Java
+Policy Dateien in Ihr System einspielen.  \footnote{Sollten Sie von dem
+Problem betroffen sein, finden Sie f"ur Java 6 und Java 7 die ``Java Cryptography Extension (JCE)
+Unlimited Strength Jurisdiction Policy Files''  hier:
+\url{http://www.oracle.com/technetwork/java/javase/downloads/index.html} Die
+Dateien m"ussen anschlie"send nach JAVA\_HOME/lib/security kopiert werden,
+wobei damit die bestehenden Policy Dateien "uberschrieben werden.}
+\end{quote}
+
+\newpage
+
+\section{Verwaltung}
+
+\newitem{Innerhalb der Anwendung}
+%
+Nach der Erstkonfiguration pr"asentiert sich die Anwendung, abh"angig von den
+aktivierten Modulen, mit den folgenden Reitern:
+
+\begin{items}
+	\item X509: Der "Uberblick "uber die Zertifikatskonfiguration
+	\item Server: Die Schnittstelle zur Verwaltung der einzelnen Server
+	\item Benutzer: Die Schnittstelle zur Benutzerverwaltung
+	\item Server/Benutzer: Eine alternative Darstellung der konfigurierten
+Zugriffe auf die VPN-Server der einzelnen Benutzer
+\end{items}
+%
+% currently not supported
+%\subpoint{Updates}
+%
+%\nl "Uber ``Hilfe$\,\rightarrow\,$Update-Einstellungen'' k"onnen Zertifikate eingespielt werden,
+%um Updates abzurufen. Diese Zertifikate werden Ihnen von \Nbtm{} zur Verf"ugung gestellt. Ohne
+%g"ultige Zertifikate k"onnen keine Updates heruntergeladen werden.
+%
+%\nl Es k"onnen entweder eine einzelne pem-Datei, oder Zertifikat- und Key-
+%Datei separat eingepflegt werden.
+%
+%\nl Weiterhin kann festgelegt werden, ob beim Anwendungsstart automatisch nach neuen
+%Updates gesucht werden soll.
+%
+%\nl Die Lizenzdateien bekommen Sie von \Nbtm{}.
+%
+\subpoint{Import}
+
+\nl "Uber ``Datei$\,\rightarrow\,$Benutzer Import'' kann der Import
+(bei Bedarf auch mehrmals) angesto"sen werden. Es erscheint wiederum
+ein Dialog, in welchem die Erzeugung von Benutzern aus den CNs
+ausgew"ahlt werden kann.
+
+\newitem{Verwaltung der Zertifikate}
+
+\nl Die vom \Nbm{} verwalteten Zertifikate k"onnen jederzeit
+"uber die ``X509''-Ansicht eingesehen werden. Hierzu kann man ein Zertifikat in der
+"Ubersicht ausw"ahlen und durch Doppelklick "offnen. In dieser
+Ansicht sind auch alle Details des Zertifikates sichtbar. Eine Option unter
+ ``Bearbeiten$\rightarrow$Gesperrte Zertifikate anzeigen''
+erm"oglicht es, sich nur die g"ultigen Zertifikate anzeigen zu lassen.
+
+\nl Um das Zertifikat eines Benutzers noch schneller erreichen zu k"onnen, kann
+auch der Benutzer ge"offnet werden (in der Ansicht ``Benutzer''). Im Detail-Dialog
+des Benutzers kann "uber ``Anzeigen'' bei ``Zertifikat'' die Detail-Ansicht des
+Zertifikats erreicht werden.
+
+\subpoint{Root Zertifikate}
+
+\nl Die Anwendung ist f"ur die Verwaltung von einem Root Zertifikat ausgelegt. Ausgehend davon
+werden die Server- und Client-Zertifikate erstellt.
+
+\nl Sollen mehrere Root Zertifikate mit dem \Nbm{} verwaltet werden kann dies durch das Anlegen
+einer neuen Datenbank f"ur jedes zu verwaltende Root Zertifikat erreicht werden. Die Datenbanken k"onnen
+einfach "uber den allgemeinen Konfigurationsdialog gewechselt werden.
+
+\newitem{Serververwaltung}
+
+\nl "Uber ``Bearbeiten$\,\rightarrow\,$Neuen Server anlegen'' k"onnen der
+Anwendung Server hinzugef"ugt werden. Folgende Einstellungen sind im
+Dialog m"oglich:
+
+\begin{items}
+	\item Bezeichnung: Hier kann ein beliebiger Name vergeben werden
+	\item Hostname: Der Hostname oder die IP-Adresse des Servers
+	\item Name im Zertifikat: Der Name (common name) f"ur das Zertifikat des Servers
+	\item Abteilung: Die Abteilung (organizational unit) f"ur das Zertifikat des Servers
+	\item Server-Typ: Hier kann ausgew"ahlt werden, ob es sich bei dem Server
+	      um eine \Nboa{} oder um einen regul"aren OpenVPN
+	      Server handelt. Soll der Manager mit einem regul"aren OpenVPN
+	      Server verbunden werden, so beachten Sie bitte den Abschnitt
+	      ``Verbindung mit einem regul"aren OpenVPN Server''.
+	\item Art der Authentifizierung: Der  \Nbm{} kommuniziert mit dem
+         Server "uber das SSH-Protokoll und kann sich entweder per
+	      Passwort oder mittels eines SSH-Schl"ussels authentifizieren.
+	\item Benutzername: Der Benutzername der f"ur die SSH-Verbindung
+	      verwendet werden soll. Im Falle einer \Nboa{} ist dies der
+	      Benutzer `manager'.
+	\item Schl"usseldatei: Pfad zur ssh key Datei (nur notwendig falls
+	      die Authentifizierung mittels eines Schl"ussels verwendet wird).
+	\item Socket Befehl: Hier muss das Programm zur Socket-Kommunikation
+	      inkl. vollst"andigem Pfad auf dem Server angegeben werden. Im
+	      Falle einer \Nboa{} kann der Default-Wert "ubernommen werden.
+	\item SSH Port: Port auf der Serverseite "uber den das SSH-Protokoll kommuniziert
+	\item G"ultig: G"ultigkeit des Serverzertifikats
+	\item Server-Pfad zur Passwd-Datei: Pfad auf der Serverseite, sofern
+	      Dual-Factor Authentifizierung verwendet wird.
+	\item Server-Pfad der Zertifikate: Pfad auf der Serverseite zum
+	Verzeichnis, in welchem Root- und Serverzertifikat gespeichert werden
+	sollen.
+	\item OpenVPN Port: Der Port auf welchem der OpenVPN Server l"auft
+	\item OpenVPN Protokoll: Das Protokoll welches der OpenVPN Server benutzt
+	\item Netzwerkaddresse: Die Netzwerkaddresse welche der Server verwendet
+	\item OpenVPN Device: Das \textit{device} (dt. Ger"at) welches der
+	OpenVPN-D"amon verwenden soll.
+	\item Redirect Gateway: Diese Option leitet den gesamten IP-Verkehr vom
+	Benutzer "uber den Server.
+	\item OpenVPN statische IP f"ur Benutzer: Diese Option erm"oglicht es den
+	Benutzern, statische IP-Adressen zuzuweisen.
+	\item Server-Pfad zum Konfigurationsverzeichnis: Pfad auf der Serverseite
+	zum Konfiguratiosnverzeichnis der Benutzer. Dieses Feld ist notwendig
+	wenn man statische IP-Adressen an Benutzer vergeben hat.
+
+
+\end{items}
+
+\nl "Uber das Pluszeichen k"onnen weitere Daten des Servers eingetragen werden:
+
+\begin{items}
+	\item Duplicate-CN: Erm"oglicht zwei Verbindungen mit dem gleichen
+	Zertifikat, dh. ein Zertifikat kann von mehr als einem Benutzer verwendet
+	werden.
+	\item User: Nachdem der OpenVPN-D"amon gestartet wurde, l"auft er mit
+	den Rechten von \textit{user} weiter.
+	\item Group: Nachdem der OpenVPN-D"amon gestartet wurde, l"auft er mit
+	den Rechten von \textit{group} weiter.
+	\item Keep Alive: Das erste Feld gibt an, nach wievielen Sekunden der Server
+	einen Ping senden soll, um zu "uberpr"ufen ob der Client noch erreichbar
+	ist. Das zweite Feld gibt an, wieviele Sekunden der Server auf eine Antwort
+	des Pings warten soll.
+\end{items}
+
+
+\nl Eine weitere M"oglichkeit Server anzulegen ist "uber den ``Server/Benutzer''-Reiter.
+Ist dieser Reiter angew"ahlt, ist in der Toolbar eine Schaltfl"ache zum Anlegen von Servern
+sichtbar.
+
+
+\newitem{Benutzerverwaltung}
+
+\nl "Uber ``Bearbeiten$\,\rightarrow\,$Neuen Benutzer anlegen'' k"onnen der
+Datenbank Benutzer hinzugef"ugt werden. Folgende Einstellungen sind im
+Dialog m"oglich:
+\begin{items}
+
+	\item Benutzername: Hier kann ein beliebiger Name f"ur den Benutzer vergeben werden
+	\item Passwort: Das Passwort muss mindestens sechs (6) Zeichen lang sein
+\end{items}
+
+\nl "Uber das Pluszeichen k"onnen weitere Daten des Benutzers eingetragen werden:
+\begin{items}
+	\item Name im Zertifikat: Der Name (common name) f"ur das Zertifikat des Benutzers
+	\item Abteilung: Die Abteilung (organizational unit) f"ur das Zertifikat des Benutzers
+\end{items}
+
+\nl Sind bereits Server im \Nbm{} angelegt worden, kann der Benutzer
+bereits beim Anlegen diesen direkt zugewiesen werden.
+
+\nl Es ist auch m"oglich "uber den ``Server/Benutzer''-Reiter neue Benutzer
+anzulegen. Wenn dieser Reiter angew"ahlt ist, so erscheint in der Toolbar
+eine Schaltfl"ache zum Anlegen von Benutzern.
+
+\subpoint{Zuweisung von Benutzern zu Servern}
+
+\nl Benutzer k"onnen den VPN-Servern, mit denen Sie sich verbinden k"onnen, auf
+verschiedene Weisen zugewiesen werden.
+
+\begin{items}
+	\item Per Drag'n'Drop im ``Server/Benutzer''-Reiter
+	\item "Uber die Seitenleiste der Detail-Ansicht des Benutzers
+	\item "Uber die Seitenleiste der Detail-Ansicht des Servers
+\end{items}
+
+
+\subpoint{Synchronisierung der Benutzer- und Zertifikatsdaten}
+
+\nl Ist ein Server in der Anwendung vorhanden kann mit ihm synchronisiert werden.
+Die Synchronisation dient dazu, den Server zu aktualisieren, indem folgende Dateien
+auf den Server hochgeladen werden:
+\begin{items}
+\item Root- und Serverzertifikat
+\item Zertifikatssperrliste
+\item \Npwf{}
+\end{items}
+Die  \Npwf{} wird dabei aus den aktuell mit dem Server verbundenen
+Benutzern erstellt.
+
+\newpage
+\newitem{Netzwerkverwaltung}
+
+\subpoint{Server im Leitstand "offnen}
+
+\nl Durch einen Rechtsklick auf einen Server in der Serverliste gelangt man zu
+dem Men"upunkt ``Im Leitstand \"offnen''. Abh"angig davon welche SSH-Authentifizierungsmethode
+f"ur diesen Server konfiguriert wurde, wird im n"achsten Schritt nach dem Passwort
+f"ur den Login oder nach der Passphrase f"ur den SSH-Key, sofern dieser durch eine
+Passphrase gesch"utzt ist, gefragt.\\
+
+\noindent
+\begin{center}
+ \parbox[b]{84mm}{\textbf{\small
+  bytemine empfiehlt die Verwendung von\\
+  passwort-gesch"utzten SSH-Schl"usseln.
+ }}{\Huge\bfseries!}
+\end{center}
+
+\nl War die Authentifizierung erfolgreich, so "offnet sich ein
+weiterer Reiter im Hauptfenster des \Nbm.
+
+Zun"achst ist nur der untere Teil des Reiters aktiv. Dort werden die auf dem
+Server verf"ugbaren Kan"ale angezeigt -- jeweils mit der M"oglichkeit
+den Kanal zu "offnen.
+%
+Pro OpenVPN-Server-Dienst auf dem jeweiligen Server gibt es einen Kanal. Mittels
+des Kanals wird der Zugriff auf die OpenVPN Management-Schnittstelle realisiert.
+%
+Wurde ein Kanal durch ''Verbinden'' ge"offnet, werden im zugeh"origen Reiter
+die verschiedenen Informationen, die "uber den Kanal empfangen
+werden, dargestellt.
+
+\subpoint{Mit einem Server verbundene Benutzer anzeigen}
+
+\nl Folgende Informationen
+werden pr"asentiert:
+
+\begin{description}
+	\item [CN]: Der CommonName auf dem Zertifikat des Benutzers
+	\item [IP]: Die IP Adresse von der aus der Benutzer verbunden ist
+	\item [VPN IP]: Die IP Adresse die dem Benutzer im VPN zugewiesen wurde
+	\item [Empfangen]: Die vom VPN-Server empfangenen Daten des Benutzers
+	\item [Gesendet]: Die vom VPN-Server an den Benutzer gesendete Daten
+	\item [Verbunden seit]: Zeitpunkt seitdem der Benutzer mit
+		dem VPN Server verbunden ist
+\end{description}
+
+\nl Handelt es sich bei dem VPN um eine Verbindung im sogenannten ``Bridge''-Modus
+so wird statt der \textbf{VPN IP} die \textbf{Virtuelle MAC} der Verbindung angezeigt.
+
+\nl Weiterhin stehen folgende Schaltfl"achen zur Verf"ugung:
+
+\begin{description}
+	\item [Status]: Hiermit kann der aktuelle Status abgerufen werden. Dies
+	    geschieht auch automatisch alle 30 Sekunden.
+	\item [Version]: Hier"uber wird die aktuelle Version des OpenVPN Servers
+	    angezeigt.
+	\item [Serverlog anzeigen/ausblenden]: Ein Echtzeit-Log kann hiermit an- und ausgeschaltet
+	    werden.
+	\item [Befehl senden]: Hiermit kann ein Befehl an das OpenVPN
+	    Management Interface gesendet werden. \footnote{Die Dokumentation zum
+	    OpenVPN Management Interface ist hier einzusehen:
+	    \url{http://openvpn.net/index.php/open-source/documentation/miscellaneous/79-management-interface.html}}
+        \\ Beispiel: ''verb 5'' zeigt detaillierte Ausgaben im Logging
+\end{description}
+
+
+\subpoint{Mit einem Server verbundene Benutzer trennen}
+
+\nl In der Liste der mit einem Server verbundenen Benutzern, kann durch einen
+Rechtsklick auf den jeweiligen Benutzer die Aktion ``Benutzer trennen''
+ausgew"ahlt
+werden. Hierdurch wird die Verbindung des Benutzers zum VPN-Server getrennt.
+
+\newpage
+\newitem{Vorbereitung des OpenVPN Servers}
+
+\subpoint{Verbindung mit einem regul"aren OpenVPN Server}
+
+\nl Der Vorteil der \Nboa{} ist,
+dass diese bereits f"ur die Nutzung mit dem \Nbm{} vorbereitet ist.
+Jedoch wurde der \Nbm{} auch f"ur die
+Nutzung mit regul"aren OpenVPN Servern entworfen.\\\\
+Folgende Komponenten m"ussen dazu auf dem OpenVPN-Server installiert
+sein:
+
+\begin{items}
+	\item Das Software-Paket \textsl{socket-wrapper}
+		(wird zusammen mit dem \Nbm{} ausgeliefert).
+	\item Das Software-Paket \textsl{bytemine-manager-integration}
+		(wird ebenfalls mit dem \Nbm{} ausgeliefert).
+	\item OpenVPN in der Version 2.1rc14 oder neuer
+\end{items}
+\subpoint{Kommunikation mit Unix Domain Sockets}
+
+\nl Seit der Version 2.1rc14 unterst"utzt der OpenVPN Server
+zur Kommunikation mit der Management-Schnittstelle Unix-Domain Sockets.
+In der Konfigurationsdatei des OpenVPN Servers wird dies wie folgt angegeben:
+
+\nl\code{\ \ \ management /var/run/management-udp unix}
+
+\nl In diesem Falle w"are der Socket dann als
+\code{management-udp} im Verzeichnis \code{/var/run} konfiguriert.
+%
+Auf diesem Unix-Domain Socket wird aus dem Manager "uber
+eine SSH-Verbindung zugegriffen.
+Damit dies m"oglich ist, existiert das Programm \code{ut} aus dem
+Software-Paket \textsl{socket-wrapper}.
+
+Damit der \Nbm{} die Benutzer synchronisieren
+kann, m"ussen die entsprechenden Verzeichnisse auf der Serverseite
+f"ur den Benutzer, mit dem sich der \Nbm{}
+per SSH verbindet, schreibbar sein.
+
+\newpage
+
+\subpoint{Installation des \textsl{socket-wrapper}}
+
+\nl Die Installation des
+\textsl{socket-wrapper}-Paketes\footnote{http://www.bytemine.net/de/bytemine-download
+} unter Unix-Systemen ist einfach: Nach Entpacken mittels\\
+\textit{\code{tar -xzf (socket-wrapper-packet)}}\\
+wechelt man in das entpackte Verzeichnis und installiert \textit{ut} mit\\
+\textit{\code{make install}}\\
+
+Anschlie"send gibt es das Programm \code{/usr/local/sbin/ut}, sowie die
+manual pages \code{ut(8)} und \code{ut.conf(8)}.
+
+\subpoint{Konfiguration des \textsl{socket-wrapper}}
+
+\nl Der Socket-Wrapper wird "uber die Datei \code{/etc/btm/ut.conf}
+konfiguriert.  In dieser Datei werden die Unix-Domain Sockets der
+einzelnen OpenVPN-Dienste den Kan"alen, auf die der \Nbm{} zugreifen
+kann, zugeordnet.
+
+F"ur jeden OpenVPN Dienst wird eine \code{channel}-Anweisung geschrieben.
+Hierbei definiert die \code{type}-Anweisung die Art des Kanals (f"ur den
+Zugriff auf einen OpenVPN Management Port ist dies \code{VPNM}).
+Mittels des \code{method}-Schl"usselwortes wird dann der Weg zu dem
+Socket von OpenVPN gewiesen.
+
+\begin{verbatim}
+channel "mgmt udp" {
+    type VPNM
+    method { unix "/var/run/management-udp" }
+}
+\end{verbatim}
+\newpage
+
+\section{Verschiedenes}
+
+\newitem{Probleme mit dem \Nbm ?}
+Sollten sie Probleme mit dem \Nbm haben,
+schicken Sie bitte eine m"oglichst detaillierte Fehlerbeschreibung
+an \textsl{support@bytemine.net}.
+Hier ist es hilfreich wenn sie die Versions- und Build-Nummer des von ihnen
+verwendeten \Nbm s angeben; sie finden diese Informationen in der Anwendung unter dem Men"upunkt
+``Men\"u$\,\rightarrow\,$Info''.
+
+\newitem{OpenVPN-Benutzerkonfigurationserstellung}
+Um das Verwalten von Benutzern zu erleichtern, erstellt der \Nbm{} automatisch
+ f"ur jeden Benutzer OpenVPN-Konfigurationsdateien. Diese Konfigurationen
+liegen jedem Benutzer im Exportverzeichnis bei.\\
+Generell erstellt der \Nbm{}  f"ur jeden Server, mit welchem der User
+verbunden ist, eine Konfiguration. Dabei verwendet er ein Template, auf
+welche alle Konfigurationen basieren. Das Template liegt im
+Projektverzeichniss unter ``templates'', und kann den eigenen Bed"urfnissen
+angepasst werden.
+
+\newitem{OpenVPN-Benutzerkonfiguration}
+Es ist mit dem \Nbm{} auch m"oglich einzelnen OpenVPN-Benutzern statische
+IP-Adressen zuzuweisen. M"ochte man diese Funktion verwenden, so gen"ugt es in
+dem ServerDetails-Tab die Option 'OpenVPN statische IP f"ur Benutzter' zu
+aktivieren, sowie folgende Zeile ihrer OpenVPN-Serverkonfigurationsdatei
+hinzuzuf"ugen:\\[2mm]
+\textit{client-config-dir (Pfad zum cc-Verzeichnis)}\\[2mm]
+M"ochte man statische IP-Adressen verwenden, so sollte man darauf achten
+nur Adressen aus einem sukzessiven /30 Subnetz zu verwenden, um
+kompatibal mit Windows zu sein.
+\textit{Dazu muss das letzte Oktet einer IP-Adresse aus folgendem Set ausgewaehlt
+werden}
+\footnote{\url{http://openvpn.net/index.php/open-source/documentation/howto.html\#policy}}
+\begin{verbatim}
+[1 ]  [ 5]  [ 9]  [13]  [17]
+[21]  [25]  [29]  [33]  [37]
+[41]  [45]  [49]  [53]  [57]
+[61]  [65]  [69]  [73]  [77]
+[81]  [85]  [89]  [93]  [97]
+[101] [105] [109] [113] [117]
+[121] [125] [129] [133] [137]
+[141] [145] [149] [153] [157]
+[161] [165] [169] [173] [177]
+[181] [185] [189] [193] [197]
+[201] [205] [209] [213] [217]
+[221] [225] [229] [233] [237]
+[241] [245] [249] [253]
+\end{verbatim}
+Der \Nbm{} setzt hierbei automatisch den Endpunkt (IP-Adresse f"ur
+den Server).
+
+%\newitem{Glossar}
+

@@ -1,0 +1,65 @@
+\begin{center}
+\huge QuickStart Guide\\[5.5mm]
+\end{center}
+Diese Anleitung beschreibt wie man in 7 Schritten ein eigenes
+OpenVPN-Netzwerk mit dem \Nbm{} erstellen kann.\\[2mm]
+
+\colhead{Start}
+\picContentRight{config}{
+Entpacke den \Nbm{} und starte ihn mit einem Klick auf die
+``start-manager''-Datei im entpackten Ordner. Wird der \Nbm{} zum ersten Mal
+gestartet, erscheint ein Basis-Konfigurationsdialog.
+}{width=85mm,height=60mm}
+
+\colheadRight{Erzeugung der Benutzer}
+\picContentLeft{user1}{
+Der
+n"achste Schritt ist das Erzeugen der Benutzer. Mit einem Klick auf
+``Bearbeiten-$>$Neuer Benutzer anlegen'' kann ein neuer Benutzer angelegt
+werden.
+}{width=75mm,height=52mm}
+
+\colhead{Erzeugung des Servers}
+\picContentRight{server1}{
+Klicke auf ``Bearbeiten-$>$Neuen Server anlegen'' um einen neuen Server
+anzulegen. Haben Sie einen boa-server, so k"onnen sie dies dem \Nbm{} unter
+\textit{Server Typ} im ersten Tab mitteilen, woraufhin dieser ihnen die restliche
+Konfiguration des Servers abnimmt.
+}{width=76mm,height=56mm}
+
+\newpage
+
+\colheadRight{Syncing}
+\picContentLeft{sync}{
+Klicke mit Rechts auf den Server und w"ahle ``\textit{Synchronisiere
+Benutzer}''  um mit dem Server zu
+synchronisieren. Hierbei verbindet sich der \Nbm{} mit dem Server und l"adt
+alle, f"ur den Server relaventen Dateien, auf ihn.
+}{width=76mm,height=56mm}
+
+\colhead{Server konfigurieren}
+\picContentRight{startVpn}{
+Da der \Nbm{} automatisch eine Server-Config erstellt, gen"ugt es diese auf
+den Server zu laden und danach den OpenVPN-Prozess zu starten.\\
+Haben Sie eine boa so l"adt der \Nbm{} die Server-Config w"ahrend der
+Synchronisation selbstst"andig hoch.
+}{width=76mm,height=56mm}
+
+\colheadRight{Verbinden und Testen}
+\picContentLeft{control}{
+Der \Nbm{} erstellt automatisch OpenVPN-Userconfigs und speichert sie im
+Export-Verzeichnis unter den jeweiligen Benutzer.\\
+Ein weiteres Feature ist das Kontrollzentrum des \Nbm{}. Wenn es im
+Konfigurationsdialog aktiviert wurde, so gen"ugt es den gew"unschten Server
+zu selektieren (nicht "offnen) und man kann im Hauptpanel den
+Kontrollzentrum-Button dr"ucken.\\
+Das Kontrollzentrum kann nur verwendet werden wenn ein OpenVPN-Prozess auf
+dem Server l"auft. Es erm"oglicht eigene Kommandos an den Server zu senden
+sowie die verbunden Benutzer zu "uberwachen.
+}{width=76mm,height=56mm}
+
+\colhead{War das alles ?}
+Nein, der Quickstart Guide ist nur eine kleine Einf"uhrung in den \Nbm{}, welcher
+viele Funktionen nicht aussprechend ber"ucksichtigt.\\
+Deswegen sollten Sie auf jeden Fall das \Nbm{}-Handbuch lesen, in welchen
+alle Funktionen des \Nbm{} ausf"uhrlich beschrieben werden.

@@ -1,0 +1,57 @@
+\documentclass[a4paper,empty]{article}
+ 
+\pagestyle{empty}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{fullpage}
+
+\makeatletter
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+ {2mm}%
+ {2mm}%
+ {\normalfont\large\bfseries}}
+
+
+\newcommand{\Nbm}{\textsl{bytemine manager}}
+
+\newcommand{\colhead}[1]{\section{#1}}
+\newcommand{\colheadRight}[1]{
+\begin{flushright}\colhead{#1}\end{flushright}}
+
+\newcommand{\picContentLeft}[3]
+{
+\begin{figure}[htbp]
+\begin{minipage}[t]{9cm}
+\vspace{0pt}
+\centering
+\includegraphics[#3]{#1}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{7cm}
+\vspace{0pt}
+#2
+\end{minipage}
+\end{figure}
+}
+
+
+\newcommand{\picContentRight}[3]
+{
+\begin{figure}[htbp]
+\begin{minipage}[t]{7cm}
+\vspace{0pt}
+#2
+\end{minipage}
+\hfill
+\begin{minipage}[t]{9cm}
+\vspace{0pt}
+\centering
+\includegraphics[#3]{#1}  %width=75mm,height=50mm]{#1}
+%
+\end{minipage}
+\end{figure}
+}
+
+\begin{document}
+\input{body_en}
+\end{document}

@@ -1,0 +1,63 @@
+\begin{center}
+\huge QuickStart Guide\\[5.5mm]
+\end{center}
+\large{This guide provides an example of setting up an openvpn network in 7 steps 
+using the \Nbm{}}.\\[1mm]
+
+\colhead{Start}
+\picContentRight{config}{
+First, unzip the \Nbm{} and start it by clicking on the
+"start-manager"-file in the unzipped directory. When the \Nbm{} runs for the
+first time, it will guide you trough a basic configuration.
+}{width=85mm,height=60mm}
+
+\colheadRight{Create the users}
+\picContentLeft{user1}{
+After the basic configuration you can now work with the \Nbm{}. The next step
+is to create all neccessary user. Click on ``Edit-$>$Create new user'' and a
+UserCreation-Dialog will appear.
+}{width=75mm,height=52mm}
+
+\colhead{Create the server}
+\picContentRight{server1}{
+Click on ``Edit-$>$Create new server'' to create your server. If you have a
+boa-server, you can select this in the first tab under server-type. This will
+save you time configuring the server.\\
+}{width=76mm,height=56mm}
+
+\newpage
+
+\colheadRight{Syncing}
+\picContentLeft{sync}{
+By syncing the \Nbm{} pushes all files which are relevant for the server, to
+it.
+}{width=76mm,height=56mm}
+
+\colhead{Setup the server}
+\picContentRight{startVpn}{
+The \Nbm{} will automatically create a OpenVPN-Server-Config. You only need
+to push it to the server as well as start the openvpn-daemon on the
+server.\\
+If you have a boa, the \Nbm{} will push the config for you in the syncing
+process.
+}{width=76mm,height=56mm}
+
+\colheadRight{Connect and Test}
+\picContentLeft{control}{
+One of the features of the \Nbm{} is that it automatically creates
+userconfig-files. Simply switch into the export-dir and start the
+openvpn application.\\
+Another cool feature is the controll tab of the \Nbm{}.
+You can enable it in
+the configuration tab. Then select the server (not open it) and click on the
+Control Center-Button in the main Button-Panel.\\
+Keep in mind that you can only use the Control Tab if an openvpn process is
+running on the server. In the tab you can see all connected clients or you
+can send your own commands to the server.
+}{width=80mm,height=56mm}
+
+\colhead{Where to go from here}
+This quickstart guide is only capable of giving a brief introduction into
+the \Nbm{}. Therefore it left out background information or some cool
+features of the \Nbm{}.
+The good news is that you can explore all this in the \Nbm{}-Handbook.

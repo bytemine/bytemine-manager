@@ -1,0 +1,35 @@
+bytemine-manager (2.2.3); urgency=low
+
+  * Remove licence restrictions.
+
+  * Fix a problem preventing the control center from opening any available channel.
+
+  * Fix a potential problem that might generate an invalid certificate revocation list.
+
+  * The creation of OpenVPN configuration files is switched off by default.
+
+  * This application can also be run with Java version 7.
+
+  * Sending a custom command via control center has been improved, and is now able to display the resulting output.
+  
+  * Static IPs can be assigned to users that are connected with an OpenVPN concentrator.
+
+  * Opening an OpenVPN concentrator multiple times parallel is prohibited.
+
+  * The manual has been improved and updated.
+
+  * Revoked certificates can be re-enabled and therefor be re-used with a new user.
+  
+  * Some problems with the user import have been fixed.
+
+  * OpenVPN concentrator configuration files are automatically created at create and update of a server.
+
+  * SSH communication has been improved, some minor issues with timeouts have been fixed.
+
+  * The summary dialog on user import is now showing the correct amount of imported users and certificates.
+
+  * A servers CN and OU fields can be manually set with the server configuration dialog. Until now the values from the root certificate were used.
+
+  * Server certificates can be renewed like user certificates.
+  
+ -- Daniel Rauer <rauer@bytemine.net>  Fri, 11 November 2011 11:30:00 +0200
