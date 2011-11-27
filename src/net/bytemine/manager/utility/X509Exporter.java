@@ -58,8 +58,7 @@ public class X509Exporter {
 
         this.type = type;
         this.certificate = cert;
-
-        preparePath(path);
+        this.path = path;
 
         this.newCertFilename = certFilename;
         this.newKeyFilename = keyFilename;
@@ -68,12 +67,9 @@ public class X509Exporter {
         if (this.type == X509.X509_TYPE_CLIENT) {
             if (user != null) {
                 this.path = this.path + user.getUsername() + File.separator;
-                preparePath(this.path);
                 generateNewClientFilenames(user);
             } else {
                 this.path = this.path + Constants.EXPORT_UNASSIGNED_DIRECTORY;
-                preparePath(this.path);
-                
                 this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
                 this.newCertFilename = generateNewFilename(certFilename);
                 this.newKeyFilename = generateNewFilename(keyFilename);
@@ -82,12 +78,9 @@ public class X509Exporter {
         } else if (this.type == X509.X509_TYPE_PKCS12) {
             if (user != null) {
                 this.path = this.path + user.getUsername() + File.separator;
-                preparePath(this.path);
                 generateNewPKCS12ClientFilenames(user);
             } else {
                 this.path = this.path + Constants.EXPORT_UNASSIGNED_DIRECTORY;
-                preparePath(this.path);
-                
                 this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
                 this.newCertFilename = generateNewFilename(certFilename);
                 this.newKeyFilename = "";
@@ -104,6 +97,7 @@ public class X509Exporter {
             this.newCertFilename = generateNewFilename(certFilename, prefix + "_");
             this.newKeyFilename = generateNewFilename(keyFilename, prefix + "_");
         }
+        preparePath(this.path);
 
         String bundleName = "";
         try {
