@@ -679,7 +679,7 @@ public class X509Generator {
 
             protected String doInBackground() throws Exception {
 
-                if (x509.getType() == X509.X509_TYPE_CLIENT) {
+                if ((x509.getType() == X509.X509_TYPE_CLIENT) || (x509.getType() == X509.X509_TYPE_PKCS12)) {
                     currentThread = Thread.currentThread();
                     ThreadMgmt.getInstance().addThread(currentThread, rb.getString("statusBar.clientcert_renew.tooltip"));
                     createClientCertImmediately(UserQueries.getUserByX509id(x509.getX509id()));
