@@ -9,6 +9,8 @@ package net.bytemine.manager;
 
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.bytemine.manager.gui.ManagerGUI;
 
@@ -19,6 +21,8 @@ import net.bytemine.manager.gui.ManagerGUI;
  * @author Daniel Rauer
  */
 public class ThreadMgmt {
+    
+    private static Logger logger = Logger.getLogger(ThreadMgmt.class.getName());
 
     private static ThreadMgmt instance = null;
 
@@ -42,25 +46,33 @@ public class ThreadMgmt {
 
 
     public void addThread(Thread t, String message) {
-        Long id = t.getId();
-        if (activeThreads.get(id) == null) {
-            activeThreads.put(id, t);
-            if (activeThreads.size() == 1)
-                ManagerGUI.setThreadRunning();
-            if (message != null)
-                messages.put(id, message);
+        try {
+            Long id = t.getId();
+            if (activeThreads.get(id) == null) {
+                activeThreads.put(id, t);
+                if (activeThreads.size() == 1)
+                    ManagerGUI.setThreadRunning();
+                if (message != null)
+                    messages.put(id, message);
+            }
+            generateMessagesForGUI();
+        } catch(Exception e) {
+            logger.log(Level.WARNING, "Error on adding current thread to queue.", e);
         }
-        generateMessagesForGUI();
     }
 
     public void removeThread(Thread t) {
-        Long id = t.getId();
-        activeThreads.remove(id);
-        messages.remove(id);
-        if (activeThreads.size() == 0) {
-            ManagerGUI.unsetThreadRunning();
+        try {
+            Long id = t.getId();
+            activeThreads.remove(id);
+            messages.remove(id);
+            if (activeThreads.size() == 0) {
+                ManagerGUI.unsetThreadRunning();
+            }
+            generateMessagesForGUI();
+        } catch(Exception e) {
+            logger.log(Level.WARNING, "Error on removing current thread from queue.", e);
         }
-        generateMessagesForGUI();
     }
 
 
