@@ -1,5 +1,9 @@
 bytemine-manager (2.2.3); urgency=low
 
+  * Fix renewal of certificates for PKCS#12 certificates.
+
+  * Fix potential problem on writing files to certain export paths. 
+
   * Remove licence restrictions.
 
   * Fix a problem preventing the control center from opening any available channel.

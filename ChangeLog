@@ -1,6 +1,11 @@
+- Fix renewal of certificates for PKCS#12 certificates.
+- Fix potential problem on writing files to certain export paths. 
+
+
 ChangeLog for bytemine manager 2.2.3
 =======================================
 - Remove licence restrictions.
+
 
 ChangeLog for bytemine manager 2.2.2
 =======================================
