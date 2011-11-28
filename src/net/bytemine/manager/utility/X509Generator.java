@@ -116,9 +116,10 @@ public class X509Generator {
             keyStrength = Integer.parseInt(rootCertBundle.getString("key_strength"));
         }
 
-        generator = new net.bytemine.crypto.x509.X509Generator(
-                keyStrength, Configuration.getInstance().MANAGER_VERSION, Configuration.getInstance().MANAGER_BUILD
-        );
+        String generatorIdentifier = 
+                "Manager version: " + Configuration.getInstance().MANAGER_VERSION + ", " +
+                "build: " + Configuration.getInstance().MANAGER_BUILD;
+        generator = new net.bytemine.crypto.x509.X509Generator(keyStrength, generatorIdentifier);
     }
 
 
