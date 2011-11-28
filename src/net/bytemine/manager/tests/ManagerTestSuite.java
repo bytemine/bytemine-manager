@@ -33,7 +33,7 @@ import org.junit.runners.Suite;
                       })
 public class ManagerTestSuite {
     
-    static String testdirpath = System.getProperty("user.dir")+"/tests";
+    static String testdirpath = System.getProperty("user.dir")+"/tests/";
     
     /**
      * general set-up for every test
