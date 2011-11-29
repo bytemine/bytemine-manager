@@ -119,7 +119,7 @@ public class CRLExporter {
         preparePath(exportPath);
         
         try {
-            FileWriter fw = new FileWriter(exportPath + "/" + Constants.DEFAULT_CRL_FILENAME);
+            FileWriter fw = new FileWriter(exportPath + File.separator + Constants.DEFAULT_CRL_FILENAME);
             // write to file
             fw.write(content);
             fw.close();

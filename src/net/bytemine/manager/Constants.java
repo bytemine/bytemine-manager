@@ -9,6 +9,7 @@ package net.bytemine.manager;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,8 +68,8 @@ public class Constants {
     public static final int USER_IMPORT_TYPE_FILE = 0;
     public static final int USER_IMPORT_TYPE_LDAP = 1;
     
-    public static final String DEFAULT_EXPORT_PATH = "export/";
-    public static final String EXPORT_UNASSIGNED_DIRECTORY = "/__unassigned/"; 
+    public static final String DEFAULT_EXPORT_PATH = "export" + File.separator;
+    public static final String EXPORT_UNASSIGNED_DIRECTORY = "__unassigned" + File.separator; 
 
     // certificate types
     public static final int CERTIFICATE_TYPE_BASE64 = 0;

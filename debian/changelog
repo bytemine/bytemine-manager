@@ -1,5 +1,7 @@
 bytemine-manager (2.2.3); urgency=low
 
+  * In some occasions on Windows systems the export path was missing a trailing backslash.
+
   * Fix renewal of certificates for PKCS#12 certificates.
 
   * Fix potential problem on writing files to certain export paths. 

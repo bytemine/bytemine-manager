@@ -58,6 +58,9 @@ public class X509Exporter {
 
         this.type = type;
         this.certificate = cert;
+        
+        if (!path.endsWith(File.separator))
+            path = path + File.separator;
         this.path = path;
 
         this.newCertFilename = certFilename;
@@ -69,22 +72,24 @@ public class X509Exporter {
                 this.path = this.path + user.getUsername() + File.separator;
                 generateNewClientFilenames(user);
             } else {
-                this.path = this.path + Constants.EXPORT_UNASSIGNED_DIRECTORY;
+                this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
                 this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
                 this.newCertFilename = generateNewFilename(certFilename);
                 this.newKeyFilename = generateNewFilename(keyFilename);
-                logger.info("storing client certificate without user: " + path + File.separator + newCertFilename);
+                logger.info("storing client certificate without user: " + this.path + File.separator + newCertFilename);
+                logger.info("storing client key without user: " + this.path + File.separator + newKeyFilename);
             }
         } else if (this.type == X509.X509_TYPE_PKCS12) {
             if (user != null) {
                 this.path = this.path + user.getUsername() + File.separator;
                 generateNewPKCS12ClientFilenames(user);
             } else {
-                this.path = this.path + Constants.EXPORT_UNASSIGNED_DIRECTORY;
+                this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
                 this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
                 this.newCertFilename = generateNewFilename(certFilename);
                 this.newKeyFilename = "";
-                logger.info("storing client certificate without user: " + path + File.separator + newCertFilename);
+                logger.info("storing PKCS#12 client certificate without user: " + this.path + File.separator + newCertFilename);
+                logger.info("storing PKCS#12 client key without user: " + this.path + File.separator + newKeyFilename);
             }
         } else if (this.type == X509.X509_TYPE_SERVER) {
             this.seqNumber = serverid + "";
