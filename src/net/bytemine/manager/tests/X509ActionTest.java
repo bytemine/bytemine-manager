@@ -43,7 +43,7 @@ import org.junit.BeforeClass;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static net.bytemine.manager.tests.CustomAssert.*;
 
 public class X509ActionTest {
 
@@ -76,7 +76,11 @@ public class X509ActionTest {
     }
     
     private void testClientCertificate() throws Exception {
-        UserAction.createUserAndCertificate(username, "123456", "test", "technik", "a", "90");
+        int userid = UserAction.createUserAndCertificate(username, "123456", "test", "technik", "a", "90");
+        User user = User.getUserByID(userid);
+        X509 x509 = X509.getX509ById(user.getX509id());
+
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + user.getUsername() + File.separator + x509.getFileName());
     }
     
     private void testServerCertificate() throws Exception {
@@ -103,6 +107,9 @@ public class X509ActionTest {
         subject = dnUtil.merge();
         assertEquals(subject, serverCert.getSubject());
         
+        // check certificate export
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
+        
         
         // CN and OU set to blank
         id = ServerAction.createServerAndCertificate("username", "keyfile",
@@ -124,6 +131,8 @@ public class X509ActionTest {
         subject = dnUtil.merge();
         assertEquals(subject, serverCert.getSubject());
         
+        // check certificate export
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
         
         // CN set
         id = ServerAction.createServerAndCertificate("username", "keyfile",
@@ -144,6 +153,9 @@ public class X509ActionTest {
         dnUtil.setCn(server.getCn());
         subject = dnUtil.merge();
         assertEquals(subject, serverCert.getSubject());
+        
+        // check certificate export
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
         
         
         // OU set
@@ -167,6 +179,9 @@ public class X509ActionTest {
         subject = dnUtil.merge();
         assertEquals(subject, serverCert.getSubject());
         
+        // check certificate export
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
+        
         
         // CN and OU set
         id = ServerAction.createServerAndCertificate("username", "keyfile",
@@ -188,6 +203,9 @@ public class X509ActionTest {
         dnUtil.setOu(server.getOu());
         subject = dnUtil.merge();
         assertEquals(subject, serverCert.getSubject());
+        
+        // check certificate export
+        assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
     }
     
     private void testRootCreation() throws Exception {
@@ -198,6 +216,9 @@ public class X509ActionTest {
             
             assertEquals(rootX509.getType(), X509.X509_TYPE_ROOT);
             assertTrue(rootX509.isGenerated());
+            
+            // check certificate export
+            assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + rootX509.getFileName());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -275,6 +296,9 @@ public class X509ActionTest {
             X509Utils.revokeCertificate(x509);
             
             assertTrue(CRLQueries.isCertificateRevoked(x509.getSerial()));
+            
+            // check CRL export
+            assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + Constants.DEFAULT_CRL_FILENAME);
             
             return x509;
         } catch (Exception e) {
