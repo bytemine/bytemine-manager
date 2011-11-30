@@ -1,3 +1,10 @@
+/*************************************************************************
+ * Written by / Copyright (C) 2009-2011 bytemine GmbH                     *
+ * Author: Daniel Rauer                     E-Mail:    rauer@bytemine.net *
+ *                                                                        *
+ * http://www.bytemine.net/                                               *
+ *************************************************************************/
+
 package net.bytemine.manager.tests;
 
 import java.io.File;
@@ -9,7 +16,7 @@ public class CustomAssert extends Assert {
     }
 
     /**
-     * Tests if the fiel at the given location exists
+     * Tests if the file at the given location exists
      * @param filename The path and name of the file
      */
     public static void assertFileExists(String filename) {
