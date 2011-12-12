@@ -151,10 +151,6 @@ public class ManagerGUI {
      * opens some dialogs if necessary
      */
     private void showDialogs() {
-
-        if (!updateMgmt.isUpdateKeystoreExisting())
-            Dialogs.showNfrBox(mainFrame);
-
         // is set, if a different database gets selected
         boolean skipFollowingDialogs = false;
         boolean generateRootCertificate = false;

@@ -2801,52 +2801,7 @@ public class Dialogs {
         popup.show();
 
     }
-
-    /**
-     * Shows a popup with NFR / beta info
-     *
-     * @param frame The parent frame
-     */
-    public static void showNfrBox(JFrame frame) {
-        ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-
-        JPanel panel = new JPanel();
-        MigLayout layout = new MigLayout("wrap 1");
-        panel.setLayout(layout);
-
-        JLabel imageLabel = new JLabel(
-                ImageUtils.createImageIcon(
-                        Configuration.getInstance().BANNER_PATH, "banner"));
-        panel.add(imageLabel, "align center");
-
-        JLabel titleLabel = new JLabel(rb.getString("app.title"));
-        panel.add(titleLabel, "align center");
-        JLabel versionLabel = new JLabel(rb.getString("app.version") + " " + Configuration.getInstance().MANAGER_VERSION);
-        panel.add(versionLabel, "align center");
-        JLabel copyrightLabel = new JLabel(rb.getString("app.copyright"));
-        panel.add(copyrightLabel, "align center");
-
-        JLabel nfrLabel = new JLabel(rb.getString("app.nfr"));
-        panel.add(nfrLabel, "align center");
-
-        JButton closeButton = new JButton(rb.getString("detailsFrame.closebutton"));
-        closeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                popup.hide();
-            }
-        });
-        panel.add(closeButton, "align center");
-
-        // style
-        panel.setBorder(BorderFactory.createLineBorder(Color.black));
-        CssRuleManager.getInstance().format(panel);
-
-        Point location = GuiUtils.getCenterPositionRelativeTo(panel, frame);
-        PopupFactory factory = PopupFactory.getSharedInstance();
-        popup = factory.getPopup(frame, panel, location.x, location.y);
-        popup.show();
-
-    }
+    
 
     /**
      * Shows a JFilechooser for choosing the import directory
