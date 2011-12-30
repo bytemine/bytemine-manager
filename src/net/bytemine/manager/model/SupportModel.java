@@ -1,5 +1,5 @@
 /*************************************************************************
- * Written by / Copyright (C) 2009-2011 bytemine GmbH                     *
+ * Written by / Copyright (C) 2009-2012 bytemine GmbH                     *
 
  * Author: Daniel Rauer                     E-Mail:    rauer@bytemine.net *
  *                                                                        *
