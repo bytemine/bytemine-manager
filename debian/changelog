@@ -1,4 +1,4 @@
-bytemine-manager (2.2.3); urgency=low
+bytemine-manager (2.2.3) stable; urgency=low
 
   * In some occasions on Windows systems the export path was missing a trailing backslash.
 
@@ -38,4 +38,4 @@ bytemine-manager (2.2.3); urgency=low
 
   * Server certificates can be renewed like user certificates.
   
- -- Daniel Rauer <rauer@bytemine.net>  Fri, 11 November 2011 11:30:00 +0200
+ -- Daniel Rauer <rauer@bytemine.net>  Thu, 9 February 2012 22:30:00 +0200
