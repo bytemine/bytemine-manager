@@ -22,8 +22,8 @@
 
 		<!-- copy documentation -->
 		<copy file="${readme}" todir="${dist-temp-dir}"/>
-		<copy file="${pdf-doc-de}" tofile="${dist-temp-dir}/instructions-de.pdf"/>
-		<copy file="${pdf-doc-en}" tofile="${dist-temp-dir}/instructions-en.pdf"/>
+		<copy file="${manual-de}" tofile="${dist-temp-dir}/manual-de.pdf"/>
+		<copy file="${manual-en}" tofile="${dist-temp-dir}/manual-en.pdf"/>
 
 		<!-- move everything into a new directory to zip -->
 		<move todir="${dist-temp-dir}/${zip-dir}">
