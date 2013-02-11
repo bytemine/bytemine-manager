@@ -88,8 +88,15 @@ public class ResourceBundleMgmt {
      * @return the default ResourceBundle
      */
     private ResourceBundle getDefaultBundle() {
-        ResourceBundle b = ResourceBundle.getBundle(Constants.BUNDLE_PACKAGE, Locale.getDefault());
-        setSelectedLanguage(Locale.getDefault().getLanguage());
+        ResourceBundle b = null;
+        if (Locale.getDefault().getLanguage().equals(Constants.LANGUAGE_CODE_GERMAN) || 
+                Locale.getDefault().getLanguage().equals(Constants.LANGUAGE_CODE_ENGLISH)) {
+            b = ResourceBundle.getBundle(Constants.BUNDLE_PACKAGE, Locale.getDefault());
+            setSelectedLanguage(Locale.getDefault().getLanguage());
+        } else {
+            b = ResourceBundle.getBundle(Constants.BUNDLE_PACKAGE, Locale.ENGLISH);
+            setSelectedLanguage(Constants.LANGUAGE_CODE_ENGLISH);
+        }
         return b;
     }
 
