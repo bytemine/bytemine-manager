@@ -382,7 +382,7 @@ public class X509Generator {
 
             X509Certificate cert = generator.createServerCert(rootCert, rootPrivKey,
                                             Constants.PROPERTIES_DATE_FORMAT.parse(validFrom),
-                                            Constants.PROPERTIES_DATE_FORMAT.parse(DateUtils.addDaysToDate(validFrom, validFor)));
+                                            Constants.PROPERTIES_DATE_FORMAT.parse(DateUtils.addDaysToDate(validFrom, validFor)), subject);
             if (cert == null)
                 throw new Exception(rb.getString("error.x509.generate.server"));
             
