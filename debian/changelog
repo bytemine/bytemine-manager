@@ -31,10 +31,6 @@ bytemine-manager (2.2.4) stable; urgency=low
 
   * Server certificates can be renewed like user certificates.
   
-<<<<<<< HEAD
- -- Daniel Rauer <rauer@bytemine.net>  Thu, 9 February 2012 22:30:00 +0200
-=======
   * Fix a problem with subject of server certificates
   
  -- Daniel Rauer <rauer@bytemine.net>  Fri, 27 Sep 2013 16:30:00 +0200
->>>>>>> 611f354... Adapt changelogs to version 2.2.4

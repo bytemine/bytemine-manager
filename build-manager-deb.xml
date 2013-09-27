@@ -32,7 +32,7 @@
 		
 		<!-- zip the created directory -->
 		<zip
-			destfile="${dist-customer-dir}/${name}-${version_filename}-${licence}${zip-extension}"
+			destfile="${dist-customer-dir}/${name}-${version_filename}${zip-extension}"
 			basedir="${dist-temp-dir}"
 			compress="false"
 			excludes="${svn.properties}"
