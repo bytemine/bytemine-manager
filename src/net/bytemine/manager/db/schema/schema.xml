@@ -213,6 +213,23 @@
       </map>
     </entry>
     <entry>
+      <string>TREESTATES</string>
+      <map>
+        <entry>
+          <string>stateid</string>
+          <string>INT</string>
+        </entry>
+        <entry>
+          <string>treename</string>
+          <string>TEXT</string>
+        </entry>
+        <entry>
+          <string>expandednodes</string>
+          <string>TEXT</string>
+        </entry>
+      </map>
+    </entry>
+    <entry>
       <string>CRL</string>
       <map>
         <entry>
@@ -287,31 +304,14 @@
       </map>
     </entry>
     <entry>
-      <string>TREESTATES</string>
-      <map>
-        <entry>
-          <string>stateid</string>
-          <string>INT</string>
-        </entry>
-        <entry>
-          <string>treename</string>
-          <string>TEXT</string>
-        </entry>
-        <entry>
-          <string>expandednodes</string>
-          <string>TEXT</string>
-        </entry>
-      </map>
-    </entry>
-    <entry>
       <string>SERVER</string>
       <map>
         <entry>
-          <string>servertype</string>
+          <string>authtype</string>
           <string>INT</string>
         </entry>
         <entry>
-          <string>authtype</string>
+          <string>servertype</string>
           <string>INT</string>
         </entry>
         <entry>
@@ -367,15 +367,15 @@
           <string>INT</string>
         </entry>
         <entry>
+          <string>vpnUser</string>
+          <string>TEXT</string>
+        </entry>
+        <entry>
           <string>exportpath</string>
           <string>TEXT</string>
         </entry>
         <entry>
           <string>hostname</string>
-          <string>TEXT</string>
-        </entry>
-        <entry>
-          <string>vpnUser</string>
           <string>TEXT</string>
         </entry>
         <entry>
