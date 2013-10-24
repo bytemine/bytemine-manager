@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="extlib/bcprov-jdk16-145.jar"/>
+	<classpathentry kind="lib" path="extlib/bytemine-crypto-1.0.2.jar"/>
+	<classpathentry kind="lib" path="extlib/bytemine-utils-1.2.1.jar"/>
+	<classpathentry kind="lib" path="extlib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="extlib/crypt4j-1.0.0.jar"/>
+	<classpathentry kind="lib" path="extlib/jsch-0.1.43.btm.jar"/>
+	<classpathentry kind="lib" path="extlib/junit-4.8.2.jar"/>
+	<classpathentry kind="lib" path="extlib/mail.jar"/>
+	<classpathentry kind="lib" path="extlib/miglayout-3.6.3-swing.jar"/>
+	<classpathentry kind="lib" path="extlib/sqlitejdbc-v054.jar"/>
+	<classpathentry kind="lib" path="extlib/xstream-1.4.1.jar"/>
+	<classpathentry kind="lib" path="extlib/yamlbeans-1.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
