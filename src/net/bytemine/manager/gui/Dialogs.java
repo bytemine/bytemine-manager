@@ -1480,7 +1480,14 @@ public class Dialogs {
         openVPNConfigFiles.setSelected(Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES);
         openVPNConfigFiles.setFont(Constants.FONT_PLAIN);
 
-
+        // disabled warnings should be shown again
+        final JCheckBox showAllWarnings = new JCheckBox(rb.getString("dialog.configuration.showAllWarnings"));
+        showAllWarnings.setFont(Constants.FONT_PLAIN);
+        if (Configuration.getInstance().GUI_SHOW_EXIT_DIALOG && Configuration.getInstance().GUI_SHOW_EXIT_DIALOG_ACTIVE_THREADS && Configuration.getInstance().GUI_SHOW_OPENVPN_IP_WARNING ) {
+        	showAllWarnings.setSelected(true);
+        	showAllWarnings.setEnabled(false);        	
+        }
+        
         final JButton saveButton = new JButton(rb.getString("dialog.configuration.saveButton"));
         saveButton.setName("config_save");
         saveButton.addActionListener(new ActionListener() {
@@ -1505,10 +1512,17 @@ public class Dialogs {
                                 dbPathField.getText(),
                                 defaultDB.isSelected(),
                                 pam.isSelected(),
-                                openVPNConfigFiles.isSelected()
+                                openVPNConfigFiles.isSelected()                              
                         );
                         dialog.setVisible(false);
-
+                        
+                        //all warnings will be shown again
+                        if (showAllWarnings.isSelected()) {
+                        	Configuration.getInstance().setGuiShowOpenVPNIpWarningDialog(true);
+                        	Configuration.getInstance().setGuiShowExitDialog(true);
+                        	Configuration.getInstance().setGuiShowExitDialogActiveThreads(true);
+                        }
+ 
                     } else {
                         // show error dialog
                         CustomJOptionPane.showMessageDialog(dialog,
@@ -1583,7 +1597,8 @@ public class Dialogs {
                         defaultDB,
                         generalLabel,
                         pam,
-                        openVPNConfigFiles
+                        openVPNConfigFiles,
+                        showAllWarnings
                 );
             }
         });
@@ -1615,7 +1630,8 @@ public class Dialogs {
                         defaultDB,
                         generalLabel,
                         pam,
-                        openVPNConfigFiles
+                        openVPNConfigFiles,
+                        showAllWarnings
                 );
             }
         });
@@ -1738,7 +1754,8 @@ public class Dialogs {
         generalPanel.add(generalLabel, "gapleft 8, wrap");
         generalPanel.add(pam, "gapleft 8, wrap");
         generalPanel.add(openVPNConfigFiles, "gapleft 8, wrap");
-        inputPanel.add(generalPanel, "span 3, growx");
+        generalPanel.add(showAllWarnings, "gapleft 8, wrap");
+        inputPanel.add(generalPanel, "span 4, growx");
 
         Container contentPane = dialog.getContentPane();
         contentPane.add(inputPanel, BorderLayout.CENTER);
@@ -2880,7 +2897,8 @@ public class Dialogs {
             JCheckBox defaultDB,
             JLabel generalLabel,
             JCheckBox pam,
-            JCheckBox createOpenVPNConfigFiles
+            JCheckBox createOpenVPNConfigFiles,
+            JCheckBox showAllWarnings
     ) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
@@ -2908,6 +2926,7 @@ public class Dialogs {
         generalLabel.setText(rb.getString("dialog.configuration.general"));
         pam.setText(rb.getString("dialog.configuration.pam"));
         createOpenVPNConfigFiles.setText(rb.getString("dialog.configuration.create_openvpn_config_files"));
+        showAllWarnings.setText(rb.getString("dialog.configuration.showAllWarnings"));
     }
     
     
