@@ -274,6 +274,7 @@ public class UserDetails {
 
         final JTextField cnField = new JTextField(details[5], 10);
         final JTextField ouField = new JTextField(details[6], 10);
+        final JTextField yubiField = new JTextField(details[7], 10);
 
         usernameField.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent e) {
@@ -303,10 +304,14 @@ public class UserDetails {
         cnLabel.setFont(Constants.FONT_PLAIN);
         JLabel ouLabel = new JLabel(rb.getString("user.details.ou"));
         ouLabel.setFont(Constants.FONT_PLAIN);
+        JLabel yubiLabel = new JLabel(rb.getString("user.details.yubikeyid"));
+        yubiLabel.setFont(Constants.FONT_PLAIN);
         extensionPanel.add(cnLabel, "align right");
         extensionPanel.add(cnField, "span, growx, wrap");
         extensionPanel.add(ouLabel, "align right");
         extensionPanel.add(ouField, "span, growx, wrap");
+        extensionPanel.add(yubiLabel, "align right");
+        extensionPanel.add(yubiField, "span, growx, wrap");
         
         final JLabel clientValidForLabel = new JLabel(rb.getString("user.details.clientValidFor"));
         clientValidForLabel.setFont(Constants.FONT_PLAIN);
@@ -456,7 +461,7 @@ public class UserDetails {
 
                     if (newUser && x509id==null) {
                         // save
-                        if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText())) {
+                        if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText(), yubiField.getText())) {
                             String password = null;
                             if (Configuration.getInstance().PKCS12_PASSWORD_TYPE
                                             == Constants.PKCS12_SINGLE_PASSWORD) {
@@ -489,7 +494,8 @@ public class UserDetails {
                                     cnField.getText(),
                                     ouField.getText(),
                                     password,
-                                    clientValidFor
+                                    clientValidFor,
+                                    yubiField.getText()
                             );
                             // connect server and users
                             UserQueries.reconnectServersAndUser(userid, connectedServers);
@@ -503,13 +509,14 @@ public class UserDetails {
                         }
                     } else if(newUser && x509id!=null) {
                     	// save
-                        if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText())) {
+                        if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText(), yubiField.getText())) {
                         	
                             
                             User user = new User(username, newpasswordField.getText(), 
                             								Integer.parseInt(x509id), true,
                             					cnField.getText(),
-                            					ouField.getText());
+                            					ouField.getText(),
+                            					yubiField.getText());
                             int userid = user.getUserid();
                             
                             // connect server and users
@@ -524,13 +531,14 @@ public class UserDetails {
                         }
                     } else {
                         //update
-                        if (ValidatorAction.validateUserUpdate(usernameField.getText(), details[1], newpasswordField.getText())) {
+                        if (ValidatorAction.validateUserUpdate(usernameField.getText(), details[1], newpasswordField.getText(), yubiField.getText())) {
                             UserAction.updateUser(
                                     idField.getText(),
                                     usernameField.getText(),
                                     newpasswordField.getText(),
                                     cnField.getText(),
-                                    ouField.getText()
+                                    ouField.getText(),
+                                    yubiField.getText()
                             );
                             // connect server and users
                             UserQueries.reconnectServersAndUser(idField.getText(), connectedServers);
@@ -586,6 +594,8 @@ public class UserDetails {
                         		usernameField.requestFocus(); break;
                         case 2: newpasswordField.setBackground(Constants.COLOR_ERROR);
                         		newpasswordField.requestFocus(); break;
+                        case 3: yubiField.setBackground(Constants.COLOR_ERROR);
+                                yubiField.requestFocus(); break;
                         default: break;
                         }
                     }

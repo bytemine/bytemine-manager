@@ -131,6 +131,10 @@
           <string>INT</string>
         </entry>
         <entry>
+          <string>yubikeyid</string>
+          <string>TEXT</string>
+        </entry>
+        <entry>
           <string>x509id</string>
           <string>INT</string>
         </entry>

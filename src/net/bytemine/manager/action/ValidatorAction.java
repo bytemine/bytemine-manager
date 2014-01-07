@@ -46,9 +46,10 @@ public class ValidatorAction {
      *
      * @param username The content of the username field
      * @param password The content of the password field
+     * @param yubikeyid The content of the yubikeyid field
      * @return true, if the entries are valid
      */
-    public static boolean validateUserCreation(String username, String password) throws ValidationException {
+    public static boolean validateUserCreation(String username, String password, String yubikeyid) throws ValidationException {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         int minimumPasswordLength = Configuration.getInstance().USER_PASSWORD_LENGTH;
 
@@ -83,6 +84,15 @@ public class ValidatorAction {
                     rb.getString("error.username.characters"),
                     rb.getString("error.general.title"), 
                     1);
+        
+        else if (yubikeyid != null && !"".equals(yubikeyid)) {
+            if (yubikeyid.length() != 12) {
+                throw new ValidationException(
+                        rb.getString("error.yubikeyid.characters"),
+                        rb.getString("error.general.title"),
+                        3);
+            }
+        }
         return true;
     }
 
@@ -93,11 +103,12 @@ public class ValidatorAction {
      * @param username    The content of the username field
      * @param oldUsername The username before the update
      * @param password    The content of the password field
+     * @param yubikeyid   The content of the yubikeyid field
      * @return true, if username and password are valid
      * @throws NoSuchAlgorithmException, ValidationException
      */
     public static boolean validateUserUpdate(
-            String username, String oldUsername, String password)
+            String username, String oldUsername, String password, String yubikeyid)
             throws NoSuchAlgorithmException, ValidationException {
 
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
@@ -136,6 +147,15 @@ public class ValidatorAction {
                     rb.getString("error.password.usascii"),
                     rb.getString("error.general.title"),
                     2);
+        else if (yubikeyid != null && !"".equals(yubikeyid)) {
+            if (yubikeyid.length() != 12) {
+                throw new ValidationException(
+                        rb.getString("error.yubikeyid.characters"),
+                        rb.getString("error.general.title"), 
+                        3);
+            } else
+                return true;
+        }
         else
             return true;
     }

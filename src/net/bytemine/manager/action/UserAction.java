@@ -52,9 +52,27 @@ public class UserAction {
      */
     public static int createUserAndCertificate(String username, String password, String cn, String ou, String pkcs12Password, String validFor)
             throws Exception {
+        return createUserAndCertificate(username, password, cn, ou, pkcs12Password, validFor, "");
+    }
+    
+    /**
+     * Create new user and client certificate
+     *
+     * @param username The users username
+     * @param password The users password
+     * @param cn The users CN
+     * @param ou The users OU
+     * @param pkcs12Password The (optional) PKCS12 password
+     * @param validFor Number of days the certificate will be valid
+     * @param yubikeyid An optional yubikeyid
+     * @return the new userid
+     * @throws java.lang.Exception
+     */
+    public static int createUserAndCertificate(String username, String password, String cn, String ou, String pkcs12Password, String validFor, String yubikeyid)
+            throws Exception {
 
         // create new user
-        User newUser = new User(username, password, -1, true, cn, ou);
+        User newUser = new User(username, password, -1, true, cn, ou, yubikeyid);
 
         // create client certificate
         if (Configuration.getInstance().CA_ENABLED) {
@@ -99,6 +117,12 @@ public class UserAction {
 
         UserDAO.getInstance().deleteById(userId);
     }
+    
+    public static void updateUser(
+            String userId, String username, String newPasswordPlain, String cn, String ou)
+            throws Exception {
+        updateUser(userId, username, newPasswordPlain, cn, ou, "");
+    }
 
 
     /**
@@ -110,7 +134,7 @@ public class UserAction {
      * @throws java.lang.Exception
      */
     public static void updateUser(
-            String userId, String username, String newPasswordPlain, String cn, String ou)
+            String userId, String username, String newPasswordPlain, String cn, String ou, String yubikeyid)
             throws Exception {
         logger.info("Update User with id: " + userId);
 
@@ -120,6 +144,7 @@ public class UserAction {
         boolean newCn = !user.getCn().equals(cn);
         user.setCn(cn);
         user.setOu(ou);
+        user.setYubikeyid(yubikeyid);
         if (newCn)
             renameUser(user, username);
 

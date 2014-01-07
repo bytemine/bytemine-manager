@@ -499,7 +499,7 @@ public class UserSync {
      */
     private String generateNewUserfile() {
         Hashtable<String, String> existingUsers = UserQueries.getUserTableForServer(
-                server.getServerid(), false
+                server, false
         );
         StringBuffer output = new StringBuffer();
         for (Iterator<String> it = existingUsers.keySet().iterator(); it.hasNext(); ) {
@@ -513,7 +513,6 @@ public class UserSync {
             }
         }
 
-        logger.info("new userfile: \n" + output.toString());
         return output.toString();
     }
 
@@ -521,7 +520,7 @@ public class UserSync {
     public static void main(String[] args) {
         try {
             UserSync sync = new UserSync("1");
-            sync.syncUsers();
+            sync.generateNewUserfile();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -49,12 +49,13 @@ public class UserActionTest {
     }
     
     public int testUserCreation() throws Exception {
-    	int id = UserAction.createUserAndCertificate("dan_ra", "123456", "dra", "technik", "a", "90");
+    	int id = UserAction.createUserAndCertificate("dan_ra", "123456", "dra", "technik", "a", "90", "vvddbgfjgndl");
         User user = User.getUserByID(id);
         assertEquals("dan_ra", user.getUsername());
         assertEquals("dra", user.getCn());
         assertNotNull(user.getPassword());
         assertEquals("technik", user.getOu());
+        assertEquals("vvddbgfjgndl", user.getYubikeyid());
         
         SimpleDateFormat validToFormat = new SimpleDateFormat("dd. MMMMM yyyy hh:mm:ss");
         Date validTo = validToFormat.parse(X509.getX509ById(user.getX509id()).getValidTo());

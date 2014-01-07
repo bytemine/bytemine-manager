@@ -17,6 +17,8 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.bytemine.manager.Constants;
+import net.bytemine.manager.bean.Server;
 import net.bytemine.manager.bean.User;
 import net.bytemine.manager.i18n.ResourceBundleMgmt;
 import net.bytemine.manager.model.UserOverviewTableModel;
@@ -203,7 +205,7 @@ public class UserQueries {
      * @return a stringarray
      */
     public static String[] getUserDetails(String id) {
-        String[] detail = new String[7];
+        String[] detail = new String[8];
 
         try {
             Statement st = DBConnector.getInstance().getConnection().createStatement();
@@ -216,6 +218,7 @@ public class UserQueries {
                 detail[3] = rs.getString("x509id");
                 detail[5] = rs.getString("cn");
                 detail[6] = rs.getString("ou");
+                detail[7] = rs.getString("yubikeyid");
 
                 if (!StringUtils.isEmptyOrWhitespaces(detail[3]) && !"0".equals(detail[3]) && !"-1".equals(detail[3])) {
                     Statement st2 = DBConnector.getInstance().getConnection().createStatement();
@@ -386,17 +389,17 @@ public class UserQueries {
     /**
      * Loads all users connected to the given server
      *
-     * @param serverid   The server id
+     * @param server   The server
      * @param importList if true, put username and userid into hashtable
      *                   if false, put username and password into hashtable
      * @return HashTable with username and userid of each user if importList is true
      *         or username and password if importList is false
      */
-    public static Hashtable<String, String> getUserTableForServer(int serverid, boolean importList) {
+    public static Hashtable<String, String> getUserTableForServer(Server server, boolean importList) {
         Hashtable<String, String> returnTable = new Hashtable<String, String>();
 
         try {
-            Vector<String> userids = getUsersForServer(serverid);
+            Vector<String> userids = getUsersForServer(server.getServerid());
 
             // convert Vector to String "2,3,5"
             StringBuffer idList = new StringBuffer();
@@ -409,15 +412,19 @@ public class UserQueries {
             }
 
             PreparedStatement pst = DBConnector.getInstance().getConnection().prepareStatement(
-                    "SELECT userid, username, password FROM user " +
+                    "SELECT userid, username, password, yubikeyid FROM user " +
                             "WHERE userid IN (" + idList + ")");
             ResultSet rs = pst.executeQuery();
 
             while (rs.next())
                 if (importList)
                     returnTable.put(rs.getString("username"), rs.getString("userid"));
-                else if (rs.getString("password") != null)
-                    returnTable.put(rs.getString("username"), rs.getString("password"));
+                else if (rs.getString("password") != null) {
+                    if (rs.getString("yubikeyid") != null && !"".equals(rs.getString("yubikeyid")) && (server.getServerType()==Server.SERVER_TYPE_BYTEMINE_APPLIANCE))
+                        returnTable.put(rs.getString("username"), rs.getString("password")+":"+rs.getString("yubikeyid"));
+                    else
+                        returnTable.put(rs.getString("username"), rs.getString("password"));
+                }
 
             rs.close();
             pst.close();

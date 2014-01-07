@@ -66,7 +66,7 @@ public class UserDAO {
             user.setUserid(nextUserId);
 
             PreparedStatement pst = dbConnection.prepareStatement(
-                    "INSERT INTO user(userid, username, password, x509id, cn, ou) VALUES(?,?,?,?,?,?)"
+                    "INSERT INTO user(userid, username, password, x509id, cn, ou, yubikeyid) VALUES(?,?,?,?,?,?,?)"
             );
             pst.setInt(1, nextUserId);
             pst.setString(2, user.getUsername());
@@ -74,6 +74,7 @@ public class UserDAO {
             pst.setInt(4, user.getX509id());
             pst.setString(5, user.getCn());
             pst.setString(6, user.getOu());
+            pst.setString(7, user.getYubikeyid());
             pst.executeUpdate();
             pst.close();
 
@@ -96,7 +97,7 @@ public class UserDAO {
         User returnUser = null;
         try {
             PreparedStatement pst = dbConnection.prepareStatement(
-                    "SELECT username, password, x509id, cn, ou FROM user WHERE userid=?"
+                    "SELECT username, password, x509id, cn, ou, yubikeyid FROM user WHERE userid=?"
             );
             pst.setInt(1, user.getUserid());
             ResultSet rs = pst.executeQuery();
@@ -107,6 +108,7 @@ public class UserDAO {
                 user.setX509id(rs.getInt(3));
                 user.setCn(rs.getString(4));
                 user.setOu(rs.getString(5));
+                user.setYubikeyid(rs.getString(6));
 
                 returnUser = user;
             }
@@ -132,15 +134,16 @@ public class UserDAO {
     public void update(User user) {
         try {
             PreparedStatement pst = dbConnection.prepareStatement(
-                    "UPDATE user SET username=?, password=?, x509id=?, cn=?, ou=? " +
+                    "UPDATE user SET username=?, password=?, x509id=?, cn=?, ou=?, yubikeyid=? " +
                             "WHERE userid=?"
             );
-            pst.setInt(6, user.getUserid());
+            pst.setInt(7, user.getUserid());
             pst.setString(1, user.getUsername());
             pst.setString(2, user.getPassword());
             pst.setInt(3, user.getX509id());
             pst.setString(4, user.getCn());
             pst.setString(5, user.getOu());
+            pst.setString(6, user.getYubikeyid());
             pst.executeUpdate();
             pst.close();
 

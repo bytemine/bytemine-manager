@@ -30,6 +30,7 @@ public class User {
     private String cn;
     private String ou;
     private int x509id;
+    private String yubikeyid;
 
     // indicates wether the object is persistent (userDAO!=null) or not
     private UserDAO userDAO = null;
@@ -48,28 +49,33 @@ public class User {
 
     public User(String username, int x509id) {
         try {
-            initialize(username, null, x509id, false, "", "");
+            initialize(username, null, x509id, false, "", "", "");
         } catch (Exception e) {
         }
     }
 
     public User(String username, String password, int x509id)
             throws Exception {
-        initialize(username, password, x509id, true, "", "");
+        initialize(username, password, x509id, true, "", "", "");
     }
 
     public User(String username, String password, int x509id, boolean cryptPassword)
             throws Exception {
-        initialize(username, password, x509id, cryptPassword, "", "");
+        initialize(username, password, x509id, cryptPassword, "", "", "");
     }
 
     public User(String username, String password, int x509id, boolean cryptPassword, String cn, String ou)
             throws Exception {
-        initialize(username, password, x509id, cryptPassword, cn, ou);
+        initialize(username, password, x509id, cryptPassword, cn, ou, "");
+    }
+    
+    public User(String username, String password, int x509id, boolean cryptPassword, String cn, String ou, String yubikeyid)
+            throws Exception {
+        initialize(username, password, x509id, cryptPassword, cn, ou, yubikeyid);
     }
 
 
-    private void initialize(String username, String password, int x509id, boolean cryptPassword, String cn, String ou)
+    private void initialize(String username, String password, int x509id, boolean cryptPassword, String cn, String ou, String yubikeyid)
             throws Exception {
         logger.info("creating new user: " + username);
 
@@ -77,6 +83,7 @@ public class User {
         this.x509id = x509id;
         this.cn = cn;
         this.ou = ou;
+        this.yubikeyid = yubikeyid;
 
         if (password != null) {
             if (cryptPassword) {
@@ -219,6 +226,14 @@ public class User {
 
     public void setOu(String ou) {
         this.ou = ou;
+    }
+    
+    public String getYubikeyid() {
+        return yubikeyid;
+    }
+
+    public void setYubikeyid(String yubikeyid) {
+        this.yubikeyid = yubikeyid;
     }
 
 

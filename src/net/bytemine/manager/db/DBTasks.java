@@ -191,7 +191,7 @@ public class DBTasks {
             if (!keepConfiguration)
                 st.execute("create table configuration(configurationid int not null primary key, key text, value text)");
 
-            st.execute("create table user(userid int not null primary key, username text, password text, cn text, ou text, x509id int)");
+            st.execute("create table user(userid int not null primary key, username text, password text, cn text, ou text, x509id int, yubikeyid text)");
             st.execute("create table groups(groupid int not null primary key, name text, description text)");
             st.execute("create table groups_user(groupid int not null, userid int not null, primary key(groupid, userid))");
             
