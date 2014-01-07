@@ -1,4 +1,6 @@
-bytemine-manager (2.2.4) stable; urgency=low
+bytemine-manager (2.3.0) stable; urgency=low
+  * Add the option to add a Yubikey-ID to each user. This ID will be written to passwd file if server type is 'bytemine appliance'.
+
   * Remove licence restrictions.
 
   * Fix a problem preventing the control center from opening any available channel.

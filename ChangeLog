@@ -1,3 +1,8 @@
+ChangeLog for bytemine manager 2.3.0
+=======================================
+- Add the option to add a Yubikey-ID to each user. This ID will be written to passwd file if server type is 'bytemine appliance'
+
+
 ChangeLog for bytemine manager 2.2.4
 =======================================
 - Fix a problem with subject of server certificates
