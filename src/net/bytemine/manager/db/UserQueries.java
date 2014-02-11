@@ -17,7 +17,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.bytemine.manager.Constants;
 import net.bytemine.manager.bean.Server;
 import net.bytemine.manager.bean.User;
 import net.bytemine.manager.i18n.ResourceBundleMgmt;
@@ -281,7 +280,7 @@ public class UserQueries {
                     "DELETE FROM server_user WHERE userid=?");
             pst.setInt(1, userid);
             pst.executeUpdate();
-
+            
             pst.close();
 
         } catch (Exception e) {
@@ -306,7 +305,6 @@ public class UserQueries {
             pst.executeUpdate();
 
             pst.close();
-            DBConnector.getInstance().getConnection().commit();
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "error while removing a user from a server", e);
