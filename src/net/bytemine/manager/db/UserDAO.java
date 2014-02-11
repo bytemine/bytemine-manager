@@ -169,7 +169,7 @@ public class UserDAO {
             pst.setInt(1, user.getUserid());
             pst.executeUpdate();
             pst.close();
-
+            
             UserQueries.removeUserFromAllServers(user.getUserid());
         } catch (Exception e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
@@ -193,7 +193,10 @@ public class UserDAO {
             pst.setInt(1, Integer.parseInt(userId));
             pst.executeUpdate();
             pst.close();
-
+            
+            // wait a short moment to close this statement before proceeding with the next database transaction
+            Thread.sleep(300);
+            
             UserQueries.removeUserFromAllServers(Integer.parseInt(userId));
         } catch (Exception e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
