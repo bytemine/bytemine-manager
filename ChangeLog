@@ -1,3 +1,8 @@
+ChangeLog for bytemine manager 2.3.1
+=======================================
+- Add crl-verify option to server config.
+- Do not add a user to the passwd file if his/her certificate is revoked.
+
 ChangeLog for bytemine manager 2.3.0
 =======================================
 - Add the option to add a Yubikey-ID to each user. This ID will be written to passwd file if server type is 'bytemine appliance'

@@ -22,7 +22,7 @@ versioning, 6 or 7) runtime environment.
     In order to build the windows package simply call `ant` from your checkout directory. The archive will be created at `./dist/bytemine` and contains a `start-manager.jar` to run the software.
 
   - Debian:
-    In order to build .deb packages on your machine at least the packages `build-essential` and `dpkg-dev` have to be installed, as the script uses `dpkg-buildpackage`.
+    In order to build .deb packages on your machine at least the packages `build-essential`, `cdbs` and `dpkg-dev` have to be installed, as the script uses `dpkg-buildpackage`.
     If these packages are installed simply run `sh build-deb.sh` to create a .deb file inside the top directory of the current checkout directory.
 
   - Specials:
