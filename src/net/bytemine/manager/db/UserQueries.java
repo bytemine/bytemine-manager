@@ -8,6 +8,7 @@
 package net.bytemine.manager.db;
 
 import java.sql.PreparedStatement;
+
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Hashtable;
@@ -17,8 +18,10 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.bytemine.manager.bean.CRL;
 import net.bytemine.manager.bean.Server;
 import net.bytemine.manager.bean.User;
+import net.bytemine.manager.bean.X509;
 import net.bytemine.manager.i18n.ResourceBundleMgmt;
 import net.bytemine.manager.model.UserOverviewTableModel;
 import net.bytemine.utility.StringUtils;
@@ -383,7 +386,6 @@ public class UserQueries {
         return user;
     }
 
-
     /**
      * Loads all users connected to the given server
      *
@@ -394,6 +396,21 @@ public class UserQueries {
      *         or username and password if importList is false
      */
     public static Hashtable<String, String> getUserTableForServer(Server server, boolean importList) {
+        return getUserTableForServer(server, importList, false);
+    }
+
+
+    /**
+     * Loads all users connected to the given server
+     *
+     * @param server   The server
+     * @param importList if true, put username and userid into hashtable
+     *                   if false, put username and password into hashtable
+     * @param exportRevokedUsers if false does not return users with revoked certificate
+     * @return HashTable with username and userid of each user if importList is true
+     *         or username and password if importList is false
+     */
+    public static Hashtable<String, String> getUserTableForServer(Server server, boolean importList, boolean exportRevokedUsers) {
         Hashtable<String, String> returnTable = new Hashtable<String, String>();
 
         try {
@@ -414,15 +431,29 @@ public class UserQueries {
                             "WHERE userid IN (" + idList + ")");
             ResultSet rs = pst.executeQuery();
 
-            while (rs.next())
-                if (importList)
-                    returnTable.put(rs.getString("username"), rs.getString("userid"));
-                else if (rs.getString("password") != null) {
-                    if (rs.getString("yubikeyid") != null && !"".equals(rs.getString("yubikeyid")) && (server.getServerType()==Server.SERVER_TYPE_BYTEMINE_APPLIANCE))
-                        returnTable.put(rs.getString("username"), rs.getString("password")+":"+rs.getString("yubikeyid"));
-                    else
-                        returnTable.put(rs.getString("username"), rs.getString("password"));
-                }
+            // get current CRL
+            String crlContent = null;
+            int crlId = CRLQueries.getMaxCRLId();
+            if (crlId > 0) {
+                CRL crl = new CRL(crlId);
+                crl = CRLDAO.getInstance().read(crl);
+                if (crl != null && crl.getContent() != null)
+                    crlContent = crl.getContent();
+            }
+
+            while (rs.next()) {
+                User user = User.getUserByID(Integer.parseInt(rs.getString("userid")));
+                // only add passwd entry if x509 serial of the user is not revoked
+                if (crlContent.indexOf(X509.getX509ById(user.getX509id()).getSerial()) < 0)
+	                if (importList)
+	                    returnTable.put(rs.getString("username"), rs.getString("userid"));
+	                else if (rs.getString("password") != null) {
+	                    if (rs.getString("yubikeyid") != null && !"".equals(rs.getString("yubikeyid")) && (server.getServerType()==Server.SERVER_TYPE_BYTEMINE_APPLIANCE))
+	                        returnTable.put(rs.getString("username"), rs.getString("password")+":"+rs.getString("yubikeyid"));
+	                    else
+	                        returnTable.put(rs.getString("username"), rs.getString("password"));
+	                }
+            }
 
             rs.close();
             pst.close();

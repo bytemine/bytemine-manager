@@ -499,7 +499,7 @@ public class UserSync {
      */
     private String generateNewUserfile() {
         Hashtable<String, String> existingUsers = UserQueries.getUserTableForServer(
-                server, false
+                server, false, false
         );
         StringBuffer output = new StringBuffer();
         for (Iterator<String> it = existingUsers.keySet().iterator(); it.hasNext(); ) {
