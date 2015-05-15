@@ -76,6 +76,7 @@ dev ${device}
 ca ${root_ca}
 cert ${crt}
 key ${key}  # This file should be kept secret
+crl-verify ${crl}
 
 # Diffie hellman parameters.
 # Generate your own with:

@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.bytemine.manager.Configuration;
+import net.bytemine.manager.Constants;
 import net.bytemine.manager.action.ServerAction;
 import net.bytemine.manager.bean.Server;
 import net.bytemine.manager.bean.X509;
@@ -64,6 +65,8 @@ public class ServerConfig {
                 keyfilepath + "server.crt");
         this.params.put(VPNConfigurationConstants.KEY,
                 keyfilepath + "server.key");
+        this.params.put(VPNConfigurationConstants.CRL,
+                keyfilepath + Constants.DEFAULT_CRL_FILENAME);
         
         try {
             this.params.put(VPNConfigurationConstants.SERVER_PORT,

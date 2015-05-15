@@ -89,7 +89,7 @@ public class TemplateEngine {
 
     public static void main(String[] args) {
         try {
-            TemplateEngine tEng = new TemplateEngine("client.tpl");
+            TemplateEngine tEng = new TemplateEngine("server.tpl");
         
             tEng.addParam("server_name", "127.0.0.2");
             tEng.addParam("server_port", "8080");
@@ -97,6 +97,7 @@ public class TemplateEngine {
             tEng.addParam("crt", "bla");
             tEng.addParam("key", "bla");
             tEng.addParam("protocol", "udp");
+            tEng.addParam("crl", "/path/to/crl");
 
             tEng.processTemplate();
         } catch (Exception e) {

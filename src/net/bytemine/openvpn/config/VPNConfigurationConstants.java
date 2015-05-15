@@ -24,6 +24,7 @@ public class VPNConfigurationConstants {
     public static final String ROOT_CA = "root_ca";
     public static final String CRT = "crt";
     public static final String KEY = "key";
+    public static final String CRL = "crl";
     public static final String PROTOCOL = "protocol";
     public static final String CCD = "client-config-dir ccd";
     public static final String DH = "server_dh";
