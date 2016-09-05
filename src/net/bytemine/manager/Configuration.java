@@ -86,8 +86,8 @@ public class Configuration {
     public int USER_IMPORT_TYPE;
 
     // gets inserted by ant task
-    public String MANAGER_VERSION = "";
-    public String MANAGER_BUILD = "";
+    public String MANAGER_VERSION = "2.3.2";
+    public String MANAGER_BUILD = "a5fbecf032929fa494e89ba5af5fed8fe8880e7a";
 
 
     // update settings

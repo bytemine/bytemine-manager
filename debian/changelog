@@ -1,6 +1,4 @@
-bytemine-manager (2.3.1) stable; urgency=low
-  * Add crl-verify option to server config.
-
-  * Do not add a user to the passwd file if his/her certificate is revoked.
+bytemine-manager (2.3.2) stable; urgency=low
+  * Set the cipher on server and client configuration to 'AES-256-CBC'.
   
- -- Daniel Rauer <rauer@bytemine.net>  Fri, 15 May 2015 14:55:00 +0200
+ -- Daniel Rauer <rauer@bytemine.net>  Mon, 05 Sep 2016 17:19:00 +0200

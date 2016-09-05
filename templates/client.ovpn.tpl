@@ -110,6 +110,7 @@ ns-cert-type server
 # If the cipher option is used on the server
 # then you must also specify it here.
 ;cipher x
+cipher AES-256-CBC
 
 # Enable compression on the VPN link.
 # Don't enable this unless it is also
