@@ -43,7 +43,7 @@
 	<property name="manual-en" value="documentation/manual/manual-en.pdf"/>
 	<property name="vpn-user-template" value="templates/client.ovpn.tpl"/>
 	<property name="vpn-server-template" value="templates/server.ovpn.tpl"/>
-	<property name="readme" value="README"/>
+	<property name="readme" value="README.md"/>
 	<property name="doc" value="javadoc/"/>
 	<property name="doc_packages" 
 		value="
