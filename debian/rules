@@ -13,6 +13,8 @@ PACKAGE := bytemine-manager
 install/${PACKAGE}::
 	dh_fixperms -p$(PACKAGE) -X manager\.db
 	dh_install -p$(PACKAGE) ./bytemine-manager.jar usr/share/java/bytemine-manager
+	dh_install -p$(PACKAGE) ./templates/client.ovpn.tpl usr/share/java/bytemine-manager/templates
+	dh_install -p$(PACKAGE) ./templates/server.ovpn.tpl usr/share/java/bytemine-manager/templates
 	dh_install -p$(PACKAGE) ./extlib/bytemine-crypto-1.0.2.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/bytemine-utils-1.2.1.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/bcprov-jdk16-145.jar usr/share/java/bytemine-manager/lib

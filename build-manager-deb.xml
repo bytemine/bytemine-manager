@@ -20,6 +20,10 @@
 
 		<mkdir dir="${dist-temp-dir}/${export-dir}"/>
 
+		<!-- copy templates -->
+		<copy file="${vpn-user-template}" todir="${dist-temp-dir}/${template-dir}" />
+		<copy file="${vpn-server-template}" todir="${dist-temp-dir}/${template-dir}" />
+
 		<!-- copy documentation -->
 		<copy file="${readme}" todir="${dist-temp-dir}"/>
 		<copy file="${manual-de}" tofile="${dist-temp-dir}/manual-de.pdf" failonerror="false"/>
