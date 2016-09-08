@@ -1,4 +1,6 @@
-bytemine-manager (2.3.2) stable; urgency=low
-  * Set the cipher on server and client configuration to 'AES-256-CBC'.
+bytemine-manager (2.3.3) stable; urgency=low
+  * Fix template copy process on packaging as deb.
+
+  * Adjust to new bytemine design.
   
- -- Daniel Rauer <rauer@bytemine.net>  Mon, 05 Sep 2016 17:19:00 +0200
+ -- Daniel Rauer <rauer@bytemine.net>  Mon, 08 Sep 2016 10:17:00 +0200
