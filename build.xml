@@ -267,9 +267,12 @@
 	    </condition>
 	</target>
 
+	<condition property="isUnix">
+		<os family="unix" />
+	</condition>
 
 	<!-- create the manual pdfs -->
-	<target name="build-doc" description="creates the manual">
+	<target name="build-doc" description="creates the manual" if="isUnix">
 		<exec dir="${manual-build}" executable="/usr/bin/make"> 
 		        <arg value="Makefile" line="all"/> 
 		</exec>
@@ -300,8 +303,8 @@
 
 		<!-- copy documentation -->
 		<copy file="${readme}" todir="${dist-temp-dir}"/>
-		<copy file="${manual-de}" tofile="${dist-temp-dir}/manual-de.pdf"/>
-		<copy file="${manual-en}" tofile="${dist-temp-dir}/manual-en.pdf"/>
+		<copy file="${manual-de}" tofile="${dist-temp-dir}/manual-de.pdf" failonerror="false"/>
+		<copy file="${manual-en}" tofile="${dist-temp-dir}/manual-en.pdf" failonerror="false"/>
 
 		<!-- move everything into a new directory to zip -->
 		<move todir="${dist-temp-dir}/${zip-dir}">
@@ -389,7 +392,7 @@
 		     use unix style linefeeds
 		-->
         <replaceregexp file="${git-revision-file}"
-                       match="\n"
+					   match="(\r?\n)\s*\r?\n"
                        replace=""
                        flags="g"
         />
