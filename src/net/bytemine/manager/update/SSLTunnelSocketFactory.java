@@ -76,9 +76,11 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
     private void doTunnelHandshake(Socket tunnel, String host, int port)
             throws IOException {
         OutputStream out = tunnel.getOutputStream();
+        String javaVersion = "Java/" + System.getProperty("java.version");
+        String userAgent = System.getProperty("http.agent") == null ? javaVersion : System.getProperty("http.agent") + " " + javaVersion;
         String msg = "CONNECT " + host + ":" + port + " HTTP/1.0\n"
                 + "User-Agent: "
-                + sun.net.www.protocol.http.HttpURLConnection.userAgent
+                + userAgent
                 + "\r\n\r\n";
         byte b[];
         try {
