@@ -1,6 +1,4 @@
-bytemine-manager (2.3.3) stable; urgency=low
-  * Fix template copy process on packaging as deb.
-
-  * Adjust to new bytemine design.
+bytemine-manager (2.4.0) stable; urgency=low
+  * Set the nextUpdate value of a CRL to the duration period of client certificates.
   
- -- Daniel Rauer <rauer@bytemine.net>  Mon, 08 Sep 2016 10:17:00 +0200
+ -- Daniel Rauer <rauer@bytemine.net>  Mon, 08 Jan 2018 23:37:00 +0200

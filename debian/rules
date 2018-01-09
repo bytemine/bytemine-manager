@@ -15,9 +15,9 @@ install/${PACKAGE}::
 	dh_install -p$(PACKAGE) ./bytemine-manager.jar usr/share/java/bytemine-manager
 	dh_install -p$(PACKAGE) ./templates/client.ovpn.tpl usr/share/java/bytemine-manager/templates
 	dh_install -p$(PACKAGE) ./templates/server.ovpn.tpl usr/share/java/bytemine-manager/templates
-	dh_install -p$(PACKAGE) ./extlib/bytemine-crypto-1.0.2.jar usr/share/java/bytemine-manager/lib
+	dh_install -p$(PACKAGE) ./extlib/bytemine-crypto-1.0.4.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/bytemine-utils-1.2.1.jar usr/share/java/bytemine-manager/lib
-	dh_install -p$(PACKAGE) ./extlib/bcprov-jdk16-145.jar usr/share/java/bytemine-manager/lib
+	dh_install -p$(PACKAGE) ./extlib/bcprov-jdk16-146.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/commons-io-1.4.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/crypt4j-1.0.0.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/jsch-0.1.43.btm.jar usr/share/java/bytemine-manager/lib
@@ -27,9 +27,9 @@ install/${PACKAGE}::
 	dh_install -p$(PACKAGE) ./extlib/sqlitejdbc-v054.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/xstream-1.4.1.jar usr/share/java/bytemine-manager/lib
 	dh_install -p$(PACKAGE) ./extlib/yamlbeans-1.0.jar usr/share/java/bytemine-manager/lib
-	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/bytemine-crypto-1.0.2.jar usr/share/java/bytemine-manager/lib/bytemine-crypto.jar
+	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/bytemine-crypto-1.0.4.jar usr/share/java/bytemine-manager/lib/bytemine-crypto.jar
 	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/bytemine-utils-1.2.1.jar usr/share/java/bytemine-manager/lib/bytemine-utils.jar
-	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/bcprov-jdk16-145.jar usr/share/java/bytemine-manager/lib/bcprov.jar
+	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/bcprov-jdk16-146.jar usr/share/java/bytemine-manager/lib/bcprov.jar
 	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/commons-io-1.4.jar usr/share/java/bytemine-manager/lib/commons-io.jar
 	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/crypt4j-1.0.0.jar usr/share/java/bytemine-manager/lib/crypt4j.jar
 	dh_link -p$(PACKAGE) usr/share/java/bytemine-manager/lib/jsch-0.1.43.btm.jar usr/share/java/bytemine-manager/lib/jsch-btm.jar
