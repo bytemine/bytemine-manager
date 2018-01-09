@@ -810,7 +810,7 @@ public class X509Generator {
 
             Date now = new Date();
             Calendar nowCal = Calendar.getInstance();
-            nowCal.add(Calendar.MONTH, 1);
+            nowCal.add(Calendar.DAY_OF_YEAR, Integer.parseInt(Configuration.getInstance().X509_CLIENT_VALID_FOR));
             Date nextUpdate = nowCal.getTime();
 
             String createDateStr = Constants.formatDetailedFormat(now);
@@ -821,7 +821,7 @@ public class X509Generator {
             Vector<String> revocationSerials = CRLQueries.getRevocationSerials();
 
             // generate
-            X509CRL x509crl = generator.createCRLImmediately(rootCert, rootPrivKey, crlNumber, revocationSerials);
+            X509CRL x509crl = generator.createCRLImmediately(rootCert, rootPrivKey, crlNumber, revocationSerials, Integer.parseInt(Configuration.getInstance().X509_CLIENT_VALID_FOR));
 
             // export
             String contentStr = CRLExporter.exportCRLToFile(x509crl);
@@ -856,7 +856,7 @@ public class X509Generator {
             //gen.createServerCert(X509Generator.loadRootCertificate());
             //gen.createServerCert(rootCert);
 
-            //createCRL();
+            gen.createCRLImmediately();
 
             /*
             String subject = "C=DE,ST=NDS,L=Oldenburg,O=example,CN=exampleCA,E=root@example.org";
