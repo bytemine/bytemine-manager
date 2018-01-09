@@ -29,6 +29,7 @@ import net.bytemine.manager.db.*;
 import net.bytemine.manager.gui.ManagerGUI;
 import net.bytemine.manager.gui.StatusFrame;
 import net.bytemine.manager.i18n.ResourceBundleMgmt;
+import net.bytemine.manager.utility.X509Generator;
 import net.bytemine.manager.utility.X509Utils;
 import net.bytemine.openvpn.ssh.SSHTool;
 import net.bytemine.utility.*;
@@ -348,6 +349,10 @@ public class UserSync {
         } else
             // no root certificate existing!
             throw new Exception(rb.getString("error.syncusers.root"));
+
+        // re-generate the CRL
+        X509Generator g = new X509Generator();
+        g.createCRLImmediately();
 
         // export CRL
         int crlId = CRLQueries.getMaxCRLId();
