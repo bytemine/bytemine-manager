@@ -24,7 +24,7 @@ __Windows__
 In order to build the windows package simply call `ant` from your checkout directory. The archive will be created at `./dist/bytemine` and contains a `start-manager.jar` to run the software.
 
 __Debian__
-In order to build .deb packages on your machine at least the packages `build-essential` and `dpkg-dev` have to be installed, as the script uses `dpkg-buildpackage`.
+In order to build .deb packages on your machine at least the packages `build-essential`, `cdbs`, `debhelper` and `dpkg-dev` have to be installed, as the script uses `dpkg-buildpackage`.
 If these packages are installed simply run `sh build-deb.sh` to create a .deb file inside the top directory of the current checkout directory.
 You probably need to adjust the JAVA_HOME directive in debian/rules.
 
