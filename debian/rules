@@ -7,7 +7,10 @@ include /usr/share/cdbs/1/class/ant.mk
 DEB_JARS := /usr/share/ant/lib/ant-nodeps.jar
 DEB_ANT_BUILDFILE := build-manager-deb.xml
 DEB_FIXPERMS_EXCLUDE = manager\.db
+JAVA_HOME := ${JAVA_HOME}
+ifndef JAVA_HOME
 JAVA_HOME := /usr/lib/jvm/java-8-openjdk-amd64
+endif
 PACKAGE := bytemine-manager
 
 install/${PACKAGE}::
