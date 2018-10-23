@@ -31,7 +31,6 @@ import net.bytemine.utility.StringUtils;
  * @author Daniel Rauer
  */
 public class Configuration {
-
     private static Logger logger = Logger.getLogger(Configuration.class.getName());
 
     private static Configuration instance = null;
@@ -40,7 +39,7 @@ public class Configuration {
 
     public String JDBC_DRIVER_CLASSNAME = "org.sqlite.JDBC";
     public String JDBC_URL_PREFIX = "jdbc:sqlite:";
-    public String JDBC_PATH =  (System.getProperty("os.name").indexOf("Windows") > -1) 
+    public String JDBC_PATH =  (System.getProperty("os.name").contains("Windows"))
     	? System.getProperty("user.home")+"\\bytemine-manager\\manager.db" : 
     	  System.getProperty("user.home")+"/.bytemine-manager/manager.db";
     public String MANAGER_USER_DIRECTORY = "bytemine-manager";
@@ -61,11 +60,12 @@ public class Configuration {
     public String MANAGER_PROPERTIES_NAME = "manager";
 
     // path to logging properties
-    public String LOGGING_PROPERTIES = "/logging.properties";
-    public String LOGGING_DEBUG_PROPERTIES = "/logging_debug.properties";
+    private static boolean DEBUG_LOGGING;
+    String LOGGING_PROPERTIES = "/logging.properties";
+    String LOGGING_DEBUG_PROPERTIES = "/logging_debug.properties";
 
     // path to css file
-    public String CSS_FILE = "./css.xml";
+    String CSS_FILE = "./css.xml";
 
     // minimum length of users password
     public int USER_PASSWORD_LENGTH = 6;
@@ -92,13 +92,12 @@ public class Configuration {
 
     // update settings
     public boolean UPDATE_AUTOMATICALLY = false;
-    public String UPDATE_KEYSTORE_PATH;
     public String UPDATE_SERVER = Constants.UPDATE_HTTPS_SERVER;
     public String UPDATE_REPOSITORY = Constants.UPDATE_REPOSITORY;
     public String UPDATE_PROXY;
     public String UPDATE_PROXY_PORT;
-    public String UPDATE_PROXY_USERNAME;
-    public String UDPATE_PROXY_PASSWORD;
+    private String UPDATE_PROXY_USERNAME;
+    private String UDPATE_PROXY_PASSWORD;
 
     // Base64 or PKCS12
     public int CERTIFICATE_TYPE;
@@ -108,7 +107,6 @@ public class Configuration {
     public boolean CA_ENABLED;
     public boolean CC_ENABLED;
     public boolean DEBUG_SSH;
-    public boolean DEBUG_LOGGING;
 
     public String LANGUAGE = null;
     public String CLIENT_CERT_IMPORT_DIR = null;
@@ -119,7 +117,7 @@ public class Configuration {
     public String LDAP_PORT = null;
     public String LDAP_DN = null;
     public String LDAP_OBJECTCLASS = null;
-    public String LDAP_CN = null;
+    private String LDAP_CN = null;
     public String LDAP_CERT_ATTRNAME = null;
     public String LDAP_CERT_IMPORTDIR = null;
 
@@ -127,15 +125,15 @@ public class Configuration {
     public String X509_ROOT_VALID_FROM = null;
     public String X509_ROOT_VALID_TO = null;
     public String X509_SERVER_SUBJECT = null;
-    public String X509_SERVER_VALID_FROM = null;
+    private String X509_SERVER_VALID_FROM = null;
     public String X509_SERVER_VALID_FOR = null;
     public String X509_CLIENT_SUBJECT = null;
-    public String X509_CLIENT_VALID_FROM = null;
+    private String X509_CLIENT_VALID_FROM = null;
     public String X509_CLIENT_VALID_FOR = null;
     public String X509_KEY_STRENGTH = null;
 
     // shall a user password be suggested 
-    public boolean SUGGEST_PASSWORD = true;
+    private boolean SUGGEST_PASSWORD = true;
     
     // initial GUI size and position
     public int GUI_WIDTH = 720;
@@ -150,7 +148,7 @@ public class Configuration {
     public int X509_GUI_HEIGHT = -1;		// 
     public int X509_GUI_LOCATION_X = -1;	// 
     public int X509_GUI_LOCATION_Y = -1;	// 
-    
+    /**
     // initial GUI size and position (ServerDetails)
     public int SERVER_GUI_WIDTH = -1;		// window will be positioned by offset
     public int SERVER_GUI_HEIGHT = -1;		// 										
@@ -162,14 +160,14 @@ public class Configuration {
     public int USER_GUI_HEIGHT = -1;		// 
     public int USER_GUI_LOCATION_X = -1;	// 
     public int USER_GUI_LOCATION_Y = -1;	// 
-    
+    **/
     public boolean GUI_SHOW_CRL_TAB = false;
     public boolean GUI_SHOW_CR_X509 = true;
     public boolean GUI_SHOW_EXIT_DIALOG = true;
     public boolean GUI_SHOW_EXIT_DIALOG_ACTIVE_THREADS = true;
     public boolean GUI_SHOW_OPENVPN_IP_WARNING = true;
 
-    public Vector<String> NOT_SYNCED_SERVERS = new Vector<String>();
+    public Vector<String> NOT_SYNCED_SERVERS = new Vector<>();
     
     public boolean CREATE_OPENVPN_CONFIG_FILES = false;
     
@@ -225,10 +223,7 @@ public class Configuration {
             setUpdateKeystorePath(configBundle.getString("keystore_path"));
             setDebugSSH(false);
 
-        } catch (MissingResourceException mre) {
-            logger.log(Level.SEVERE, "Error: manager.properties could not be read", mre);
-            return;
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("manager.properties could not be processed");
         }
     }
@@ -237,7 +232,7 @@ public class Configuration {
     /**
      * initializes config entries stored in database
      */
-    public void initializeDB() {
+    void initializeDB() {
         // read database
         this.LANGUAGE = ConfigurationQueries.getValue(ConfigurationQueries.LANGUAGE_KEY);
         this.CLIENT_CERT_IMPORT_DIR = ConfigurationQueries.getValue(ConfigurationQueries.CLIENT_CERT_IMPORT_DIR_KEY);
@@ -254,14 +249,14 @@ public class Configuration {
         this.USER_IMPORT_TYPE = Constants.USER_IMPORT_TYPE_FILE;
         try {
             this.USER_IMPORT_TYPE = Integer.parseInt(ConfigurationQueries.getValue(ConfigurationQueries.USER_IMPORT_TYPE));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             setUserImportType(Constants.USER_IMPORT_TYPE_FILE);
         }
 
         this.CERTIFICATE_TYPE = Constants.CERTIFICATE_TYPE_BASE64;
         try {
             this.CERTIFICATE_TYPE = Integer.parseInt(ConfigurationQueries.getValue(ConfigurationQueries.CERTIFICATE_TYPE));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.log(Level.SEVERE, "error detecting certificate type, key: " + ConfigurationQueries.CERTIFICATE_TYPE, e);
             setCertificateType(Constants.CERTIFICATE_TYPE_BASE64);
         }
@@ -269,7 +264,7 @@ public class Configuration {
         this.PKCS12_PASSWORD_TYPE = Constants.PKCS12_NO_PASSWORD;
         try {
             this.PKCS12_PASSWORD_TYPE = Integer.parseInt(ConfigurationQueries.getValue(ConfigurationQueries.PKCS12_PASSWORD_TYPE));
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.log(Level.WARNING, "error detecting pkcs12 password type, key: " +
                     ConfigurationQueries.PKCS12_PASSWORD_TYPE +
                     ". Is okay if configuration was saved for the first time.");
@@ -350,18 +345,12 @@ public class Configuration {
         
         String defaultDB = ConfigurationQueries.getValue(ConfigurationQueries.USE_DEFAULT_DB, DBConnector.getInstance().getBaseConnection());
         if (defaultDB != null) {
-            if (defaultDB.equals("true"))
-                this.USE_DEFAULT_DB = true;
-            else
-                this.USE_DEFAULT_DB = false;
+            this.USE_DEFAULT_DB = defaultDB.equals("true");
         }
         
         String usePamStr = ConfigurationQueries.getValue(ConfigurationQueries.USE_PAM);
         if (usePamStr != null) {
-            if (usePamStr.equals("true"))
-                this.USE_PAM = true;
-            else
-                this.USE_PAM = false;
+            this.USE_PAM = usePamStr.equals("true");
         }
 
         // x509 window positioning
@@ -394,10 +383,7 @@ public class Configuration {
     							   int screen ) {
     	int pos;
     	String get_pos =  ConfigurationQueries.getValue(query);
-        if (!StringUtils.isEmptyOrWhitespaces(get_pos))
-            pos = Integer.parseInt(get_pos);
-        else
-            pos = fallback_pos;
+        pos = !StringUtils.isEmptyOrWhitespaces(get_pos) ? Integer.parseInt(get_pos) : fallback_pos;
         
         if ( pos > screen ) {
         	pos = fallback_pos;
@@ -426,9 +412,9 @@ public class Configuration {
         this.X509_KEY_STRENGTH = ConfigurationQueries.getValue(ConfigurationQueries.X509_KEY_STRENGTH);
 
 
-        ResourceBundle rootCertBundle = null;
-        ResourceBundle serverCertBundle = null;
-        ResourceBundle clientCertBundle = null;
+        ResourceBundle rootCertBundle;
+        ResourceBundle serverCertBundle;
+        ResourceBundle clientCertBundle;
         try {
             rootCertBundle = ResourceBundle.getBundle(Constants.ROOT_BUNDLE_NAME);
             serverCertBundle = ResourceBundle.getBundle(Constants.SERVER_BUNDLE_NAME);
@@ -471,7 +457,7 @@ public class Configuration {
      * @return A String representing the date
      */
     private String formatStartDate(String date) {
-        if (date != null && "now".equals(date))
+        if ("now".equals(date))
             return Constants.PROPERTIES_DATE_FORMAT.format(new Date());
 
         return date;
@@ -521,7 +507,7 @@ public class Configuration {
      *
      * @param path the new path
      */
-    public void setJdbcPath(String path) {
+    void setJdbcPath(String path) {
         this.JDBC_PATH = path;
         ConfigurationQueries.setValue(ConfigurationQueries.DB_PATH, path, DBConnector.getInstance().getBaseConnection());
     }
@@ -541,7 +527,7 @@ public class Configuration {
      * Sets the database filename
      * @param filename The filename
      */
-    public void setDbFilename(String filename) {
+    private void setDbFilename(String filename) {
         DB_FILENAME = filename;
     }
 
@@ -735,49 +721,47 @@ public class Configuration {
         this.X509_KEY_STRENGTH = x509_key_strength;
     }
 
-    public void setUserPasswordLength(int userPasswordLength) {
+    private void setUserPasswordLength(int userPasswordLength) {
         this.USER_PASSWORD_LENGTH = userPasswordLength;
     }
 
 
-    public void setServerWrapperCommand(String wrapperCommand) {
+    private void setServerWrapperCommand(String wrapperCommand) {
         this.SERVER_WRAPPER_COMMAND = wrapperCommand;
     }
 
-    public void setServerUsername(String username) {
+    private void setServerUsername(String username) {
         this.SERVER_USERNAME = username;
     }
 
-    public void setServerPasswdPath(String path) {
+    private void setServerPasswdPath(String path) {
         this.SERVER_PASSWD_PATH = path;
     }
     
-    public void setServerCCPath(String path) {
+    private void setServerCCPath(String path) {
     	this.SERVER_CC_PATH = path;
     }
     
-    public void setServerNetworkAddress(String address) {
+    private void setServerNetworkAddress(String address) {
         this.SERVER_NETWORK_ADDRESS = address;
     }
     
-    public void setServerDevice(int device) {
+    private void setServerDevice(int device) {
         this.SERVER_DEVICE = device;
     }
 
-    public void setServerKeysPath(String path) {
+    private void setServerKeysPath(String path) {
         this.SERVER_KEYS_PATH = path;
     }
 
-    public void setDebugSSH(boolean debug_ssh) {
+    void setDebugSSH(boolean debug_ssh) {
         DEBUG_SSH = debug_ssh;
     }
 
-    public void setDebugLogging(boolean debugLogging) {
-        DEBUG_LOGGING = debugLogging;
-    }
+    void setDebugLogging(boolean debugLogging) { DEBUG_LOGGING = debugLogging; }
 
-    public void setUpdateKeystorePath(String path) {
-        UPDATE_KEYSTORE_PATH = path;
+    private void setUpdateKeystorePath(String path) {
+        String UPDATE_KEYSTORE_PATH = path;
     }
 
 
@@ -817,9 +801,7 @@ public class Configuration {
     }
 
     public boolean isClientCertImportDirSet() {
-        if (CLIENT_CERT_IMPORT_DIR == null || "".equals(CLIENT_CERT_IMPORT_DIR))
-            return false;
-        return true;
+        return CLIENT_CERT_IMPORT_DIR != null && !"".equals(CLIENT_CERT_IMPORT_DIR);
     }
     
     public void setRootCertExisting(boolean existing) {
@@ -912,5 +894,13 @@ public class Configuration {
     public void setCreateOpenVPNConfigFiles(boolean createOpenVPNConfigFiles) {
         ConfigurationQueries.setValue(ConfigurationQueries.CREATE_OPENVPN_CONFIG_FILES, createOpenVPNConfigFiles + "");
         this.CREATE_OPENVPN_CONFIG_FILES = createOpenVPNConfigFiles;
+    }
+
+    public String getLDAP_CN() {
+        return LDAP_CN;
+    }
+
+    public void setLDAP_CN(String LDAP_CN) {
+        this.LDAP_CN = LDAP_CN;
     }
 }
