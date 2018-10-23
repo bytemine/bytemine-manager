@@ -30,7 +30,7 @@ public class Server {
     public static final int AUTH_TYPE_KEYFILE = 1;
 
     public static final int STATUS_TYPE_TCPIP = 0;
-    public static final int STATUS_TYPE_UNIX_DOMAIN = 1;
+    private static final int STATUS_TYPE_UNIX_DOMAIN = 1;
 
     public static final int SERVER_TYPE_REGULAR_OPENVPN = 0;
     public static final int SERVER_TYPE_BYTEMINE_APPLIANCE = 1;
@@ -39,11 +39,11 @@ public class Server {
     public static final int SERVER_OPENVPN_PROTOCOL_UDP = 1;
     
     public static final int SERVER_OPENVPN_DEVICE_TUN = 0;
-    public static final int SERVER_OPENVPN_DEVICE_TUN0 = 1;
-    public static final int SERVER_OPENVPN_DEVICE_TUN1 = 2;
+    private static final int SERVER_OPENVPN_DEVICE_TUN0 = 1;
+    private static final int SERVER_OPENVPN_DEVICE_TUN1 = 2;
     
-    public static final int OPTION_DISABLED = 0;
-    public static final int OPTION_ENABLED = 1;
+    private static final int OPTION_DISABLED = 0;
+    private static final int OPTION_ENABLED = 1;
     
     private int serverid;
     private String name;
@@ -189,6 +189,10 @@ public class Server {
 
     public static String transformStatusTypeToString(int type) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+        return getRBString(type, rb);
+    }
+
+    private static String getRBString(int type, ResourceBundle rb) {
         switch (type) {
             case STATUS_TYPE_TCPIP:
                 return rb.getString("server.statustype.tcpip");
@@ -199,7 +203,7 @@ public class Server {
         }
     }
 
-    
+
     public static String transformVpnProtocolToString(int type) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         switch (type) {
@@ -218,17 +222,10 @@ public class Server {
         int type = Server.STATUS_TYPE_TCPIP;
         try {
             type = Integer.parseInt(typeStr);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("status type is not an int!");
         }
-        switch (type) {
-            case STATUS_TYPE_TCPIP:
-                return rb.getString("server.statustype.tcpip");
-            case STATUS_TYPE_UNIX_DOMAIN:
-                return rb.getString("server.statustype.unix");
-            default:
-                return rb.getString("server.statustype.tcpip");
-        }
+        return getRBString(type, rb);
     }
     
     public static boolean transformBooleanOption(String option) {
