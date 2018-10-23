@@ -39,9 +39,9 @@ public class Constants {
     public static final String CLIENT_BUNDLE_NAME = "client_cert";
 
     // SimpleDateFormat for displaying dates in the gui
-    public static final SimpleDateFormat SHOW_FORMAT_DE = new SimpleDateFormat(
+    private static final SimpleDateFormat SHOW_FORMAT_DE = new SimpleDateFormat(
             "dd.MM.yyyy");
-    public static final SimpleDateFormat SHOW_FORMAT_EN = new SimpleDateFormat(
+    private static final SimpleDateFormat SHOW_FORMAT_EN = new SimpleDateFormat(
             "yyyy/MM/dd");
     // SimpleDateFormat more detailed
     public static final SimpleDateFormat DETAILED_FORMAT_DE = new SimpleDateFormat(
@@ -59,8 +59,8 @@ public class Constants {
     public static final int DEFAULT_X509_VERSION = 3;
     public static final int DEFAULT_CRL_VERSION = 2;
 
-    public static final int DEFAULT_SERVER_CERT_VALIDITY = 730;
-    public static final int DEFAULT_CLIENT_CERT_VALIDITY = 365;
+    static final int DEFAULT_SERVER_CERT_VALIDITY = 730;
+    static final int DEFAULT_CLIENT_CERT_VALIDITY = 365;
     
     public static final String[] AVAILABLE_KEYSTRENGTH = new String[] {"1024", "2048", "4096"};
 
@@ -228,7 +228,7 @@ public class Constants {
      * @return The date String, or null
      */
     public static String formatDetailedFormat(Date date) {
-        String dt = null;
+        String dt;
         String currentLocale = 
             ResourceBundleMgmt.getInstance().getUserBundle().getLocale().getLanguage();
         if(LANGUAGE_CODE_ENGLISH.equals(currentLocale))
@@ -254,8 +254,9 @@ public class Constants {
         } catch (ParseException e) {
             try {
                 dt = DETAILED_FORMAT_EN.parse(date);
-            } catch (ParseException e2) {}
+            } catch (ParseException ignored) {}
         }
+        assert dt != null;
         System.out.println(dt.getTime());
     }
 }
