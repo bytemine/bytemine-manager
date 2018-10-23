@@ -1,0 +1,18 @@
+apply plugin: 'idea' // For Intellij support
+apply plugin: 'java'
+
+// Define project version
+version '2.3.3'
+
+// Adjust source compatibility for later improvements to the project based on a newer java version
+sourceCompatibility = 1.8
+
+// Set source directory
+sourceSets.main.java.srcDirs = ['src']
+
+dependencies {
+
+    // Compile all local libraries
+    compile fileTree(dir: 'extlib', include: ['*.jar'])
+}
+
