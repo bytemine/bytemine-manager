@@ -30,10 +30,8 @@ public class GroupAction {
      * @param name
      * @param description
      * @return the new groupid
-     * @throws java.lang.Exception
      */
-    public static int createGroup(String name, String description)
-            throws Exception {
+    public static int createGroup(String name, String description) {
 
         // create new group
         Group newGroup = new Group(name, description);
@@ -58,11 +56,9 @@ public class GroupAction {
      * @param groupId
      * @param name
      * @param description
-     * @throws java.lang.Exception
      */
     public static void updateGroup(
-            String groupId, String name, String description)
-            throws Exception {
+            String groupId, String name, String description) {
         logger.info("Update Group with id: " + groupId);
 
         Group group = new Group(Integer.parseInt(groupId));
