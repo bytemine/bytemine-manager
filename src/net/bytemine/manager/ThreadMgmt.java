@@ -26,8 +26,8 @@ public class ThreadMgmt {
 
     private static ThreadMgmt instance = null;
 
-    private Hashtable<Long, Thread> activeThreads = new Hashtable<Long, Thread>();
-    private Hashtable<Long, String> messages = new Hashtable<Long, String>();
+    private Hashtable<Long, Thread> activeThreads = new Hashtable<>();
+    private Hashtable<Long, String> messages = new Hashtable<>();
 
 
     private ThreadMgmt() {
@@ -87,10 +87,10 @@ public class ThreadMgmt {
 
 
     private void generateMessagesForGUI() {
-        StringBuffer messageBuffer = new StringBuffer("<html>");
+        StringBuilder messageBuffer = new StringBuilder("<html>");
         for (Iterator<String> iterator = messages.values().iterator(); iterator.hasNext();) {
-            String message = (String) iterator.next();
-            messageBuffer.append("- " + message);
+            String message = iterator.next();
+            messageBuffer.append("- ").append(message);
             if (iterator.hasNext())
                 messageBuffer.append("<br />");
             else
