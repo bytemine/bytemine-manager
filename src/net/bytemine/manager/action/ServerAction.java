@@ -94,19 +94,19 @@ public class ServerAction {
         int vpnPort = 0;
         try {
             statusPort = Integer.parseInt(statusPortStr);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         try {
             statusInterval = Integer.parseInt(statusIntervalStr);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         try {
             sshPort = Integer.parseInt(sshPortStr);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         try {
             vpnPort = Integer.parseInt(vpnPortStr);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         
         if (Configuration.getInstance().USE_PAM)
@@ -278,10 +278,10 @@ public class ServerAction {
      */
     public static void createVPNUserConfigFile(Server server) {
         try {
-        	Vector<String> serverlist = new Vector<String>();
+        	Vector<String> serverlist = new Vector<>();
         	serverlist.add("" + server.getServerid());
             
-            Vector<String> userlist = new Vector<String>();
+            Vector<String> userlist;
             userlist = UserQueries.getUsersForServer(server.getServerid());
             
             // loop through every (connected) user, and create a config for each one
@@ -312,8 +312,7 @@ public class ServerAction {
 
         if (!new File(exportPath).exists()) {
             boolean success = (new File(exportPath)).mkdirs();
-            if (!success)
-                throw new Exception(rb.getString("dialog.cert.exporterror"));
+            assert success : rb.getString("dialog.cert.exporterror");
         }
     }
     
