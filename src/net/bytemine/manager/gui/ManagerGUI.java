@@ -14,13 +14,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterException;
-import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.ResourceBundle;
@@ -47,8 +44,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
@@ -97,11 +92,11 @@ public class ManagerGUI {
     public static JPanel detailsPanel = new JPanel();
     public static SupportForm supportForm = null;
 
-    public static final int mainWidth = Configuration.getInstance().GUI_WIDTH;
-    public static final int mainHeight = Configuration.getInstance().GUI_HEIGHT;
-    public static final int locationX = Configuration.getInstance().GUI_LOCATION_X;
-    public static final int locationY = Configuration.getInstance().GUI_LOCATION_Y;
-    public static final int serverUserTreeDividerLocation = Configuration.getInstance().SERVER_USER_TREE_DIVIDER_LOCATION;
+    private static final int mainWidth = Configuration.getInstance().GUI_WIDTH;
+    private static final int mainHeight = Configuration.getInstance().GUI_HEIGHT;
+    private static final int locationX = Configuration.getInstance().GUI_LOCATION_X;
+    private static final int locationY = Configuration.getInstance().GUI_LOCATION_Y;
+    private static final int serverUserTreeDividerLocation = Configuration.getInstance().SERVER_USER_TREE_DIVIDER_LOCATION;
 
     private static ManagerGUI app = null;
     private JPanel mainPanel = null;
@@ -128,12 +123,12 @@ public class ManagerGUI {
     private final UpdateMgmt updateMgmt;
 
     private static JScrollPane serverUserDetailsScrollPane;
-    public static JSplitPane serverUserSplitPane;
+    static JSplitPane serverUserSplitPane;
     private static JTree serverUserTree;
-    protected static ServerUserTreeModel serverUserTreeModel;
+    static ServerUserTreeModel serverUserTreeModel;
     
     // containing all servers which are opened in a control-tab
-    public static Vector<String> OPEN_CONTROL_SERVERS = new Vector<String>();
+    static Vector<String> OPEN_CONTROL_SERVERS = new Vector<>();
     
     public ManagerGUI() {
         app = this;
@@ -170,15 +165,11 @@ public class ManagerGUI {
                 //if (Configuration.getInstance().isClientCertImportDirSet())
                 importSkipped = Dialogs.showImportDialog(mainFrame);
 
-                if (importSkipped) {
+                // Import configuration dialog, starts the import after
+                // configuration is completed
+                if (importSkipped || !Dialogs.showImportConfigurationDialog(mainFrame)) {
                     // shows x509 configuration dialog
                     generateRootCertificate = Dialogs.showX509ConfigurationDialog(mainFrame);
-                } else {
-                    // Import configuration dialog, starts the import after
-                    // configuration is completed
-                    if(!Dialogs.showImportConfigurationDialog(mainFrame)) {
-                        generateRootCertificate = Dialogs.showX509ConfigurationDialog(mainFrame);
-                    }
                 }
             } else if (!Configuration.getInstance().isRootCertExisting()) {
                 // shows x509 configuration dialog
@@ -226,25 +217,23 @@ public class ManagerGUI {
         // reload the tree to confirm that the tree is displayed correctly
         reloadServerUserTree();
 
-        tabs.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                int controlCenterIndex = 3;
-                if (Configuration.getInstance().GUI_SHOW_CRL_TAB)
-                    controlCenterIndex = 4;
-                
-                if (tabs.getSelectedIndex() > controlCenterIndex)
-                    invisiblePrintPanel();
-                else
-                    showPrintPanel();
-                
-                switch (tabs.getSelectedIndex()) {
-                case 0: createX509ToolBar(null); break;
-                case 1: createServerToolBar(null); break;
-                case 2: createUserToolBar(null); break;
-                case 3: createServerUserToolBar(); break;
-                case 4: createCRLToolBar(); break;
-                default: createCCToolBar(); break;
-                }
+        tabs.addChangeListener(arg0 -> {
+            int controlCenterIndex = 3;
+            if (Configuration.getInstance().GUI_SHOW_CRL_TAB)
+                controlCenterIndex = 4;
+
+            if (tabs.getSelectedIndex() > controlCenterIndex)
+                invisiblePrintPanel();
+            else
+                showPrintPanel();
+
+            switch (tabs.getSelectedIndex()) {
+            case 0: createX509ToolBar(null); break;
+            case 1: createServerToolBar(null); break;
+            case 2: createUserToolBar(null); break;
+            case 3: createServerUserToolBar(); break;
+            case 4: createCRLToolBar(); break;
+            default: createCCToolBar(); break;
             }
         });
 
@@ -286,11 +275,7 @@ public class ManagerGUI {
         toolBar = new JPanel(new MigLayout("insets 0, fill"));
         JButton detailsButton = new JButton(rb.getString("toolbar.x509.details"));
         detailsButton.setToolTipText(rb.getString("toolbar.x509.details_tt"));
-        detailsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                showX509Details(x509Id);
-            }
-        });
+        detailsButton.addActionListener(arg0 -> showX509Details(x509Id));
         if (x509Id == null)
             detailsButton.setEnabled(false);
         toolBar.add(detailsButton);
@@ -312,49 +297,33 @@ public class ManagerGUI {
         
         JButton newButton = new JButton(rb.getString("toolbar.server.new"));
         newButton.setToolTipText(rb.getString("toolbar.server.new_tt"));
-        newButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                ServerDetails serverDetailsFrame = new ServerDetails(mainFrame, "-1");
-                serverDetailsFrame.showServerDetailsFrame();
-            }
+        newButton.addActionListener(arg0 -> {
+            ServerDetails serverDetailsFrame = new ServerDetails(mainFrame, "-1");
+            serverDetailsFrame.showServerDetailsFrame();
         });
         
         JButton detailsButton = new JButton(rb.getString("toolbar.server.details"));
         detailsButton.setToolTipText(rb.getString("toolbar.server.details_tt"));
-        detailsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                showServerDetails(serverId);
-            }
-        });
+        detailsButton.addActionListener(arg0 -> showServerDetails(serverId));
         
         JButton syncButton = new JButton(rb.getString("toolbar.server.sync"));
         syncButton.setToolTipText(rb.getString("toolbar.server.sync_tt"));
-        syncButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                syncUsersClicked(serverId);
-            }
-        });
+        syncButton.addActionListener(e -> syncUsersClicked(serverId));
         
         JButton startVpnButton = new JButton(rb.getString("toolbar.server.startVpn"));
         startVpnButton.setToolTipText(rb.getString("toolbar.server.startVpn_tt"));
-        startVpnButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Server server = Server.getServerById(Integer.parseInt(serverId));
-                try {
-                    Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
-                } catch (Exception ex) {
-                    logger.warning("showOpenVpnStartDaemonDialog throwed: "+ex.toString());
-                }
+        startVpnButton.addActionListener(e -> {
+            Server server = Server.getServerById(Integer.parseInt(serverId));
+            try {
+                Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
+            } catch (Exception ex) {
+                logger.warning("showOpenVpnStartDaemonDialog throwed: "+ex.toString());
             }
         });
 
         JButton deleteButton = new JButton(rb.getString("toolbar.server.delete"));
         deleteButton.setToolTipText(rb.getString("toolbar.server.delete_tt"));
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId);
-            }
-        });
+        deleteButton.addActionListener(evt -> Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId));
 
         JButton ccButton = new JButton(rb.getString("toolbar.server.cc"));
         ccButton.setToolTipText(rb.getString("toolbar.server.cc_tt"));
@@ -368,28 +337,26 @@ public class ManagerGUI {
         } else {
             Server s = new Server(serverId);
             final Server server = ServerDAO.getInstance().read(s);
-            ccButton.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                	// only permit one open control tab for every server    
-                	if (!OPEN_CONTROL_SERVERS.contains(serverId)) {
-                		
-                		// is there any cctab having the same hostname
-                		if (openCCTabs.containsKey(server.getHostname())) {
-                			// is vpnport equal
-                			if (openCCTabs.get(server.getHostname()).getVpnPort()==server.getVpnPort())
-                				// error
-                				CustomJOptionPane.showMessageDialog(mainPanel,
-                                        rb.getString("dialog.cctab.hostip.msg"),
-                                        rb.getString("dialog.cctab.hostip.title"),
-                                        CustomJOptionPane.ERROR_MESSAGE);
-                			
-                				return;
-                		}
-                		
-                		//openCCTabs.get()
-                		openCCTab(server);
-                		OPEN_CONTROL_SERVERS.addElement(serverId);
-                	}
+            ccButton.addActionListener(e -> {
+                // only permit one open control tab for every server
+                if (!OPEN_CONTROL_SERVERS.contains(serverId)) {
+
+                    // is there any cctab having the same hostname
+                    if (openCCTabs.containsKey(server.getHostname())) {
+                        // is vpnport equal
+                        if (openCCTabs.get(server.getHostname()).getVpnPort()==server.getVpnPort())
+                            // error
+                            CustomJOptionPane.showMessageDialog(mainPanel,
+                                    rb.getString("dialog.cctab.hostip.msg"),
+                                    rb.getString("dialog.cctab.hostip.title"),
+                                    CustomJOptionPane.ERROR_MESSAGE);
+
+                            return;
+                    }
+
+                    //openCCTabs.get()
+                    openCCTab(server);
+                    OPEN_CONTROL_SERVERS.addElement(serverId);
                 }
             });
         }
@@ -420,55 +387,45 @@ public class ManagerGUI {
         
         JButton newButton = new JButton(rb.getString("toolbar.user.new"));
         newButton.setToolTipText(rb.getString("toolbar.user.new_tt"));
-        newButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                showUserDetails("-1");
-            }
-        });
+        newButton.addActionListener(arg0 -> showUserDetails("-1"));
         
         JButton detailsButton = new JButton(rb.getString("toolbar.user.details"));
         detailsButton.setToolTipText(rb.getString("toolbar.user.details_tt"));
-        detailsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                showUserDetails(userId);
-            }
-        });
+        detailsButton.addActionListener(arg0 -> showUserDetails(userId));
         
         JButton deleteButton = new JButton(rb.getString("toolbar.user.delete"));
         deleteButton.setToolTipText(rb.getString("toolbar.user.delete_tt"));
-        deleteButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("user.dialog.delete.answer_yes"),
-                        rb.getString("user.dialog.delete.answer_no")
-                };
-                int answer = CustomJOptionPane.showOptionDialog(
-                        ManagerGUI.mainFrame,
-                        rb.getString("user.dialog.delete.text"),
-                        rb.getString("user.dialog.delete.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+        deleteButton.addActionListener(evt -> {
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("user.dialog.delete.answer_yes"),
+                    rb.getString("user.dialog.delete.answer_no")
+            };
+            int answer = CustomJOptionPane.showOptionDialog(
+                    ManagerGUI.mainFrame,
+                    rb.getString("user.dialog.delete.text"),
+                    rb.getString("user.dialog.delete.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        UserAction.deleteUser(userId);
-                    } catch (Exception e) {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                rb.getString("user.dialog.delete.errortext"),
-                                rb.getString("user.dialog.delete.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
-                    }
-
-                    ManagerGUI.reloadServerUserTree();
-                    ManagerGUI.refreshUserTable();
-                    ManagerGUI.refreshX509Table();
+            // delete
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    UserAction.deleteUser(userId);
+                } catch (Exception e) {
+                    // show error dialog
+                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                            rb.getString("user.dialog.delete.errortext"),
+                            rb.getString("user.dialog.delete.errortitle"),
+                            CustomJOptionPane.ERROR_MESSAGE);
                 }
+
+                ManagerGUI.reloadServerUserTree();
+                ManagerGUI.refreshUserTable();
+                ManagerGUI.refreshX509Table();
             }
         });
 
@@ -476,7 +433,6 @@ public class ManagerGUI {
             // disable some buttons
             detailsButton.setEnabled(false);
             deleteButton.setEnabled(false);
-        } else {
         }
 
         toolBar.add(newButton);
@@ -499,22 +455,18 @@ public class ManagerGUI {
         toolBar = new JPanel(new MigLayout("insets 0, fill"));
         JButton newUserButton = new JButton(rb.getString("toolbar.server_user.new_user"));
         newUserButton.setToolTipText(rb.getString("toolbar.server_user.new_user_tt"));
-        newUserButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                UserDetails uDetails = new UserDetails(null, null);
-                JPanel detailsPanel = uDetails.createUserDetailsPanel();
-                updateServerUserDetails(detailsPanel);
-            }
+        newUserButton.addActionListener(arg0 -> {
+            UserDetails uDetails = new UserDetails(null, null);
+            JPanel detailsPanel = uDetails.createUserDetailsPanel();
+            updateServerUserDetails(detailsPanel);
         });
         JButton newServerButton = new JButton(rb.getString("toolbar.server_user.new_server"));
         newServerButton.setToolTipText(rb.getString("toolbar.server_user.new_server_tt"));
-        newServerButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                ServerDetails sDetails = new ServerDetails(null, null);
-                JTabbedPane detailsPanel = sDetails.createServerDetailsPanel();
-                sDetails.setTabbedPane(detailsPanel);
-                updateServerUserDetails(detailsPanel);
-            }
+        newServerButton.addActionListener(arg0 -> {
+            ServerDetails sDetails = new ServerDetails(null, null);
+            JTabbedPane detailsPanel = sDetails.createServerDetailsPanel();
+            sDetails.setTabbedPane(detailsPanel);
+            updateServerUserDetails(detailsPanel);
         });
         
         toolBar.add(newUserButton);
@@ -536,17 +488,15 @@ public class ManagerGUI {
         
         JButton exportButton = new JButton(rb.getString("toolbar.crl.export"));
         exportButton.setToolTipText(rb.getString("toolbar.crl.export_tt"));
-        exportButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                try {
-                    CRLExporter.exportCRLToFile();
-                    addStatusMessage(new StatusMessage(rb.getString("statusBar.crl.export")));
-                } catch (Exception e) {
-                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                            rb.getString("toolbar.crl.errortext"),
-                            rb.getString("toolbar.crl.errortitle"),
-                            CustomJOptionPane.ERROR_MESSAGE);
-                }
+        exportButton.addActionListener(arg0 -> {
+            try {
+                CRLExporter.exportCRLToFile();
+                addStatusMessage(new StatusMessage(rb.getString("statusBar.crl.export")));
+            } catch (Exception e) {
+                CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                        rb.getString("toolbar.crl.errortext"),
+                        rb.getString("toolbar.crl.errortitle"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         
@@ -595,7 +545,7 @@ public class ManagerGUI {
                 x509Table.setRowSelectionInterval(row, row);
                 X509OverviewTableModel model = (X509OverviewTableModel) x509Table.getModel();
                 // get the x509id from the mapping in the tableModel
-                String x509Id = (String) model.getIdRowMapping().get(row + "");
+                String x509Id = model.getIdRowMapping().get(row + "");
 
                 if (e.getButton() != MouseEvent.BUTTON1) {
                     // context menue
@@ -611,7 +561,7 @@ public class ManagerGUI {
         TableCellRenderer renderer = new CustomTableCellRenderer();
         try {
             x509Table.setDefaultRenderer(Class.forName("java.lang.Object"), renderer);
-        } catch(ClassNotFoundException ex) {}
+        } catch(ClassNotFoundException ignored) {}
 
         x509Table.setFillsViewportHeight(false);
         x509Table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -644,7 +594,7 @@ public class ManagerGUI {
                 serverTable.setRowSelectionInterval(row, row);
                 ServerOverviewTableModel model = (ServerOverviewTableModel) serverTable.getModel();
                 // get the serverId from the mapping in the tableModel
-                String serverId = (String) model.getIdRowMapping().get(row + "");
+                String serverId = model.getIdRowMapping().get(row + "");
 
                 if (e.getButton() != MouseEvent.BUTTON1) {
                     // context menue
@@ -660,7 +610,7 @@ public class ManagerGUI {
         TableCellRenderer renderer = new CustomTableCellRenderer();
         try {
             serverTable.setDefaultRenderer(Class.forName("java.lang.Object"), renderer);
-        } catch(ClassNotFoundException ex) {}
+        } catch(ClassNotFoundException ignored) {}
 
         serverTable.setFillsViewportHeight(false);
         serverTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -708,7 +658,7 @@ public class ManagerGUI {
         TableCellRenderer renderer = new CustomTableCellRenderer();
         try {
             userTable.setDefaultRenderer(Class.forName("java.lang.Object"), renderer);
-        } catch(ClassNotFoundException ex) {}
+        } catch(ClassNotFoundException ignored) {}
 
         userTable.setFillsViewportHeight(false);
         userTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -744,7 +694,7 @@ public class ManagerGUI {
         TableCellRenderer renderer = new CustomTableCellRenderer();
         try {
             crlTable.setDefaultRenderer(Class.forName("java.lang.Object"), renderer);
-        } catch(ClassNotFoundException ex) {}
+        } catch(ClassNotFoundException ignored) {}
 
         crlTable.setFillsViewportHeight(false);
         crlTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -835,7 +785,7 @@ public class ManagerGUI {
     }
     
 
-    public void createBottomPanel() {
+    private void createBottomPanel() {
         bottomPanel = new JPanel(new MigLayout("fillx"));
         bottomPanel.add(createPrintButton(), "");
         bottomPanel.add(createStatusBar(), "width " + (mainWidth - 30));
@@ -866,54 +816,52 @@ public class ManagerGUI {
         JPopupMenu contextMenu = new JPopupMenu();
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("user.details.deletebutton"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("user.dialog.delete.answer_yes"),
-                        rb.getString("user.dialog.delete.answer_no")
-                };
-                String text;
-                if (userIds.size() > 1)
-                    text = rb.getString("user.dialog.delete_multiple.text");
-                else
-                    text = rb.getString("user.dialog.delete.text");
-                int answer = CustomJOptionPane.showOptionDialog(
-                        ManagerGUI.mainFrame,
-                        text,
-                        rb.getString("user.dialog.delete.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+        deleteMenu.addActionListener(evt -> {
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("user.dialog.delete.answer_yes"),
+                    rb.getString("user.dialog.delete.answer_no")
+            };
+            String text;
+            if (userIds.size() > 1)
+                text = rb.getString("user.dialog.delete_multiple.text");
+            else
+                text = rb.getString("user.dialog.delete.text");
+            int answer = CustomJOptionPane.showOptionDialog(
+                    ManagerGUI.mainFrame,
+                    text,
+                    rb.getString("user.dialog.delete.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete all selected users
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        for (Iterator<String> iter = userIds.iterator(); iter.hasNext();) {
-                            String userId = (String) iter.next();
-                            UserAction.deleteUser(userId);
-                        }
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "error deleting users", e);
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                rb.getString("user.dialog.delete_multiple.errortext"),
-                                rb.getString("user.dialog.delete.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
+            // delete all selected users
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    for (Iterator<String> iter = userIds.iterator(); iter.hasNext();) {
+                        String userId = (String) iter.next();
+                        UserAction.deleteUser(userId);
                     }
-                    
-                    serverUserTreeModel.reload();
-                    serverUserSplitPane.repaint();
-                    serverUserSplitPane.getParent().repaint();
-
-                    ManagerGUI.reloadServerUserTree();
-                    ManagerGUI.refreshUserTable();
-                    ManagerGUI.refreshX509Table();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "error deleting users", e);
+                    // show error dialog
+                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                            rb.getString("user.dialog.delete_multiple.errortext"),
+                            rb.getString("user.dialog.delete.errortitle"),
+                            CustomJOptionPane.ERROR_MESSAGE);
                 }
 
+                serverUserTreeModel.reload();
+                serverUserSplitPane.repaint();
+                serverUserSplitPane.getParent().repaint();
+
+                ManagerGUI.reloadServerUserTree();
+                ManagerGUI.refreshUserTable();
+                ManagerGUI.refreshX509Table();
             }
+
         });
         
         JMenuItem x509MgmtMenu = new JMenuItem();
@@ -921,11 +869,7 @@ public class ManagerGUI {
         if (userIds.size() > 1)
             x509MgmtMenu.setEnabled(false);
         else {
-            x509MgmtMenu.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    showX509UserManager(userIds.get(0));
-                }
-            });
+            x509MgmtMenu.addActionListener(e -> showX509UserManager(userIds.get(0)));
         }
 
         contextMenu.add(deleteMenu);
@@ -943,12 +887,10 @@ public class ManagerGUI {
         JPopupMenu contextMenu = new JPopupMenu();
 
         JMenuItem newUserMenuItem = new JMenuItem(rb.getString("actionMenu.newUser.text"));
-        newUserMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                UserDetails uDetails = new UserDetails(null, null);
-                JPanel detailsPanel = uDetails.createUserDetailsPanel();
-                updateServerUserDetails(detailsPanel);
-            }
+        newUserMenuItem.addActionListener(e -> {
+            UserDetails uDetails = new UserDetails(null, null);
+            JPanel detailsPanel = uDetails.createUserDetailsPanel();
+            updateServerUserDetails(detailsPanel);
         });
         contextMenu.add(newUserMenuItem);
 
@@ -965,12 +907,10 @@ public class ManagerGUI {
         JPopupMenu contextMenu = new JPopupMenu();
 
         JMenuItem newServerMenuItem = new JMenuItem(rb.getString("actionMenu.newServer.text"));
-        newServerMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ServerDetails sDetails = new ServerDetails(null, null);
-                JTabbedPane detailsPanel = sDetails.createServerDetailsPanel();
-                updateServerUserDetails(detailsPanel);
-            }
+        newServerMenuItem.addActionListener(e -> {
+            ServerDetails sDetails = new ServerDetails(null, null);
+            JTabbedPane detailsPanel = sDetails.createServerDetailsPanel();
+            updateServerUserDetails(detailsPanel);
         });
         contextMenu.add(newServerMenuItem);
 
@@ -989,53 +929,42 @@ public class ManagerGUI {
 
         JMenuItem x509MgmtMenu = new JMenuItem();
         x509MgmtMenu.setText(rb.getString("serverContextMenu.certmgmt"));
-        x509MgmtMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showX509ServerManager(serverId);
-            }
-        });
+        x509MgmtMenu.addActionListener(e -> showX509ServerManager(serverId));
 
         JMenuItem syncMenu = new JMenuItem();
         syncMenu.setText(rb.getString("serverContextMenu.sync"));
-        syncMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                syncUsersClicked(serverId);
-            }
-        });
+        syncMenu.addActionListener(e -> syncUsersClicked(serverId));
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("serverContextMenu.delete"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId);
-            }
-        });
+        deleteMenu.addActionListener(evt -> Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId));
 
 
         Server s = new Server(serverId);
         final Server server = ServerDAO.getInstance().read(s);
         JMenuItem ccMenu = new JMenuItem();
         ccMenu.setText(rb.getString("serverContextMenu.cc"));
-        ccMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openCCTab(server);
-            }
-        });
+        ccMenu.addActionListener(e -> openCCTab(server));
         
         JMenuItem startVpnMenu = new JMenuItem();
         startVpnMenu.setText(rb.getString("serverContextMenu.startVpn"));
-        startVpnMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
-                } catch (Exception ex) {
-                    logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
-                }
+        startVpnMenu.addActionListener(e -> {
+            try {
+                Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
+            } catch (Exception ex) {
+                logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
             }
         });
 
         contextMenu.add(deleteMenu);
         contextMenu.add(x509MgmtMenu);
         contextMenu.add(syncMenu);
+        addToContenxtMenu(contextMenu, server, ccMenu);
+        contextMenu.add(startVpnMenu);
+        CssRuleManager.getInstance().format(contextMenu);
+        contextMenu.show(serverUserTree, position.x + 10, position.y);
+    }
+
+    private static void addToContenxtMenu(JPopupMenu contextMenu, Server server, JMenuItem ccMenu) {
         if (Configuration.getInstance().CC_ENABLED) {
             if (!openCCTabs.containsKey(server.getHostname())) {
                 contextMenu.add(ccMenu);
@@ -1044,9 +973,6 @@ public class ManagerGUI {
                 contextMenu.add(ccMenu);
             }
         }
-        contextMenu.add(startVpnMenu);
-        CssRuleManager.getInstance().format(contextMenu);
-        contextMenu.show(serverUserTree, position.x + 10, position.y);
     }
 
     /**
@@ -1059,53 +985,50 @@ public class ManagerGUI {
         JPopupMenu contextMenu = new JPopupMenu();
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("server.details.deletebutton"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("server.dialog.delete.answer_yes"),
-                        rb.getString("server.dialog.delete.answer_no")
-                };
-                String text;
-                if (serverIds.size() > 1)
-                    text = rb.getString("server.dialog.delete_multiple.text");
-                else
-                    text = rb.getString("server.dialog.delete.text");
-                int answer = CustomJOptionPane.showOptionDialog(
-                        ManagerGUI.mainFrame,
-                        text,
-                        rb.getString("server.dialog.delete.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+        deleteMenu.addActionListener(evt -> {
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("server.dialog.delete.answer_yes"),
+                    rb.getString("server.dialog.delete.answer_no")
+            };
+            String text;
+            if (serverIds.size() > 1)
+                text = rb.getString("server.dialog.delete_multiple.text");
+            else
+                text = rb.getString("server.dialog.delete.text");
+            int answer = CustomJOptionPane.showOptionDialog(
+                    ManagerGUI.mainFrame,
+                    text,
+                    rb.getString("server.dialog.delete.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete all selected servers
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        for (Iterator<String> iter = serverIds.iterator(); iter.hasNext();) {
-                            String serverId = (String) iter.next();
-                            ServerAction.deleteServer(serverId);
-                        }
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "error deleting servers", e);
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                rb.getString("server.dialog.delete_multiple.errortext"),
-                                rb.getString("server.dialog.delete.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
+            // delete all selected servers
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    for (String serverId : serverIds) {
+                        ServerAction.deleteServer(serverId);
                     }
-                    
-                    serverUserTreeModel.reload();
-                    serverUserSplitPane.repaint();
-                    serverUserSplitPane.getParent().repaint();
-
-                    ManagerGUI.refreshServerTable();
-                    ManagerGUI.refreshX509Table();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "error deleting servers", e);
+                    // show error dialog
+                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                            rb.getString("server.dialog.delete_multiple.errortext"),
+                            rb.getString("server.dialog.delete.errortitle"),
+                            CustomJOptionPane.ERROR_MESSAGE);
                 }
 
+                serverUserTreeModel.reload();
+                serverUserSplitPane.repaint();
+                serverUserSplitPane.getParent().repaint();
+
+                ManagerGUI.refreshServerTable();
+                ManagerGUI.refreshX509Table();
             }
+
         });
 
         contextMenu.add(deleteMenu);
@@ -1121,10 +1044,10 @@ public class ManagerGUI {
      * @param userId  The userId
      */
     public static void showConnectionContextFromTree(Point position, String serverId, String userId) {
-        Vector<String> serverIds = new Vector<String>();
+        Vector<String> serverIds = new Vector<>();
         serverIds.add(serverId);
         
-        Vector<String> userIds = new Vector<String>();
+        Vector<String> userIds = new Vector<>();
         userIds.add(userId);
         
         showMultipleConnectionsContextFromTree(position, serverIds, userIds);
@@ -1139,7 +1062,7 @@ public class ManagerGUI {
      */
     public static void showMultipleConnectionsContextFromTree(Point position, final Vector<String> serverIds, 
             final String userId) {
-        Vector<String> userIds = new Vector<String>();
+        Vector<String> userIds = new Vector<>();
         userIds.add(userId);
         
         showMultipleConnectionsContextFromTree(position, serverIds, userIds);
@@ -1154,7 +1077,7 @@ public class ManagerGUI {
      */
     public static void showMultipleConnectionsContextFromTree(Point position, final String serverId, 
             final Vector<String> userIds) {
-        Vector<String> serverIds = new Vector<String>();
+        Vector<String> serverIds = new Vector<>();
         serverIds.add(serverId);
         
         showMultipleConnectionsContextFromTree(position, serverIds, userIds);
@@ -1173,38 +1096,30 @@ public class ManagerGUI {
         JPopupMenu contextMenu = new JPopupMenu();
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("serverUserTree.userTree.serverConnectionDelete.text"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                try {
-                    if (userIds.size() == 1) {
-                        for (Iterator<String> iter = serverIds.iterator(); iter.hasNext();) {
-                            String serverId = (String) iter.next();
-                            UserQueries.removeUserFromServer(userIds.get(0), serverId);
-                        }    
-                    } else if (serverIds.size() == 1) {
-                        for (Iterator<String> iter = userIds.iterator(); iter.hasNext();) {
-                            String userId = (String) iter.next();
-                            UserQueries.removeUserFromServer(userId, serverIds.get(0));
-                        }    
-                    } else {
-                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                rb.getString("serverUserTree.userTree.serverConnectionDelete.illegalChoice"),
-                                rb.getString("serverUserTree.userTree.serverConnectionDelete.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "error deleting connection between servers and user", e);
-                    // show error dialog
+        deleteMenu.addActionListener(evt -> {
+            try {
+                if (userIds.size() == 1) {
+                    serverIds.forEach(serverId -> UserQueries.removeUserFromServer(userIds.get(0), serverId));
+                } else if (serverIds.size() == 1) {
+                    userIds.forEach(userId -> UserQueries.removeUserFromServer(userId, serverIds.get(0)));
+                } else {
                     CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                            rb.getString("serverUserTree.userTree.serverConnectionDelete.errortext"),
+                            rb.getString("serverUserTree.userTree.serverConnectionDelete.illegalChoice"),
                             rb.getString("serverUserTree.userTree.serverConnectionDelete.errortitle"),
                             CustomJOptionPane.ERROR_MESSAGE);
                 }
-                
-                serverUserTreeModel.reload();
-                serverUserSplitPane.repaint();
-                serverUserSplitPane.getParent().repaint();
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "error deleting connection between servers and user", e);
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                        rb.getString("serverUserTree.userTree.serverConnectionDelete.errortext"),
+                        rb.getString("serverUserTree.userTree.serverConnectionDelete.errortitle"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
+
+            serverUserTreeModel.reload();
+            serverUserSplitPane.repaint();
+            serverUserSplitPane.getParent().repaint();
         });
 
         contextMenu.add(deleteMenu);
@@ -1224,26 +1139,24 @@ public class ManagerGUI {
     private JPanel createPrintButton() {
         printPanel = new JPanel(new MigLayout());
         JButton printButton = new JButton(ImageUtils.createImageIcon(Constants.ICON_PRINT, rb.getString("print.button")));
-        printButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    switch (tabs.getSelectedIndex()) {
-                        case 0: x509Table.print(); break;
-                        case 1: serverTable.print(); break;
-                        case 2: userTable.print(); break;
-                        case 3: PrintUtils.printTreeAsTable(serverUserTree); break;
-                        case 4: crlTable.print(); break;
-                        default: break;
-                    }
-                    
-                    BufferedImage image = new BufferedImage(serverUserTree.getWidth(), serverUserTree.getHeight(), BufferedImage.TYPE_INT_RGB);
-                    Graphics2D g = image.createGraphics();
-                    serverUserTree.paint(g);
-                    g.dispose();
-
-                } catch (Exception e1) {
-                    new VisualException(rb.getString("print.error.text"), rb.getString("print.error.title"));
+        printButton.addActionListener(e -> {
+            try {
+                switch (tabs.getSelectedIndex()) {
+                    case 0: x509Table.print(); break;
+                    case 1: serverTable.print(); break;
+                    case 2: userTable.print(); break;
+                    case 3: PrintUtils.printTreeAsTable(serverUserTree); break;
+                    case 4: crlTable.print(); break;
+                    default: break;
                 }
+
+                BufferedImage image = new BufferedImage(serverUserTree.getWidth(), serverUserTree.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = image.createGraphics();
+                serverUserTree.paint(g);
+                g.dispose();
+
+            } catch (Exception e1) {
+                new VisualException(rb.getString("print.error.text"), rb.getString("print.error.title"));
             }
         });
         printButton.setToolTipText(rb.getString("print.button_tt"));
@@ -1259,7 +1172,7 @@ public class ManagerGUI {
         statusPanel = new JPanel(new MigLayout());
         statusPanel.setSize(mainWidth, 10);
 
-        String iconPath = null;
+        String iconPath;
         String toolTip = rb.getString("statusBar.button.tooltip");
         int type = StatusMessage.TYPE_INFO;
         if (!statusMessages.isEmpty())
@@ -1277,26 +1190,23 @@ public class ManagerGUI {
         );
         closeButton.setToolTipText(toolTip);
         closeButton.setSize(20, 20);
-        closeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                StatusMessage nextMessage = removeCurrentStatusMessage();
-                
-                if (nextMessage != null) {
-                    String iconPath = null;
-                    String toolTip = rb.getString("statusBar.button.tooltip");
+        closeButton.addActionListener(e -> {
+            StatusMessage nextMessage = removeCurrentStatusMessage();
 
-                    int type = nextMessage.getType();
-                    switch (type) {
-                        case StatusMessage.TYPE_CONFIRM: iconPath = Constants.ICON_CLOSE_PATH; break;
-                        case StatusMessage.TYPE_INFO: iconPath = Constants.ICON_INFO_PATH; break;
-                        case StatusMessage.TYPE_ERROR: iconPath = Constants.ICON_ERROR_PATH; break;
-                        default: iconPath = Constants.ICON_INFO_PATH; break;
-                    }
-                    closeButton.setIcon(ImageUtils.createImageIcon(iconPath, "close"));
-                    closeButton.setToolTipText(toolTip);
+            if (nextMessage != null) {
+                String iconPath1 = null;
+                String toolTip1 = rb.getString("statusBar.button.tooltip");
+
+                int type1 = nextMessage.getType();
+                switch (type1) {
+                    case StatusMessage.TYPE_CONFIRM: iconPath1 = Constants.ICON_CLOSE_PATH; break;
+                    case StatusMessage.TYPE_INFO: iconPath1 = Constants.ICON_INFO_PATH; break;
+                    case StatusMessage.TYPE_ERROR: iconPath1 = Constants.ICON_ERROR_PATH; break;
+                    default: iconPath1 = Constants.ICON_INFO_PATH; break;
                 }
+                closeButton.setIcon(ImageUtils.createImageIcon(iconPath1, "close"));
+                closeButton.setToolTipText(toolTip1);
             }
-            
         });
         statusTextLabel = new JLabel("");
         statusTextLabel.addMouseListener(new MouseAdapter() {
@@ -1304,7 +1214,7 @@ public class ManagerGUI {
                 StatusMessage nextMessage = removeCurrentStatusMessage();
                 
                 if (nextMessage != null) {
-                    String iconPath = null;
+                    String iconPath;
                     String toolTip = rb.getString("statusBar.button.tooltip");
 
                     int type = nextMessage.getType();
@@ -1332,21 +1242,18 @@ public class ManagerGUI {
      */
     private static StatusMessage removeCurrentStatusMessage() {
         StatusMessage nextMessage = null;
-        
-        if (statusMessages.isEmpty())
-            statusPanel.setVisible(false);
-        else {
-            statusMessages.remove(statusMessages.size()-1);
-        }
 
-        if (statusMessages.isEmpty())
+        if (statusMessages.isEmpty()) {
             statusPanel.setVisible(false);
-        else {
+            statusPanel.setVisible(false);
+        } else {
+            statusMessages.remove(statusMessages.size() - 1);
+
             nextMessage = statusMessages.lastElement();
             String display = "(" + statusMessages.size() + ") " + nextMessage;
             statusTextLabel.setText(display);
         }
-        
+
         return nextMessage;
     }
 
@@ -1469,29 +1376,19 @@ public class ManagerGUI {
         JMenuItem updateSettingsMenuItem = new JMenuItem();
         updateMenuItem = new JMenuItem();
 
-        exitMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (ThreadMgmt.getInstance().areThreadsRunning()) {
-                    Dialogs.showExitDialogWithActiveThreads();
-                } else {
-                    Dialogs.showExitDialog();
-                }
+        exitMenuItem.addActionListener(e -> {
+            if (ThreadMgmt.getInstance().areThreadsRunning()) {
+                Dialogs.showExitDialogWithActiveThreads();
+            } else {
+                Dialogs.showExitDialog();
             }
         });
         exitMenuItem.setText(rb.getString("fileMenu.exit.text"));
 
-        configMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Dialogs.showConfigurationDialog(mainFrame);
-            }
-        });
+        configMenuItem.addActionListener(e -> Dialogs.showConfigurationDialog(mainFrame));
         configMenuItem.setText(rb.getString("actionMenu.configuration.text"));
 
-        x509ConfigMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Dialogs.showX509ConfigurationDialog(mainFrame);
-            }
-        });
+        x509ConfigMenuItem.addActionListener(e -> Dialogs.showX509ConfigurationDialog(mainFrame));
         x509ConfigMenuItem.setText(rb.getString("actionMenu.x509configuration.text"));
 
         fileMenu.add(configMenuItem);
@@ -1501,48 +1398,34 @@ public class ManagerGUI {
         fileMenu.add(new JSeparator());
         fileMenu.add(exitMenuItem);
         
-        printMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    x509Table.print();
-                } catch (PrinterException e1) {
-                    e1.printStackTrace();
-                }
+        printMenuItem.addActionListener(e -> {
+            try {
+                x509Table.print();
+            } catch (PrinterException e1) {
+                e1.printStackTrace();
             }
         });
         printMenuItem.setText("print");
 
-        aboutMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Dialogs.showAboutBox(mainFrame);
-            }
-        });
+        aboutMenuItem.addActionListener(e -> Dialogs.showAboutBox(mainFrame));
         aboutMenuItem.setText(rb.getString("helpMenu.about.text"));
 
 
-        updateSettingsMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Dialogs.showUpdateConfigurationDialog(mainFrame);
-            }
-        });
+        updateSettingsMenuItem.addActionListener(e -> Dialogs.showUpdateConfigurationDialog(mainFrame));
         updateSettingsMenuItem.setText(rb.getString("helpMenu.updatesettings.text"));
 
-        updateMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // look for updates
-                updateMgmt.searchForUpdates();
-            }
+        updateMenuItem.addActionListener(e -> {
+            // look for updates
+            updateMgmt.searchForUpdates();
         });
         updateMenuItem.setText(rb.getString("helpMenu.update.text"));
         if (!updateMgmt.isUpdateKeystoreExisting())
             updateMenuItem.setEnabled(false);
         
         supportMenuItem.setText(rb.getString("helpMenu.support.text"));
-        supportMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                supportForm = new SupportForm();
-                supportForm.show();
-            }
+        supportMenuItem.addActionListener(e -> {
+            supportForm = new SupportForm();
+            supportForm.show();
         });
 
         helpMenu.add(updateSettingsMenuItem);
@@ -1550,170 +1433,144 @@ public class ManagerGUI {
         helpMenu.add(aboutMenuItem);
 
 
-        newUserMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showUserDetails("-1");
-            }
-        });
+        newUserMenuItem.addActionListener(e -> showUserDetails("-1"));
         newUserMenuItem.setText(rb.getString("actionMenu.newUser.text"));
 
 
-        newServerMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ServerDetails serverDetailsFrame = new ServerDetails(mainFrame, "-1");
-                serverDetailsFrame.showServerDetailsFrame();
-            }
+        newServerMenuItem.addActionListener(e -> {
+            ServerDetails serverDetailsFrame = new ServerDetails(mainFrame, "-1");
+            serverDetailsFrame.showServerDetailsFrame();
         });
         newServerMenuItem.setText(rb.getString("actionMenu.newServer.text"));
         
-        newGroupMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                GroupDetails groupDetailsFrame = new GroupDetails(mainFrame);
-                groupDetailsFrame.showDetails();
-            }
+        newGroupMenuItem.addActionListener(e -> {
+            GroupDetails groupDetailsFrame = new GroupDetails(mainFrame);
+            groupDetailsFrame.showDetails();
         });
         newGroupMenuItem.setText(rb.getString("actionMenu.newGroup.text"));
 
 
-        importMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Dialogs.showImportConfigurationDialog(mainFrame);
-                ManagerGUI.refreshX509Table();
-            }
+        importMenuItem.addActionListener(e -> {
+            Dialogs.showImportConfigurationDialog(mainFrame);
+            ManagerGUI.refreshX509Table();
         });
         importMenuItem.setText(rb.getString("actionMenu.import.text"));
 
 
-        crlMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Configuration.getInstance().setGuiShowCRL(crlMenuItem.getState());
-                if (crlMenuItem.getState()) {
-                    openCRLTab();
-                } else {
-                    closeCRLTab();
-                }
+        crlMenuItem.addActionListener(e -> {
+            Configuration.getInstance().setGuiShowCRL(crlMenuItem.getState());
+            if (crlMenuItem.getState()) {
+                openCRLTab();
+            } else {
+                closeCRLTab();
             }
         });
 
-        crX509MenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Configuration.getInstance().setGuiShowCRX509(crX509MenuItem.getState());
-                ManagerGUI.refreshX509Table();
-            }
+        crX509MenuItem.addActionListener(e -> {
+            Configuration.getInstance().setGuiShowCRX509(crX509MenuItem.getState());
+            ManagerGUI.refreshX509Table();
         });
         
 
-        dbResetMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        dbResetMenuItem.addActionListener(e -> {
 
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("dialog.dbreset.answer_yes"),
-                        rb.getString("dialog.dbreset.answer_no")
-                };
-                int answer = CustomJOptionPane.showOptionDialog(
-                        mainFrame,
-                        rb.getString("dialog.dbreset.text"),
-                        rb.getString("dialog.dbreset.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("dialog.dbreset.answer_yes"),
+                    rb.getString("dialog.dbreset.answer_no")
+            };
+            int answer = CustomJOptionPane.showOptionDialog(
+                    mainFrame,
+                    rb.getString("dialog.dbreset.text"),
+                    rb.getString("dialog.dbreset.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        boolean keepConfiguration = true;
-                        DBTasks.resetDB(keepConfiguration);
+            // delete
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    boolean keepConfiguration = true;
+                    DBTasks.resetDB(keepConfiguration);
 
-                        ManagerGUI.refreshAllTables();
-                    } catch (Exception ex) {
-                        new VisualException(ex.getMessage());
-                    }
+                    ManagerGUI.refreshAllTables();
+                } catch (Exception ex) {
+                    new VisualException(ex.getMessage());
                 }
-
             }
+
         });
         dbResetMenuItem.setText(rb.getString("actionMenu.dbreset.text"));
 
-        dbSnapshotMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        dbSnapshotMenuItem.addActionListener(e -> {
 
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("dialog.dbsnapshot.answer_yes"),
-                        rb.getString("dialog.dbsnapshot.answer_no")
-                };
-                int answer = CustomJOptionPane.showOptionDialog(
-                        mainFrame,
-                        rb.getString("dialog.dbsnapshot.text"),
-                        rb.getString("dialog.dbsnapshot.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("dialog.dbsnapshot.answer_yes"),
+                    rb.getString("dialog.dbsnapshot.answer_no")
+            };
+            int answer = CustomJOptionPane.showOptionDialog(
+                    mainFrame,
+                    rb.getString("dialog.dbsnapshot.text"),
+                    rb.getString("dialog.dbsnapshot.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        DBConnector.backupDatabase(Configuration.getInstance().JDBC_PATH);
-                    } catch (Exception ex) {
-                        new VisualException(ex.getMessage());
-                    }
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    DBConnector.backupDatabase(Configuration.getInstance().JDBC_PATH);
+                } catch (Exception ex) {
+                    new VisualException(ex.getMessage());
                 }
-
             }
+
         });
         dbSnapshotMenuItem.setText(rb.getString("actionMenu.dbsnapshot.text"));
 
 
-        crlClearMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        crlClearMenuItem.addActionListener(e -> {
 
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("dialog.crlclear.answer_yes"),
-                        rb.getString("dialog.crlclear.answer_no")
-                };
-                int answer = CustomJOptionPane.showOptionDialog(
-                        mainFrame,
-                        rb.getString("dialog.crlclear.text"),
-                        rb.getString("dialog.crlclear.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("dialog.crlclear.answer_yes"),
+                    rb.getString("dialog.crlclear.answer_no")
+            };
+            int answer = CustomJOptionPane.showOptionDialog(
+                    mainFrame,
+                    rb.getString("dialog.crlclear.text"),
+                    rb.getString("dialog.crlclear.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        DBTasks.clearCrl();
+            // delete
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    DBTasks.clearCrl();
 
-                        ManagerGUI.refreshAllTables();
-                    } catch (Exception ex) {
-                        new VisualException(ex.getMessage());
-                    }
+                    ManagerGUI.refreshAllTables();
+                } catch (Exception ex) {
+                    new VisualException(ex.getMessage());
                 }
-
             }
+
         });
 
         crlClearMenuItem.setText(rb.getString("actionMenu.crlclear.text"));
 
-        exportMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                X509Action.exportAllCertificatesToFilesystem();
-            }
-        });
+        exportMenuItem.addActionListener(e -> X509Action.exportAllCertificatesToFilesystem());
         exportMenuItem.setText(rb.getString("actionMenu.export.text"));
         
-        syncBatchMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                BatchUserSync userSync = BatchUserSync.getInstance();
-                userSync.startBatchSync();
-            }
+        syncBatchMenuItem.addActionListener(e -> {
+            BatchUserSync userSync = BatchUserSync.getInstance();
+            userSync.startBatchSync();
         });
         syncBatchMenuItem.setText(rb.getString("actionMenu.batch_sync.text"));
 
@@ -1739,7 +1596,7 @@ public class ManagerGUI {
         return menuBar;
     }
 
-    public static void enableUpdateSearch() {
+    static void enableUpdateSearch() {
         updateMenuItem.setEnabled(true);
     }
 
@@ -1764,65 +1621,53 @@ public class ManagerGUI {
 
         JMenuItem detailsMenu = new JMenuItem();
         detailsMenu.setText(rb.getString("x509ContextMenu.details"));
-        detailsMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showX509Details(x509Id);
-            }
-        });
+        detailsMenu.addActionListener(e -> showX509Details(x509Id));
 
         final JMenuItem withdrawMenu = new JMenuItem();
         withdrawMenu.setText(rb.getString("x509ContextMenu.withdraw"));
-        withdrawMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    X509Utils.revokeCertificate(x509);
-                } catch (Exception e1) {
-                    new VisualException(rb.getString("error.revocation"));
-                }
-                refreshX509Table();
-                refreshCrlTable();
+        withdrawMenu.addActionListener(e -> {
+            try {
+                X509Utils.revokeCertificate(x509);
+            } catch (Exception e1) {
+                new VisualException(rb.getString("error.revocation"));
             }
+            refreshX509Table();
+            refreshCrlTable();
         });
         final JMenuItem enableMenu = new JMenuItem();
         enableMenu.setText(rb.getString("x509ContextMenu.enable"));
-        enableMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    X509Utils.reEnableCertificate(x509);
-                } catch (Exception e1) {
-                    new VisualException(rb.getString("error.revocation"));
-                }
-                refreshX509Table();
-                refreshCrlTable();
+        enableMenu.addActionListener(e -> {
+            try {
+                X509Utils.reEnableCertificate(x509);
+            } catch (Exception e1) {
+                new VisualException(rb.getString("error.revocation"));
             }
+            refreshX509Table();
+            refreshCrlTable();
         });
         final JMenuItem renewMenu = new JMenuItem();
         renewMenu.setText(rb.getString("x509ContextMenu.renew"));
-        renewMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    X509Utils.renewCertificate(x509);
-                } catch (Exception e1) {
-                    new VisualException(rb.getString("error.renew"));
-                }
+        renewMenu.addActionListener(e -> {
+            try {
+                X509Utils.renewCertificate(x509);
+            } catch (Exception e1) {
+                new VisualException(rb.getString("error.renew"));
             }
         });
         final JMenuItem enableUserMenu = new JMenuItem();
         enableUserMenu.setText(rb.getString("x509ContextMenu.enableUser"));
-        enableUserMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    X509Utils.reEnableCertificate(x509);
-                } catch (Exception e1) {
-                    new VisualException(rb.getString("error.revocation"));
-                }
-                // call create new user function
-                showUserDetails( "-1", X509Queries.getX509Username(Integer.toString(x509.getX509id())),
-                				Integer.toString(x509.getX509id()));
-                
-                refreshX509Table();
-                refreshCrlTable();
+        enableUserMenu.addActionListener(e -> {
+            try {
+                X509Utils.reEnableCertificate(x509);
+            } catch (Exception e1) {
+                new VisualException(rb.getString("error.revocation"));
             }
+            // call create new user function
+            showUserDetails(X509Queries.getX509Username(Integer.toString(x509.getX509id())),
+                            Integer.toString(x509.getX509id()));
+
+            refreshX509Table();
+            refreshCrlTable();
         });
         
         
@@ -1836,9 +1681,7 @@ public class ManagerGUI {
                 contextMenu.add(withdrawMenu);
             }
         // for now we special case the Server, since I only want to deal with !revoked certificates
-        if (x509.getType() == X509.X509_TYPE_SERVER)
-            if (!isCertificateRevoked)
-                contextMenu.add(renewMenu);
+        if (x509.getType() == X509.X509_TYPE_SERVER && !isCertificateRevoked) contextMenu.add(renewMenu);
                 contextMenu.add(withdrawMenu);
         CssRuleManager.getInstance().format(contextMenu);
         contextMenu.show(x509Table, position.x + 10, position.y);
@@ -1855,55 +1698,33 @@ public class ManagerGUI {
 
         JMenuItem x509MgmtMenu = new JMenuItem();
         x509MgmtMenu.setText(rb.getString("serverContextMenu.certmgmt"));
-        x509MgmtMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showX509ServerManager(serverId);
-            }
-        });
+        x509MgmtMenu.addActionListener(e -> showX509ServerManager(serverId));
 
         JMenuItem syncMenu = new JMenuItem();
         syncMenu.setText(rb.getString("serverContextMenu.sync"));
-        syncMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                syncUsersClicked(serverId);
-            }
-        });
+        syncMenu.addActionListener(e -> syncUsersClicked(serverId));
 
         JMenuItem detailsMenu = new JMenuItem();
         detailsMenu.setText(rb.getString("serverContextMenu.details"));
-        detailsMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showServerDetails(serverId);
-            }
-        });
+        detailsMenu.addActionListener(e -> showServerDetails(serverId));
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("serverContextMenu.delete"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId);
-            }
-        });
+        deleteMenu.addActionListener(evt -> Dialogs.showDeleteServerDialog(ManagerGUI.mainFrame, serverId));
 
 
         Server s = new Server(serverId);
         final Server server = ServerDAO.getInstance().read(s);
         JMenuItem ccMenu = new JMenuItem();
         ccMenu.setText(rb.getString("serverContextMenu.cc"));
-        ccMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openCCTab(server);
-            }
-        });
+        ccMenu.addActionListener(e -> openCCTab(server));
         
         JMenuItem startVpnMenu = new JMenuItem();
         startVpnMenu.setText(rb.getString("serverContextMenu.startVpn"));
-        startVpnMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
-                } catch (Exception ex) {
-                    logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
-                }
+        startVpnMenu.addActionListener(e -> {
+            try {
+                Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame,server);
+            } catch (Exception ex) {
+                logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
             }
         });
 
@@ -1911,14 +1732,7 @@ public class ManagerGUI {
         contextMenu.add(deleteMenu);
         contextMenu.add(x509MgmtMenu);
         contextMenu.add(syncMenu);
-        if (Configuration.getInstance().CC_ENABLED) {
-            if (!openCCTabs.containsKey(server.getHostname())) {
-                contextMenu.add(ccMenu);
-            } else {
-                ccMenu.setEnabled(false);
-                contextMenu.add(ccMenu);
-            }
-        }
+        addToContenxtMenu(contextMenu, server, ccMenu);
         contextMenu.add(startVpnMenu);
         CssRuleManager.getInstance().format(contextMenu);
         contextMenu.show(serverTable, position.x + 10, position.y);
@@ -1966,57 +1780,47 @@ public class ManagerGUI {
 
         JMenuItem detailsMenu = new JMenuItem();
         detailsMenu.setText(rb.getString("userContextMenu.details"));
-        detailsMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showUserDetails(userId);
-            }
-        });
+        detailsMenu.addActionListener(e -> showUserDetails(userId));
 
         JMenuItem deleteMenu = new JMenuItem(rb.getString("user.details.deletebutton"));
-        deleteMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-                Object[] options = {
-                        rb.getString("user.dialog.delete.answer_yes"),
-                        rb.getString("user.dialog.delete.answer_no")
-                };
-                int answer = CustomJOptionPane.showOptionDialog(
-                        ManagerGUI.mainFrame,
-                        rb.getString("user.dialog.delete.text"),
-                        rb.getString("user.dialog.delete.title"),
-                        CustomJOptionPane.YES_NO_OPTION,
-                        CustomJOptionPane.QUESTION_MESSAGE,
-                        null, // icon
-                        options,
-                        options[0]);
+        deleteMenu.addActionListener(evt -> {
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            Object[] options = {
+                    rb.getString("user.dialog.delete.answer_yes"),
+                    rb.getString("user.dialog.delete.answer_no")
+            };
+            int answer = CustomJOptionPane.showOptionDialog(
+                    ManagerGUI.mainFrame,
+                    rb.getString("user.dialog.delete.text"),
+                    rb.getString("user.dialog.delete.title"),
+                    CustomJOptionPane.YES_NO_OPTION,
+                    CustomJOptionPane.QUESTION_MESSAGE,
+                    null, // icon
+                    options,
+                    options[0]);
 
-                // delete
-                if (answer == CustomJOptionPane.YES_OPTION) {
-                    try {
-                        UserAction.deleteUser(userId);
-                    } catch (Exception e) {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                rb.getString("user.dialog.delete.errortext"),
-                                rb.getString("user.dialog.delete.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
-                    }
-
-                    ManagerGUI.reloadServerUserTree();
-                    ManagerGUI.refreshUserTable();
-                    ManagerGUI.refreshX509Table();
+            // delete
+            if (answer == CustomJOptionPane.YES_OPTION) {
+                try {
+                    UserAction.deleteUser(userId);
+                } catch (Exception e) {
+                    // show error dialog
+                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                            rb.getString("user.dialog.delete.errortext"),
+                            rb.getString("user.dialog.delete.errortitle"),
+                            CustomJOptionPane.ERROR_MESSAGE);
                 }
 
+                ManagerGUI.reloadServerUserTree();
+                ManagerGUI.refreshUserTable();
+                ManagerGUI.refreshX509Table();
             }
+
         });
 
         JMenuItem x509MgmtMenu = new JMenuItem();
         x509MgmtMenu.setText(rb.getString("userContextMenu.certmgmt"));
-        x509MgmtMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                showX509UserManagerFrame(userId);
-            }
-        });
+        x509MgmtMenu.addActionListener(e -> showX509UserManagerFrame(userId));
 
         contextMenu.add(detailsMenu);
         contextMenu.add(deleteMenu);
@@ -2030,15 +1834,9 @@ public class ManagerGUI {
      */
     private static void syncUsersClicked(String serverId) {
 
-        if (serverId != null && !"".equals(serverId)) {
+        if (serverId != null && !serverId.isEmpty()) {
             try {
                 new UserSync(serverId);
-            } catch (ConnectException ce) {
-                CustomJOptionPane.showMessageDialog(mainFrame,
-                        ce.getMessage(),
-                        rb.getString("error.syncusers.title"),
-                        JOptionPane.ERROR_MESSAGE);
-                logger.log(Level.SEVERE, ce.getMessage(), ce);
             } catch (Exception ex) {
                 CustomJOptionPane.showMessageDialog(mainFrame,
                         ex.getMessage(),
@@ -2087,13 +1885,11 @@ public class ManagerGUI {
     
     /**
      * Displays details of a (new) user in a new frame
-     *
-     * @param id The ID of the user that is to show
-     * @param username The name of the (new) user
+     *  @param username The name of the (new) user
      * @param x509id The ID of the certificate object
      */
-    private void showUserDetails(String id, String username, String x509id) {
-        UserDetails userDetailsFrame = new UserDetails(mainFrame, id, username, x509id);
+    private void showUserDetails(String username, String x509id) {
+        UserDetails userDetailsFrame = new UserDetails(mainFrame, "-1", username, x509id);
         userDetailsFrame.showUserDetailsFrame();
     }
 
@@ -2104,7 +1900,7 @@ public class ManagerGUI {
      * @param serverId The serverId
      */
     private static void showX509ServerManager(String serverId) {
-        if (serverId != null && !"".equals(serverId)) {
+        if (serverId != null && !serverId.isEmpty()) {
             Server server = new Server(serverId);
             server = ServerDAO.getInstance().read(server);
 
@@ -2126,7 +1922,7 @@ public class ManagerGUI {
      * @param userId The userId
      */
     private static void showX509UserManagerFrame(String userId) {
-        if (userId != null && !"".equals(userId)) {
+        if (userId != null && !userId.isEmpty()) {
             User user = new User(userId);
             user = UserDAO.getInstance().read(user);
 
@@ -2147,7 +1943,7 @@ public class ManagerGUI {
      * @param userId The userId
      */
     private static void showX509UserManager(String userId) {
-        if (userId != null && !"".equals(userId)) {
+        if (userId != null && !userId.isEmpty()) {
             User user = new User(userId);
             user = UserDAO.getInstance().read(user);
 
@@ -2163,7 +1959,7 @@ public class ManagerGUI {
 
     }
 
-    public static void refreshUserTable() {
+    static void refreshUserTable() {
         if (userTable != null && userTable.getModel() != null)
             ((UserOverviewTableModel) userTable.getModel()).reloadData();
     }
@@ -2178,7 +1974,7 @@ public class ManagerGUI {
             ((X509OverviewTableModel) x509Table.getModel()).reloadData();
     }
     
-    public static void refreshCrlTable() {
+    private static void refreshCrlTable() {
         if (crlTable != null && crlTable.getModel() != null)
             ((CRLOverviewTableModel) crlTable.getModel()).reloadData();
     }
@@ -2190,25 +1986,24 @@ public class ManagerGUI {
         refreshCrlTable();
     }
 
-    public static JTabbedPane getTabs() {
+    static JTabbedPane getTabs() {
         return tabs;
     }
 
-    public static Hashtable<String, ControlCenterTab> getOpenCCTabs() {
+    static Hashtable<String, ControlCenterTab> getOpenCCTabs() {
         return openCCTabs;
     }
 
     public static ControlCenterTab getOpenCCTab(String hostname) {
         if (hostname == null)
             return null;
-        ControlCenterTab tab = openCCTabs.get(hostname);
-        return tab;
+        return openCCTabs.get(hostname);
     }
 
     /**
      * clears the right panel of the main app window, if in tree mode.
      */
-    public static void clearRightPanel() {
+    static void clearRightPanel() {
         JPanel panel = new JPanel();
         CssRuleManager.getInstance().format(panel);
         ManagerGUI.updateServerUserDetails(panel);
