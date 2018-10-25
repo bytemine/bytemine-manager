@@ -32,10 +32,9 @@ class SQLGenerator {
      *
      * @param entries String[] like [0]:tableName, [1]:columnName, [2]:columnType
      * @return A List with SQL commands
-     * @throws Exception
      */
-    List<String> generateSQL(Vector<String[]> entries) throws Exception {
-        List<String> statements = new ArrayList<String>();
+    List<String> generateSQL(Vector<String[]> entries) {
+        List<String> statements = new ArrayList<>();
         try {
             SQLStatementModel model = null;
 
