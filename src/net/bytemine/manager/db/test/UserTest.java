@@ -22,7 +22,7 @@ public class UserTest {
     }
 
 
-    public static void createAndDeleteUser() {
+    private static void createAndDeleteUser() {
         // create new user
         User user;
         try {
@@ -32,10 +32,7 @@ public class UserTest {
 
             // load this user by id
             user = User.getUserByID(id);
-            if (user != null)
-                System.out.println("Success: loaded user with id " + id + ": " + user.getUsername());
-            else
-                System.out.println("Error: could not load user with id " + id);
+            System.out.println(user != null ? "Success: loaded user with id " + id + ": " + user.getUsername() : "Error: could not load user with id " + id);
 
             // delete the user
             //user.delete();
@@ -43,10 +40,7 @@ public class UserTest {
             // try to load, should fail
             user = User.getUserByID(id);
 
-            if (user != null)
-                System.out.println("Error: user with id " + id + " could not be deleted");
-            else
-                System.out.println("Success: user with id " + id + " has been deleted");
+            System.out.println(user != null ? "Error: user with id " + id + " could not be deleted" : "Success: user with id " + id + " has been deleted");
 
         } catch (Exception e) {
             //e.printStackTrace();
