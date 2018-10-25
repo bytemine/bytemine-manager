@@ -25,10 +25,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.net.ConnectException;
+import java.util.*;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -169,7 +167,7 @@ public class Dialogs {
      * @param frame The parent frame
      * @return true, if the import was skipped
      */
-    public static boolean showImportDialog(JFrame frame) {
+    static boolean showImportDialog(JFrame frame) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Object[] options = {
                 rb.getString("dialog.import.answer_yes"),
@@ -206,7 +204,7 @@ public class Dialogs {
      * @param frame The parent frame
      * @return an integer with a code
      */
-    public static int showCreateCertificatesDialog(JFrame frame) {
+    private static int showCreateCertificatesDialog(JFrame frame) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Object[] options = {
                 rb.getString("dialog.createcerts.answer_yes"),
@@ -291,9 +289,7 @@ public class Dialogs {
 
         if (n == CustomJOptionPane.YES_OPTION)
             return true;
-        else if (n == CustomJOptionPane.NO_OPTION)
-            return false;
-        return true;
+        else return n != CustomJOptionPane.NO_OPTION;
     }
 
 
@@ -321,9 +317,7 @@ public class Dialogs {
                 options,
                 options[0]); //default button title
 
-        if (n == CustomJOptionPane.YES_OPTION)
-            return true;
-        return false;
+        return n == CustomJOptionPane.YES_OPTION;
     }
 
 
@@ -351,9 +345,7 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.NO_OPTION)
-            return true;
-        return false;
+        return n == CustomJOptionPane.NO_OPTION;
     }
 
 
@@ -381,9 +373,7 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.NO_OPTION)
-            return true;
-        return false;
+        return n == CustomJOptionPane.NO_OPTION;
     }
 
 
@@ -409,9 +399,7 @@ public class Dialogs {
                 options,
                 options[0]); //default button title
 
-        if (n == CustomJOptionPane.YES_OPTION)
-            return true;
-        return false;
+        return n == CustomJOptionPane.YES_OPTION;
     }
 
 
@@ -560,7 +548,7 @@ public class Dialogs {
      * @param commandStr The displayed command
      * @param outputField The field containing the output
      */
-    public static String showUserCommandOutputDialog(JFrame parentFrame, String commandStr, JTextArea outputField, final Dimension commandOutputDialogSize) {
+    static String showUserCommandOutputDialog(JFrame parentFrame, String commandStr, JTextArea outputField, final Dimension commandOutputDialogSize) {
     	final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         final JDialog dialog = new JDialog(parentFrame, true);   
@@ -661,7 +649,7 @@ public class Dialogs {
      * @param parentFrame The parent frame
      * @param version The version String returned from the server
      */
-    public static void showOpenVPNVersionDialog(JFrame parentFrame, String version) {
+    static void showOpenVPNVersionDialog(JFrame parentFrame, String version) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         JLabel headlineLabel = new JLabel(rb.getString("ccTab.version_label") + ":");
@@ -680,7 +668,7 @@ public class Dialogs {
      * @param parentFrame The parent frame
      * @param server      The server on which the daemon should be started
      */
-    public static void showOpenVpnStartDaemonDialog(JFrame parentFrame, final Server server) throws Exception {
+    static void showOpenVpnStartDaemonDialog(JFrame parentFrame, final Server server) {
         
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
@@ -757,63 +745,53 @@ public class Dialogs {
             keyfileField.setEnabled(true);
         }
         
-        authTypePassword.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                keyfileField.setEnabled(false);
-                //keyfileLabel.setFont(Constants.FONT_PLAIN);
-                filechooserButton.setEnabled(false);
-            }
+        authTypePassword.addActionListener(e -> {
+            keyfileField.setEnabled(false);
+            //keyfileLabel.setFont(Constants.FONT_PLAIN);
+            filechooserButton.setEnabled(false);
         });
-        authTypeKeyfile.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                keyfileField.setEnabled(true);
-                //keyfileLabel.setFont(Constants.FONT_BOLD);
-                filechooserButton.setEnabled(true);
-            }
+        authTypeKeyfile.addActionListener(e -> {
+            keyfileField.setEnabled(true);
+            //keyfileLabel.setFont(Constants.FONT_BOLD);
+            filechooserButton.setEnabled(true);
         });
         
         
         // buttons
         final JButton okButton = new JButton(rb.getString("dialog.vpnstart.option_ok"));
-        okButton.addActionListener(new ActionListener() {
-            
-            public void actionPerformed(ActionEvent e) {
-                
-                int authtype = 0;
-                
-                if(authTypePassword.isSelected())
-                    authtype = Server.AUTH_TYPE_PASSWORD;
-                else if(authTypeKeyfile.isSelected())
-                    authtype = Server.AUTH_TYPE_KEYFILE;
-                
-                SSHTool sshTool = null;
-                
-                try {
-                    sshTool = new SSHTool(server, usernameField.getText(),
-                                                         keyfileField.getText(),
-                                                         authtype);
-                    
-                    sshTool.exec(commandField.getText().replace("\n", " "));
-                    sshTool.disconnectSession();
-                } catch (Exception ex) {
-                    logger.warning("SSHTool.exec: "+ex.toString());
-                }
-                    
-                if(sshTool != null)
-                    sshTool.disconnectSession();
-                
-                dialog.setVisible(false);
+        okButton.addActionListener(e -> {
+
+            int authtype = 0;
+
+            if(authTypePassword.isSelected())
+                authtype = Server.AUTH_TYPE_PASSWORD;
+            else if(authTypeKeyfile.isSelected())
+                authtype = Server.AUTH_TYPE_KEYFILE;
+
+            SSHTool sshTool = null;
+
+            try {
+                sshTool = new SSHTool(server, usernameField.getText(),
+                        keyfileField.getText(),
+                        authtype);
+
+                sshTool.exec(commandField.getText().replace("\n", " "));
+                sshTool.disconnectSession();
+            } catch (ConnectException ex) {
+                logger.warning("SSHTool.exec: " + ex.toString());
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
+
+            if(sshTool != null)
+                sshTool.disconnectSession();
+
+            dialog.setVisible(false);
         });
         final JButton cancelButton = new JButton(rb.getString("dialog.vpnstart.option_cancel"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                commandField.setText("");
-                dialog.setVisible(false);
-            }
+        cancelButton.addActionListener(e -> {
+            commandField.setText("");
+            dialog.setVisible(false);
         });
         JPanel buttonPanel = new JPanel(new MigLayout("align center"));       
         buttonPanel.add(okButton);
@@ -836,24 +814,18 @@ public class Dialogs {
         startCmd.setSelected(true);
         restartCmd.setSelected(false);
         
-        startCmd.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (server.getServerType() == Server.SERVER_TYPE_BYTEMINE_APPLIANCE)
-                    commandField.setText(Constants.DEFAULT_OPENVPN_START_COMMAND_BOA);
-                else
-                    commandField.setText(Constants.DEFAUlT_OPENVPN_START_COMMAND_NON_BOA);
-            }
+        startCmd.addActionListener(e -> {
+            if (server.getServerType() == Server.SERVER_TYPE_BYTEMINE_APPLIANCE)
+                commandField.setText(Constants.DEFAULT_OPENVPN_START_COMMAND_BOA);
+            else
+                commandField.setText(Constants.DEFAUlT_OPENVPN_START_COMMAND_NON_BOA);
         });
-        restartCmd.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (server.getServerType() == Server.SERVER_TYPE_BYTEMINE_APPLIANCE)
-                    commandField.setText("kill -HUP `head -1 /var/run/openvpnd.pid`");
-                else
-                    commandField.setText("restart vpn non boa");
-            }
-        });       
+        restartCmd.addActionListener(e -> {
+            if (server.getServerType() == Server.SERVER_TYPE_BYTEMINE_APPLIANCE)
+                commandField.setText("kill -HUP `head -1 /var/run/openvpnd.pid`");
+            else
+                commandField.setText("restart vpn non boa");
+        });
         // TODO
         
         
@@ -908,7 +880,7 @@ public class Dialogs {
      * @param parentFrame The parent frame
      * @param ip The IP causing a warning
      */
-    public static void showOpenVPNIpWarningDialog(JFrame parentFrame, String ip) {
+    static void showOpenVPNIpWarningDialog(JFrame parentFrame, String ip) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         
         final JDialog dialog = new JDialog(parentFrame, rb.getString("server.details.staticIp_warningTitle"), true);
@@ -933,15 +905,12 @@ public class Dialogs {
         inputPanel.add(askAgainCheckbox);
         
         JButton okButton = new JButton(rb.getString("dialog.cctab.option_ok"));
-        okButton.addActionListener(new ActionListener() {
+        okButton.addActionListener(e -> {
 
-            public void actionPerformed(ActionEvent e) {
-            	
-            	if (askAgainCheckbox.isSelected())
-                    Configuration.getInstance().setGuiShowOpenVPNIpWarningDialog(false);
-            	
-                dialog.dispose();
-            }
+            if (askAgainCheckbox.isSelected())
+                Configuration.getInstance().setGuiShowOpenVPNIpWarningDialog(false);
+
+            dialog.dispose();
         });
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(okButton);
@@ -968,7 +937,7 @@ public class Dialogs {
      * @param parentFrame The parent frame
      * @return true, if the x509 configuration has been saved
      */
-    public static boolean showX509ConfigurationDialog(final JFrame parentFrame) {
+    static boolean showX509ConfigurationDialog(final JFrame parentFrame) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         boolean rootExisting = Configuration.getInstance().isRootCertExisting();
@@ -1028,7 +997,7 @@ public class Dialogs {
         serverValidForField.setHorizontalAlignment(JTextField.RIGHT);
         serverValidForField.setText(Configuration.getInstance().X509_SERVER_VALID_FOR);
 
-        final JComboBox serverValidityUnitBox = new JComboBox();
+        final JComboBox<String> serverValidityUnitBox = new JComboBox<>();
         serverValidityUnitBox.addItem(rb.getString("units.days"));
         serverValidityUnitBox.addItem(rb.getString("units.weeks"));
         serverValidityUnitBox.addItem(rb.getString("units.years"));
@@ -1044,7 +1013,7 @@ public class Dialogs {
         clientValidForField.setHorizontalAlignment(JTextField.RIGHT);
         clientValidForField.setText(Configuration.getInstance().X509_CLIENT_VALID_FOR);
 
-        final JComboBox clientValidityUnitBox = new JComboBox();
+        final JComboBox<String> clientValidityUnitBox = new JComboBox<String>();
         clientValidityUnitBox.addItem(rb.getString("units.days"));
         clientValidityUnitBox.addItem(rb.getString("units.weeks"));
         clientValidityUnitBox.addItem(rb.getString("units.years"));
@@ -1056,7 +1025,7 @@ public class Dialogs {
 
         final JLabel keyStrengthLabel = new JLabel(rb.getString("dialog.x509configuration.keyStrength"));
         keyStrengthLabel.setFont(Constants.FONT_PLAIN);
-        final JComboBox keyStrengthBox = new JComboBox(Constants.AVAILABLE_KEYSTRENGTH);
+        final JComboBox<String> keyStrengthBox = new JComboBox<>(Constants.AVAILABLE_KEYSTRENGTH);
         keyStrengthBox.setSelectedItem(Configuration.getInstance().X509_KEY_STRENGTH);
         final JLabel keyStrengthUnitLabel = new JLabel(rb.getString("units.keystrength"));
         keyStrengthUnitLabel.setFont(Constants.FONT_PLAIN);
@@ -1078,78 +1047,63 @@ public class Dialogs {
 
 
         final JButton saveButton = new JButton(rb.getString("dialog.x509configuration.saveButton"));
-        saveButton.addActionListener(new ActionListener() {
+        saveButton.addActionListener(e -> {
+            try {
+                DNUtil dnUtil1 = new DNUtil();
+                dnUtil1.setC(cField.getText());
+                dnUtil1.setSt(stField.getText());
+                dnUtil1.setL(lField.getText());
+                dnUtil1.setO(oField.getText());
+                dnUtil1.setOu(ouField.getText());
+                dnUtil1.setCn(cnField.getText());
+                dnUtil1.setE(emailField.getText());
+                String dnString = dnUtil1.merge();
 
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    DNUtil dnUtil = new DNUtil();
-                    dnUtil.setC(cField.getText());
-                    dnUtil.setSt(stField.getText());
-                    dnUtil.setL(lField.getText());
-                    dnUtil.setO(oField.getText());
-                    dnUtil.setOu(ouField.getText());
-                    dnUtil.setCn(cnField.getText());
-                    dnUtil.setE(emailField.getText());
-                    String dnString = dnUtil.merge();
+                String validateResult = ValidatorAction.validateX509Configuration(
+                        dnString,
+                        rootValidFromField.getText(),
+                        rootValidToField.getText(),
+                        Integer.toString(0),
+                        serverValidForField.getText(),
+                        Integer.toString(0),
+                        clientValidForField.getText(),
+                        (String)keyStrengthBox.getSelectedItem()
+                );
+                if (validateResult.isEmpty()) {
 
-                    String validateResult = ValidatorAction.validateX509Configuration(
-                            dnString,
-                            rootValidFromField.getText(),
-                            rootValidToField.getText(),
-                            Integer.toString(0),
-                            serverValidForField.getText(),
-                            Integer.toString(0),
-                            clientValidForField.getText(),
-                            (String)keyStrengthBox.getSelectedItem()
+                    String serverValidFor= serverValidForField.getText();
+                    String clientValidFor= clientValidForField.getText();
+                    String serverValidityUnit= (String) serverValidityUnitBox.getSelectedItem();
+                    String clientValidityUnit= (String) clientValidityUnitBox.getSelectedItem();
+
+                    serverValidFor = getString(rb, serverValidFor, serverValidityUnit);
+
+                    clientValidFor = getString(rb, clientValidFor, clientValidityUnit);
+
+                    x509ConfigurationSuccessfullySaved = ConfigurationAction.saveX509Configuration(
+                                      dnString,
+                                      rootValidFromField.getText(),
+                                      rootValidToField.getText(),
+                                      Integer.toString(0),
+                                      serverValidFor,
+                                      Integer.toString(0),
+                                      clientValidFor,
+                                      (String)keyStrengthBox.getSelectedItem()
                     );
-                    if (validateResult == null || "".equals(validateResult)) {
-
-                        String serverValidFor= serverValidForField.getText();
-                        String clientValidFor= clientValidForField.getText();
-                        String serverValidityUnit= (String) serverValidityUnitBox.getSelectedItem();
-                        String clientValidityUnit= (String) clientValidityUnitBox.getSelectedItem();
-
-                        if(! serverValidityUnit.equals(rb.getString("units.days"))) {
-                           if (serverValidityUnit.equals(rb.getString("units.weeks"))) {
-                               serverValidFor= Integer.toString(Integer.parseInt(serverValidFor) * 7);
-                           } else if (serverValidityUnit.equals(rb.getString("units.years"))) {
-                                serverValidFor= Integer.toString(Integer.parseInt(serverValidFor) * 365);
-                            }
-                        }
-
-                        if(! clientValidityUnit.equals(rb.getString("units.days"))) {
-                           if (clientValidityUnit.equals(rb.getString("units.weeks"))) {
-                               clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 7);
-                           } else if (clientValidityUnit.equals(rb.getString("units.years"))) {
-                                clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 365);
-                            }
-                        }
-
-                        x509ConfigurationSuccessfullySaved = ConfigurationAction.saveX509Configuration(
-                                          dnString,
-                                          rootValidFromField.getText(),
-                                          rootValidToField.getText(),
-                                          Integer.toString(0),
-                                          serverValidFor,
-                                          Integer.toString(0),
-                                          clientValidFor,
-                                          (String)keyStrengthBox.getSelectedItem()
-                        );
-                        dialog.setVisible(false);
-                    } else {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(dialog,
-                                validateResult,
-                                rb.getString("dialog.x509configuration.error.title"),
-                                CustomJOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
+                    dialog.setVisible(false);
+                } else {
                     // show error dialog
                     CustomJOptionPane.showMessageDialog(dialog,
-                            ex.getMessage(),
+                            validateResult,
                             rb.getString("dialog.x509configuration.error.title"),
                             CustomJOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(dialog,
+                        ex.getMessage(),
+                        rb.getString("dialog.x509configuration.error.title"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         final JButton cancelButton = new JButton();
@@ -1158,17 +1112,14 @@ public class Dialogs {
             cancelButton.setText(rb.getString("dialog.configuration.skipButton"));
         else
             cancelButton.setText(rb.getString("dialog.configuration.cancelButton"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (firstCall) {
-                    // user wants to skip at first application startup
-                    // ask him to confirm
-                    if (showReallySkipX509Dialog(dialog))
-                        dialog.setVisible(false);
-                } else
+        cancelButton.addActionListener(e -> {
+            if (firstCall) {
+                // user wants to skip at first application startup
+                // ask him to confirm
+                if (showReallySkipX509Dialog(dialog))
                     dialog.setVisible(false);
-            }
+            } else
+                dialog.setVisible(false);
         });
 
 
@@ -1250,6 +1201,17 @@ public class Dialogs {
         return x509ConfigurationSuccessfullySaved;
     }
 
+    static String getString(ResourceBundle rb, String serverValidFor, String serverValidityUnit) {
+        if(! serverValidityUnit.equals(rb.getString("units.days"))) {
+           if (serverValidityUnit.equals(rb.getString("units.weeks"))) {
+               serverValidFor= Integer.toString(Integer.parseInt(serverValidFor) * 7);
+           } else if (serverValidityUnit.equals(rb.getString("units.years"))) {
+                serverValidFor= Integer.toString(Integer.parseInt(serverValidFor) * 365);
+            }
+        }
+        return serverValidFor;
+    }
+
 
     /**
      * dialog for configurations
@@ -1257,7 +1219,7 @@ public class Dialogs {
      * @param parentFrame The parent frame
      * @return true, if all following dialogs shall not be displayed
      */
-    public static boolean showConfigurationDialog(final JFrame parentFrame) {
+    static boolean showConfigurationDialog(final JFrame parentFrame) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         Hashtable<String, String> configs = ConfigurationQueries.getConfigurations();
@@ -1305,14 +1267,14 @@ public class Dialogs {
         final JRadioButton x509typeChoosePKCS12 = new JRadioButton(rb.getString("dialog.configuration.x509typeChoosePKCS12"));
         x509typeChoosePKCS12.setFont(Constants.FONT_PLAIN);
 
-        int certificateType = Constants.CERTIFICATE_TYPE_BASE64;
+        int certificateType;
         try {
             certificateType = Integer.parseInt(configs.get(ConfigurationQueries.CERTIFICATE_TYPE));
             if (certificateType == Constants.CERTIFICATE_TYPE_BASE64)
                 x509typeChooseBase64.setSelected(true);
             else
                 x509typeChoosePKCS12.setSelected(true);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("error getting the configured certificate type");
             x509typeChooseBase64.setSelected(true);
         }
@@ -1342,7 +1304,7 @@ public class Dialogs {
                 pkcs12NoPasswd.setSelected(true);
             else
                 pkcs12SinglePasswd.setSelected(true);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("error getting the configured pkcs12 password type");
             pkcs12NoPasswd.setSelected(true);
         }
@@ -1357,29 +1319,16 @@ public class Dialogs {
         pkcs12PasswordChooserPanel.add(pkcs12SinglePasswdLabel);
         if (!x509typeChoosePKCS12.isSelected()) {
             Component[] components = pkcs12PasswordChooserPanel.getComponents();
-            for (int i = 0; i < components.length; i++) {
-                Component component = components[i];
-                component.setEnabled(false);
-            }
+            Arrays.stream(components).forEach(component -> component.setEnabled(false));
         }
 
-        x509typeChooseBase64.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Component[] components = pkcs12PasswordChooserPanel.getComponents();
-                for (int i = 0; i < components.length; i++) {
-                    Component component = components[i];
-                    component.setEnabled(false);
-                }
-            }
+        x509typeChooseBase64.addActionListener(e -> {
+            Component[] components = pkcs12PasswordChooserPanel.getComponents();
+            Arrays.stream(components).forEach(component -> component.setEnabled(false));
         });
-        x509typeChoosePKCS12.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Component[] components = pkcs12PasswordChooserPanel.getComponents();
-                for (int i = 0; i < components.length; i++) {
-                    Component component = components[i];
-                    component.setEnabled(true);
-                }
-            }
+        x509typeChoosePKCS12.addActionListener(e -> {
+            Component[] components = pkcs12PasswordChooserPanel.getComponents();
+            Arrays.stream(components).forEach(component -> component.setEnabled(true));
         });
 
 
@@ -1402,37 +1351,27 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         dbChooserButton.setSize(30, 20);
-        dbChooserButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.FILES_ONLY);
-                    if (filename != null)
-                        dbPathField.setText(filename);
-                }
-            }
-        });
-        
-        defaultDB.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (defaultDB.isSelected()) {
-                    dbChooserButton.setEnabled(false);
-                    
-                    // read property file 
-                    ResourceBundle configBundle = null;
-                    try {
-                        configBundle = ResourceBundle.getBundle(Configuration.getInstance().MANAGER_PROPERTIES_NAME);
+        updateDBPath(parentFrame, dbPathField, dbChooserButton);
 
-                        String url = configBundle.getString("jdbc_url");
-                        String path = DBUtils.getDBPathFromURL(url);
-                        dbPathField.setText(path);
-                    } catch (Exception ex) {
-                        dbPathField.setText(Configuration.getInstance().JDBC_PATH);
-                    }
-                    dbPathField.setEnabled(false);
-                } else {
-                    dbChooserButton.setEnabled(true);
-                    dbPathField.setEnabled(true);
+        defaultDB.addActionListener(e -> {
+            if (defaultDB.isSelected()) {
+                dbChooserButton.setEnabled(false);
+
+                // read property file
+                ResourceBundle configBundle = null;
+                try {
+                    configBundle = ResourceBundle.getBundle(Configuration.getInstance().MANAGER_PROPERTIES_NAME);
+
+                    String url = configBundle.getString("jdbc_url");
+                    String path = DBUtils.getDBPathFromURL(url);
+                    dbPathField.setText(path);
+                } catch (Exception ex) {
+                    dbPathField.setText(Configuration.getInstance().JDBC_PATH);
                 }
+                dbPathField.setEnabled(false);
+            } else {
+                dbChooserButton.setEnabled(true);
+                dbPathField.setEnabled(true);
             }
         });
         if (useDefaultDB) {
@@ -1457,18 +1396,9 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         filechooserButton3.setSize(30, 20);
-        filechooserButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+        updateCertPath(parentFrame, certExportPathField, filechooserButton3);
 
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.DIRECTORIES_ONLY);
-                    if (filename != null)
-                        certExportPathField.setText(filename);
-                }
-            }
-        });
-        
-        
+
         // general settings
         final JLabel generalLabel = new JLabel(rb.getString("dialog.configuration.general"));
         generalLabel.setFont(Constants.FONT_BOLD);
@@ -1490,53 +1420,50 @@ public class Dialogs {
         
         final JButton saveButton = new JButton(rb.getString("dialog.configuration.saveButton"));
         saveButton.setName("config_save");
-        saveButton.addActionListener(new ActionListener() {
+        saveButton.addActionListener(e -> {
+            try {
+                String validateResult = ValidatorAction.validateConfiguration(
+                        certExportPathField.getText(),
+                        moduleCA.isSelected(),
+                        moduleCC.isSelected(),
+                        dbPathField.getText()
+                );
 
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String validateResult = ValidatorAction.validateConfiguration(
+                if (validateResult == null || "".equals(validateResult)) {
+                    skipFollowingDialogs = ConfigurationAction.saveConfiguration(
                             certExportPathField.getText(),
                             moduleCA.isSelected(),
                             moduleCC.isSelected(),
-                            dbPathField.getText()
+                            x509typeChoosePKCS12.isSelected(),
+                            pkcs12NoPasswd.isSelected(),
+                            pkcs12SinglePasswd.isSelected(),
+                            dbPathField.getText(),
+                            defaultDB.isSelected(),
+                            pam.isSelected(),
+                            openVPNConfigFiles.isSelected()
                     );
+                    dialog.setVisible(false);
 
-                    if (validateResult == null || "".equals(validateResult)) {
-                        skipFollowingDialogs = ConfigurationAction.saveConfiguration(
-                                certExportPathField.getText(),
-                                moduleCA.isSelected(),
-                                moduleCC.isSelected(),
-                                x509typeChoosePKCS12.isSelected(),
-                                pkcs12NoPasswd.isSelected(),
-                                pkcs12SinglePasswd.isSelected(),
-                                dbPathField.getText(),
-                                defaultDB.isSelected(),
-                                pam.isSelected(),
-                                openVPNConfigFiles.isSelected()                              
-                        );
-                        dialog.setVisible(false);
-                        
-                        //all warnings will be shown again
-                        if (showAllWarnings.isSelected()) {
-                        	Configuration.getInstance().setGuiShowOpenVPNIpWarningDialog(true);
-                        	Configuration.getInstance().setGuiShowExitDialog(true);
-                        	Configuration.getInstance().setGuiShowExitDialogActiveThreads(true);
-                        }
- 
-                    } else {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(dialog,
-                                validateResult,
-                                rb.getString("dialog.configuration.error.title"),
-                                CustomJOptionPane.ERROR_MESSAGE);
+                    //all warnings will be shown again
+                    if (showAllWarnings.isSelected()) {
+                        Configuration.getInstance().setGuiShowOpenVPNIpWarningDialog(true);
+                        Configuration.getInstance().setGuiShowExitDialog(true);
+                        Configuration.getInstance().setGuiShowExitDialogActiveThreads(true);
                     }
-                } catch (Exception ex) {
+
+                } else {
                     // show error dialog
                     CustomJOptionPane.showMessageDialog(dialog,
-                            ex.getMessage(),
+                            validateResult,
                             rb.getString("dialog.configuration.error.title"),
                             CustomJOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(dialog,
+                        ex.getMessage(),
+                        rb.getString("dialog.configuration.error.title"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         final JButton cancelButton = new JButton();
@@ -1545,17 +1472,14 @@ public class Dialogs {
             cancelButton.setText(rb.getString("dialog.configuration.skipButton"));
         else
             cancelButton.setText(rb.getString("dialog.configuration.cancelButton"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (firstCall) {
-                    // user wants to skip at first application startup
-                    // ask him to confirm
-                    if (showReallySkipDialog(dialog))
-                        dialog.setVisible(false);
-                } else
+        cancelButton.addActionListener(e -> {
+            if (firstCall) {
+                // user wants to skip at first application startup
+                // ask him to confirm
+                if (showReallySkipDialog(dialog))
                     dialog.setVisible(false);
-            }
+            } else
+                dialog.setVisible(false);
         });
 
         JPanel buttonPanel = new JPanel(new MigLayout("align right"));
@@ -1570,70 +1494,66 @@ public class Dialogs {
         final JRadioButton languageEN = new JRadioButton(rb.getString("dialog.configuration.en"));
         languageEN.setFont(Constants.FONT_PLAIN);
 
-        languageDE.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                germanSelected();
-                updateConfigurationLabel(
-                        dialog,
-                        clientCertExportPathLabel,
-                        cancelButton,
-                        saveButton,
-                        exportLabel,
-                        languageHeadlineLabel,
-                        languageDE,
-                        languageEN,
-                        moduleHeadlineLabel,
-                        moduleCA,
-                        moduleCC,
-                        x509typeChooseLabel,
-                        x509typeChooseBase64,
-                        x509typeChoosePKCS12,
-                        pkcs12PropertiesLabel,
-                        pkcs12NoPasswdLabel,
-                        pkcs12SinglePasswdLabel,
-                        pkcs12GlobalPasswdLabel,
-                        dbChooseLabel,
-                        dbPathLabel,
-                        defaultDB,
-                        generalLabel,
-                        pam,
-                        openVPNConfigFiles,
-                        showAllWarnings
-                );
-            }
+        languageDE.addActionListener(e -> {
+            germanSelected();
+            updateConfigurationLabel(
+                    dialog,
+                    clientCertExportPathLabel,
+                    cancelButton,
+                    saveButton,
+                    exportLabel,
+                    languageHeadlineLabel,
+                    languageDE,
+                    languageEN,
+                    moduleHeadlineLabel,
+                    moduleCA,
+                    moduleCC,
+                    x509typeChooseLabel,
+                    x509typeChooseBase64,
+                    x509typeChoosePKCS12,
+                    pkcs12PropertiesLabel,
+                    pkcs12NoPasswdLabel,
+                    pkcs12SinglePasswdLabel,
+                    pkcs12GlobalPasswdLabel,
+                    dbChooseLabel,
+                    dbPathLabel,
+                    defaultDB,
+                    generalLabel,
+                    pam,
+                    openVPNConfigFiles,
+                    showAllWarnings
+            );
         });
 
-        languageEN.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                englishSelected();
-                updateConfigurationLabel(
-                        dialog,
-                        clientCertExportPathLabel,
-                        cancelButton,
-                        saveButton,
-                        exportLabel,
-                        languageHeadlineLabel,
-                        languageDE,
-                        languageEN,
-                        moduleHeadlineLabel,
-                        moduleCA,
-                        moduleCC,
-                        x509typeChooseLabel,
-                        x509typeChooseBase64,
-                        x509typeChoosePKCS12,
-                        pkcs12PropertiesLabel,
-                        pkcs12NoPasswdLabel,
-                        pkcs12SinglePasswdLabel,
-                        pkcs12GlobalPasswdLabel,
-                        dbChooseLabel,
-                        dbPathLabel,
-                        defaultDB,
-                        generalLabel,
-                        pam,
-                        openVPNConfigFiles,
-                        showAllWarnings
-                );
-            }
+        languageEN.addActionListener(e -> {
+            englishSelected();
+            updateConfigurationLabel(
+                    dialog,
+                    clientCertExportPathLabel,
+                    cancelButton,
+                    saveButton,
+                    exportLabel,
+                    languageHeadlineLabel,
+                    languageDE,
+                    languageEN,
+                    moduleHeadlineLabel,
+                    moduleCA,
+                    moduleCC,
+                    x509typeChooseLabel,
+                    x509typeChooseBase64,
+                    x509typeChoosePKCS12,
+                    pkcs12PropertiesLabel,
+                    pkcs12NoPasswdLabel,
+                    pkcs12SinglePasswdLabel,
+                    pkcs12GlobalPasswdLabel,
+                    dbChooseLabel,
+                    dbPathLabel,
+                    defaultDB,
+                    generalLabel,
+                    pam,
+                    openVPNConfigFiles,
+                    showAllWarnings
+            );
         });
 
         try {
@@ -1643,7 +1563,7 @@ public class Dialogs {
                 // read the language from the user resourcebundle
                 language = ResourceBundleMgmt.getInstance().getUserBundle().getLocale().getLanguage();
             
-            if (language != null && Constants.LANGUAGE_CODE_GERMAN.equals(language)) {
+            if (Constants.LANGUAGE_CODE_GERMAN.equals(language)) {
                 languageDE.doClick();
                 languageDE.setSelected(true);
             } else {
@@ -1672,7 +1592,7 @@ public class Dialogs {
         /*
          * Components that need to be disabled in case the db path is changing
          */
-        final Vector<Component> components = new Vector<Component>();
+        final Vector<Component> components = new Vector<>();
         components.add(languageDE);
         components.add(languageEN);
         components.add(moduleCA);
@@ -1704,17 +1624,7 @@ public class Dialogs {
              * Disable all components if the value has changed
              */
             private void checkValueChange() {
-                if(!dbPath.equals(dbPathField.getText())) {
-                    for (Iterator<Component> iter = components.iterator(); iter.hasNext();) {
-                        Component comp = (Component) iter.next();
-                        comp.setEnabled(false);
-                    }
-                } else {
-                    for (Iterator<Component> iter = components.iterator(); iter.hasNext();) {
-                        Component comp = (Component) iter.next();
-                        comp.setEnabled(true);
-                    }
-                }
+                components.forEach(!dbPath.equals(dbPathField.getText()) ? (comp -> comp.setEnabled(false)) : (comp -> comp.setEnabled(true)));
                 
             }
         });
@@ -1773,16 +1683,40 @@ public class Dialogs {
 
         return skipFollowingDialogs;
     }
-    
-    
-    
+
+    private static void updateCertPath(JFrame parentFrame, JTextField certExportPathField, JButton filechooserButton3) {
+        filechooserButton3.addMouseListener(new java.awt.event.MouseAdapter() {
+
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (((JButton) evt.getSource()).isEnabled()) {
+                    String filename = fileChooser(parentFrame, JFileChooser.DIRECTORIES_ONLY);
+                    if (filename != null)
+                        certExportPathField.setText(filename);
+                }
+            }
+        });
+    }
+
+    private static void updateDBPath(JFrame parentFrame, JTextField dbPathField, JButton dbChooserButton) {
+        dbChooserButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (((JButton) evt.getSource()).isEnabled()) {
+                    String filename = fileChooser(parentFrame, JFileChooser.FILES_ONLY);
+                    if (filename != null)
+                        dbPathField.setText(filename);
+                }
+            }
+        });
+    }
+
+
     /**
      * dialog for user import configurations
      *
      * @param parentFrame The parent frame
      * @return true, if all following dialogs shall not be displayed
      */
-    public static boolean showImportConfigurationDialog(final JFrame parentFrame) {
+    static boolean showImportConfigurationDialog(final JFrame parentFrame) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         Hashtable<String, String> configs = ConfigurationQueries.getConfigurations();
@@ -1811,33 +1745,17 @@ public class Dialogs {
         final JRadioButton typeChooseLdap = new JRadioButton(rb.getString("dialog.configuration.typechooseLdap"));
         typeChooseLdap.setFont(Constants.FONT_PLAIN);
         
-        typeChooseFile.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Component[] fileComponents = filePanel.getComponents();
-                for (int i = 0; i < fileComponents.length; i++) {
-                    Component component = fileComponents[i];
-                    component.setEnabled(true);
-                }
-                Component[] ldapComponents = ldapPanel.getComponents();
-                for (int i = 0; i < ldapComponents.length; i++) {
-                    Component component = ldapComponents[i];
-                    component.setEnabled(false);
-                }
-            }
+        typeChooseFile.addActionListener(e -> {
+            Component[] fileComponents = filePanel.getComponents();
+            Arrays.stream(fileComponents).forEach(component -> component.setEnabled(true));
+            Component[] ldapComponents = ldapPanel.getComponents();
+            Arrays.stream(ldapComponents).forEach(component -> component.setEnabled(false));
         });
-        typeChooseLdap.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                Component[] fileComponents = filePanel.getComponents();
-                for (int i = 0; i < fileComponents.length; i++) {
-                    Component component = fileComponents[i];
-                    component.setEnabled(false);
-                }
-                Component[] ldapComponents = ldapPanel.getComponents();
-                for (int i = 0; i < ldapComponents.length; i++) {
-                    Component component = ldapComponents[i];
-                    component.setEnabled(true);
-                }
-            }
+        typeChooseLdap.addActionListener(e -> {
+            Component[] fileComponents = filePanel.getComponents();
+            Arrays.stream(fileComponents).forEach(component -> component.setEnabled(false));
+            Component[] ldapComponents = ldapPanel.getComponents();
+            Arrays.stream(ldapComponents).forEach(component -> component.setEnabled(true));
         });
         int userImportType = Constants.USER_IMPORT_TYPE_FILE;
         try {
@@ -1846,7 +1764,7 @@ public class Dialogs {
                 typeChooseLdap.setSelected(true);
             } else
                 typeChooseFile.setSelected(true);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("error getting the configured user_import_type");
             typeChooseFile.setSelected(true);
         }
@@ -1867,16 +1785,7 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         filechooserButton.setSize(30, 20);
-        filechooserButton.addMouseListener(new java.awt.event.MouseAdapter() {
-
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.DIRECTORIES_ONLY);
-                    if (filename != null)
-                        clientCertImportDirField.setText(filename);
-                }
-            }
-        });
+        updateCertPath(parentFrame, clientCertImportDirField, filechooserButton);
 
         final JTextField userfileField = new JTextField(35);
         userfileField.setText(configs.get(ConfigurationQueries.CLIENT_USERFILE));
@@ -1887,16 +1796,7 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         filechooserButton2.setSize(30, 20);
-        filechooserButton2.addMouseListener(new java.awt.event.MouseAdapter() {
-
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.FILES_ONLY);
-                    if (filename != null)
-                        userfileField.setText(filename);
-                }
-            }
-        });
+        updateDBPath(parentFrame, userfileField, filechooserButton2);
 
 
         final JLabel hostLabel = new JLabel(rb.getString("dialog.configuration.host") + " *");
@@ -1943,24 +1843,27 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         filechooserButton4.setSize(30, 20);
-        filechooserButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+        updateCertPath(parentFrame, certImportDirField, filechooserButton4);
 
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.DIRECTORIES_ONLY);
-                    if (filename != null)
-                        certImportDirField.setText(filename);
-                }
-            }
-        });
-        
-        
+
         final JButton saveButton = new JButton(rb.getString("dialog.import_configuration.saveButton"));
-        saveButton.addActionListener(new ActionListener() {
+        saveButton.addActionListener(e -> {
+            try {
+                String validateResult = ValidatorAction.validateImportConfiguration(
+                        clientCertImportDirField.getText(),
+                        userfileField.getText(),
+                        hostField.getText(),
+                        portField.getText(),
+                        dnField.getText(),
+                        objField.getText(),
+                        cnField.getText(),
+                        certAttrField.getText(),
+                        certImportDirField.getText(),
+                        typeChooseFile.isSelected()
+                );
 
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String validateResult = ValidatorAction.validateImportConfiguration(
+                if (validateResult == null || "".equals(validateResult)) {
+                    skipFollowingDialogs = ConfigurationAction.saveImportConfiguration(
                             clientCertImportDirField.getText(),
                             userfileField.getText(),
                             hostField.getText(),
@@ -1972,61 +1875,44 @@ public class Dialogs {
                             certImportDirField.getText(),
                             typeChooseFile.isSelected()
                     );
+                    dialog.setVisible(false);
 
-                    if (validateResult == null || "".equals(validateResult)) {
-                        skipFollowingDialogs = ConfigurationAction.saveImportConfiguration(
-                                clientCertImportDirField.getText(),
-                                userfileField.getText(),
-                                hostField.getText(),
-                                portField.getText(),
-                                dnField.getText(),
-                                objField.getText(),
-                                cnField.getText(),
-                                certAttrField.getText(),
-                                certImportDirField.getText(),
-                                typeChooseFile.isSelected()
-                        );
-                        dialog.setVisible(false);
-                        
-                        // start the user import
-                        boolean create = Dialogs.showCreateCertificatesDialog(ManagerGUI.mainFrame) == UserImport.YES;
-                        UserImport im = UserImporter.getUserImportImplementation(create);
-                        try {
-                            if (im.createUsersFromCN == UserImport.NOT_SET) {
-                                // show dialog
-                                im.createUsersFromCN = Dialogs.showCreateUserFromCNDialog(ManagerGUI.mainFrame);
-                            }
-                            im.importUsers();
-                        } catch (Exception ex) {
-                            CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                    ex.getMessage(),
-                                    rb.getString("dialog.configuration.error.title"),
-                                    JOptionPane.ERROR_MESSAGE);
+                    // start the user import
+                    boolean create = Dialogs.showCreateCertificatesDialog(ManagerGUI.mainFrame) == UserImport.YES;
+                    UserImport im = UserImporter.getUserImportImplementation(create);
+                    try {
+                        if (im.createUsersFromCN == UserImport.NOT_SET) {
+                            // show dialog
+                            im.createUsersFromCN = Dialogs.showCreateUserFromCNDialog(ManagerGUI.mainFrame);
                         }
-
-                    } else {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(dialog,
-                                validateResult,
+                        im.importUsers();
+                    } catch (Exception ex) {
+                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                                ex.getMessage(),
                                 rb.getString("dialog.configuration.error.title"),
-                                CustomJOptionPane.ERROR_MESSAGE);
+                                JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception ex) {
+
+                } else {
                     // show error dialog
                     CustomJOptionPane.showMessageDialog(dialog,
-                            ex.getMessage(),
+                            validateResult,
                             rb.getString("dialog.configuration.error.title"),
                             CustomJOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(dialog,
+                        ex.getMessage(),
+                        rb.getString("dialog.configuration.error.title"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         final JButton cancelButton = new JButton();
         cancelButton.setText(rb.getString("dialog.configuration.cancelButton"));
-        cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-                skipFollowingDialogs = false;
-            }
+        cancelButton.addActionListener(e -> {
+            dialog.dispose();
+            skipFollowingDialogs = false;
         });
 
         JPanel buttonPanel = new JPanel(new MigLayout("align right"));
@@ -2072,26 +1958,14 @@ public class Dialogs {
 
         if (userImportType == Constants.USER_IMPORT_TYPE_LDAP) {
             Component[] fileComponents = filePanel.getComponents();
-            for (int i = 0; i < fileComponents.length; i++) {
-                Component component = fileComponents[i];
-                component.setEnabled(false);
-            }
+            Arrays.stream(fileComponents).forEach(component -> component.setEnabled(false));
             Component[] ldapComponents = ldapPanel.getComponents();
-            for (int i = 0; i < ldapComponents.length; i++) {
-                Component component = ldapComponents[i];
-                component.setEnabled(true);
-            }
+            Arrays.stream(ldapComponents).forEach(component -> component.setEnabled(true));
         } else {
             Component[] fileComponents = filePanel.getComponents();
-            for (int i = 0; i < fileComponents.length; i++) {
-                Component component = fileComponents[i];
-                component.setEnabled(true);
-            }
+            Arrays.stream(fileComponents).forEach(component -> component.setEnabled(true));
             Component[] ldapComponents = ldapPanel.getComponents();
-            for (int i = 0; i < ldapComponents.length; i++) {
-                Component component = ldapComponents[i];
-                component.setEnabled(false);
-            }
+            Arrays.stream(ldapComponents).forEach(component -> component.setEnabled(false));
         }
         inputPanel.add(filePanel, "span 3, growx, wrap");
         inputPanel.add(ldapPanel, "span 3, growx");
@@ -2123,7 +1997,7 @@ public class Dialogs {
      *
      * @param parentFrame The parent frame
      */
-    public static void showUpdateConfigurationDialog(final JFrame parentFrame) {
+    static void showUpdateConfigurationDialog(final JFrame parentFrame) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Hashtable<String, String> configs = ConfigurationQueries.getConfigurations();
 
@@ -2131,7 +2005,7 @@ public class Dialogs {
         final boolean keystoreExisting = updateMgmt.isUpdateKeystoreExisting();
         String crtPath = LicenceQueries.getCrtPath();
         String keyPath = LicenceQueries.getKeyPath();
-        boolean pemSelected = (keyPath == null || "".equals(keyPath)) ? true : false;
+        boolean pemSelected = keyPath == null || "".equals(keyPath);
 
         
         final JDialog dialog = new JDialog(parentFrame, true);
@@ -2229,8 +2103,7 @@ public class Dialogs {
             certChooseLabel.setText(rb.getString("dialog.updateconfiguration.certChooseLabel"));
 
 
-        if (font != null)
-            certChooseLabel.setFont(font.deriveFont(font.getStyle() ^ Font.BOLD));
+        certChooseLabel.setFont(font.deriveFont(font.getStyle() ^ Font.BOLD));
 
         final ButtonGroup radioGroupCertType = new ButtonGroup();
         final JRadioButton certTypeChoosePEM = new JRadioButton(rb.getString("dialog.updateconfiguration.certTypePEMLabel"));
@@ -2255,15 +2128,7 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         pemChooserButton.setSize(30, 20);
-        pemChooserButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.FILES_ONLY);
-                    if (filename != null)
-                        crtPathField.setText(filename);
-                }
-            }
-        });
+        updateDBPath(parentFrame, crtPathField, pemChooserButton);
 
         crtPanel.add(crtPathLabel, "gapleft 12");
         crtPanel.add(crtPathField, "growx");
@@ -2279,15 +2144,7 @@ public class Dialogs {
                 ImageUtils.createImageIcon(Constants.ICON_OPEN_PATH, "open")
         );
         keyChooserButton.setSize(30, 20);
-        keyChooserButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    String filename = fileChooser(parentFrame, JFileChooser.FILES_ONLY);
-                    if (filename != null)
-                        keyPathField.setText(filename);
-                }
-            }
-        });
+        updateDBPath(parentFrame, keyPathField, keyChooserButton);
 
         keyPanel.add(keyPathLabel, "gapleft 12");
         keyPanel.add(keyPathField, "growx");
@@ -2296,87 +2153,75 @@ public class Dialogs {
         inputPanel.add(keyPanel, "span 3, growx, wrap");
 
 
-        certTypeChoosePEM.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                keyPanel.setVisible(false);
-                crtPathLabel.setText(rb.getString("dialog.updateconfiguration.pemPath"));
-            }
+        certTypeChoosePEM.addActionListener(e -> {
+            keyPanel.setVisible(false);
+            crtPathLabel.setText(rb.getString("dialog.updateconfiguration.pemPath"));
         });
-        certTypeChooseCRT.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                keyPanel.setVisible(true);
-                crtPathLabel.setText(rb.getString("dialog.updateconfiguration.crtPath"));
-            }
+        certTypeChooseCRT.addActionListener(e -> {
+            keyPanel.setVisible(true);
+            crtPathLabel.setText(rb.getString("dialog.updateconfiguration.crtPath"));
         });
 
 
         JButton saveButton = new JButton(rb.getString("dialog.updateconfiguration.savebutton"));
-        saveButton.addActionListener(new ActionListener() {
+        saveButton.addActionListener(e -> {
+            try {
+                String validateResult = null;
 
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    String validateResult = null;
+                if (!keystoreExisting)
+                    // only validate certificate fields if no keystore is existing
+                    validateResult = ValidatorAction.validateUpdateConfiguration(
+                            certTypeChoosePEM.isSelected(),
+                            crtPathField.getText(),
+                            keyPathField.getText(),
+                            serverField.getText(),
+                            repoField.getText(),
+                            proxyField.getText(),
+                            proxyPortField.getText()
+                    );
+                if (validateResult == null || validateResult.isEmpty()) {
+                    boolean certificateChangesOccured = ConfigurationAction.saveUpdateConfiguration(
+                            automaticUpdate.isSelected(),
+                            certTypeChoosePEM.isSelected(),
+                            crtPathField.getText(),
+                            keyPathField.getText(),
+                            serverField.getText(),
+                            repoField.getText(),
+                            proxyField.getText(),
+                            proxyPortField.getText()
+                    );
 
-                    if (!keystoreExisting)
-                        // only validate certificate fields if no keystore is existing
-                        validateResult = ValidatorAction.validateUpdateConfiguration(
-                                certTypeChoosePEM.isSelected(),
-                                crtPathField.getText(),
-                                keyPathField.getText(),
-                                serverField.getText(),
-                                repoField.getText(),
-                                proxyField.getText(),
-                                proxyPortField.getText()
-                        );
-                    if (validateResult == null || "".equals(validateResult)) {
-                        boolean certificateChangesOccured = ConfigurationAction.saveUpdateConfiguration(
-                                automaticUpdate.isSelected(),
-                                certTypeChoosePEM.isSelected(),
-                                crtPathField.getText(),
-                                keyPathField.getText(),
-                                serverField.getText(),
-                                repoField.getText(),
-                                proxyField.getText(),
-                                proxyPortField.getText()
-                        );
+                    ManagerGUI.enableUpdateSearch();
+                    dialog.dispose();
 
-                        ManagerGUI.enableUpdateSearch();
-                        dialog.dispose();
-
-                        // show success dialogs
-                        if (certificateChangesOccured)
-                            CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                    rb.getString("dialog.updateconfiguration.success"),
-                                    rb.getString("dialog.updateconfiguration.title"),
-                                    CustomJOptionPane.INFORMATION_MESSAGE);
-                        else
-                            CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                    rb.getString("dialog.updateconfiguration.success_save"),
-                                    rb.getString("dialog.updateconfiguration.title"),
-                                    CustomJOptionPane.INFORMATION_MESSAGE);
-                    } else {
-                        // show error dialog
-                        CustomJOptionPane.showMessageDialog(dialog,
-                                validateResult,
-                                rb.getString("dialog.updateconfiguration.errortitle"),
-                                CustomJOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
+                    // show success dialogs
+                    if (certificateChangesOccured)
+                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                                rb.getString("dialog.updateconfiguration.success"),
+                                rb.getString("dialog.updateconfiguration.title"),
+                                CustomJOptionPane.INFORMATION_MESSAGE);
+                    else
+                        CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                                rb.getString("dialog.updateconfiguration.success_save"),
+                                rb.getString("dialog.updateconfiguration.title"),
+                                CustomJOptionPane.INFORMATION_MESSAGE);
+                } else {
                     // show error dialog
                     CustomJOptionPane.showMessageDialog(dialog,
-                            ex.getMessage(),
+                            validateResult,
                             rb.getString("dialog.updateconfiguration.errortitle"),
                             CustomJOptionPane.ERROR_MESSAGE);
                 }
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(dialog,
+                        ex.getMessage(),
+                        rb.getString("dialog.updateconfiguration.errortitle"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         JButton cancelButton = new JButton(rb.getString("dialog.updateconfiguration.cancelbutton"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         JPanel buttonPanel = new JPanel(new MigLayout("align right"));
         buttonPanel.add(saveButton);
@@ -2416,7 +2261,7 @@ public class Dialogs {
      * @return true, if the configuration shall be skipped
      *         false, if not
      */
-    public static boolean showReallySkipDialog(JDialog parent) {
+    private static boolean showReallySkipDialog(JDialog parent) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Object[] options = {rb.getString("dialog.skipconfiguration.answer_yes"),
                 rb.getString("dialog.skipconfiguration.answer_no")
@@ -2431,13 +2276,9 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.YES_OPTION) {
-            // skip
-            return true;
-        } else {
-            // go on
-            return false;
-        }
+        // skip
+// go on
+        return n == CustomJOptionPane.YES_OPTION;
 
     }
 
@@ -2463,13 +2304,9 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.YES_OPTION) {
-            // skip
-            return true;
-        } else {
-            // go on
-            return false;
-        }
+        // skip
+// go on
+        return n == CustomJOptionPane.YES_OPTION;
     }
 
    /**
@@ -2479,7 +2316,7 @@ public class Dialogs {
      * @return true, if the configuration shall be skipped
      *         false, if not
      */
-    public static boolean showReallySkipX509Dialog(JDialog parent) {
+    private static boolean showReallySkipX509Dialog(JDialog parent) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Object[] options = {rb.getString("dialog.skipx509configuration.answer_yes"),
                 rb.getString("dialog.skipx509configuration.answer_no")
@@ -2494,13 +2331,9 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.YES_OPTION) {
-            // skip
-            return true;
-        } else {
-            // go on
-            return false;
-        }
+        // skip
+// go on
+        return n == CustomJOptionPane.YES_OPTION;
 
     }
 
@@ -2512,7 +2345,7 @@ public class Dialogs {
      * @return true, if the certificate sall be reassigned
      *         false, if not
      */
-    public static boolean showX509ReassignDialog(JFrame parent) {
+    static boolean showX509ReassignDialog(JFrame parent) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         Object[] options = {rb.getString("dialog.reassignx509.answer_yes"),
                 rb.getString("dialog.reassignx509.answer_no")
@@ -2527,13 +2360,9 @@ public class Dialogs {
                 options,
                 options[1]); //default button
 
-        if (n == CustomJOptionPane.YES_OPTION) {
-            // skip
-            return true;
-        } else {
-            // go on
-            return false;
-        }
+        // skip
+// go on
+        return n == CustomJOptionPane.YES_OPTION;
 
     }
 
@@ -2544,7 +2373,7 @@ public class Dialogs {
      * @param parentFrame The parent Frame
      * @param serverId    The serverId
      */
-    public static void showDeleteServerDialog(final JFrame parentFrame, final String serverId) {
+    static void showDeleteServerDialog(final JFrame parentFrame, final String serverId) {
         showDeleteServerDialog(parentFrame, serverId, false);
     }
 
@@ -2556,7 +2385,7 @@ public class Dialogs {
      * @param serverId    The serverId
      * @param dispose     boolean, if true the parentFrame will be disposed
      */
-    public static void showDeleteServerDialog(final JFrame parentFrame, final String serverId, final boolean dispose) {
+    static void showDeleteServerDialog(final JFrame parentFrame, final String serverId, final boolean dispose) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         final JDialog dialog = new JDialog(parentFrame, rb.getString("server.dialog.delete.title"), true);
@@ -2575,36 +2404,28 @@ public class Dialogs {
 
 
         JButton deleteButton = new JButton(rb.getString("server.details.deletebutton"));
-        deleteButton.addActionListener(new ActionListener() {
+        deleteButton.addActionListener(e -> {
+            try {
+                ServerAction.deleteServer(serverId, deleteCertificate.isSelected());
+                dialog.dispose();
+                if (dispose)
+                    parentFrame.dispose();
+                else
+                    ManagerGUI.clearRightPanel();
 
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    ServerAction.deleteServer(serverId, deleteCertificate.isSelected());
-                    dialog.dispose();
-                    if (dispose)
-                        parentFrame.dispose();
-                    else
-                        ManagerGUI.clearRightPanel();
-                    
-                    ManagerGUI.reloadServerUserTree();
-                    ManagerGUI.refreshServerTable();
-                    ManagerGUI.refreshX509Table();
-                } catch (Exception ex) {
-                    // show error dialog
-                    CustomJOptionPane.showMessageDialog(dialog,
-                            rb.getString("server.dialog.delete.errortext"),
-                            rb.getString("server.dialog.delete.errortitle"),
-                            CustomJOptionPane.ERROR_MESSAGE);
-                }
+                ManagerGUI.reloadServerUserTree();
+                ManagerGUI.refreshServerTable();
+                ManagerGUI.refreshX509Table();
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(dialog,
+                        rb.getString("server.dialog.delete.errortext"),
+                        rb.getString("server.dialog.delete.errortitle"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
         JButton cancelButton = new JButton(rb.getString("dialog.newuser.button_cancel"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(deleteButton);
@@ -2627,7 +2448,7 @@ public class Dialogs {
      * A dialog where the user is asked if he really wants
      * to quit
      */
-    public static void showExitDialog() {
+    static void showExitDialog() {
         if (!Configuration.getInstance().GUI_SHOW_EXIT_DIALOG)
             ManagerGUI.mainFrame.dispose();
         else
@@ -2638,7 +2459,7 @@ public class Dialogs {
      * A dialog where the user is asked if he really wants
      * to quit, although there are background tasks running
      */
-    public static void showExitDialogWithActiveThreads() {
+    static void showExitDialogWithActiveThreads() {
         if (!Configuration.getInstance().GUI_SHOW_EXIT_DIALOG_ACTIVE_THREADS)
             ManagerGUI.mainFrame.dispose();
         else
@@ -2672,28 +2493,20 @@ public class Dialogs {
 
 
         JButton exitButton = new JButton(rb.getString(rbPrefix + "answer_yes"));
-        exitButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (askAgainCheckbox.isSelected()) {
-                    if (activeThreads)
-                        Configuration.getInstance().setGuiShowExitDialogActiveThreads(false);
-                    else
-                        Configuration.getInstance().setGuiShowExitDialog(false);
-                }
-                
-                dialog.dispose();
-                ManagerGUI.mainFrame.dispose();
+        exitButton.addActionListener(e -> {
+            if (askAgainCheckbox.isSelected()) {
+                if (activeThreads)
+                    Configuration.getInstance().setGuiShowExitDialogActiveThreads(false);
+                else
+                    Configuration.getInstance().setGuiShowExitDialog(false);
             }
+
+            dialog.dispose();
+            ManagerGUI.mainFrame.dispose();
         });
         
         JButton cancelButton = new JButton(rb.getString(rbPrefix + "answer_no"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(exitButton);
@@ -2719,7 +2532,7 @@ public class Dialogs {
      * whether the user want to proceed despite changes
      * 
      */
-    public static void showWarningUserChangedBox() {
+    static void showWarningUserChangedBox() {
     	final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         String rbPrefix = "dialog.quit_alert.";
@@ -2735,22 +2548,14 @@ public class Dialogs {
         inputPanel.add(askAgainLabel);
 
         JButton exitButton = new JButton(rb.getString(rbPrefix + "answer_yes"));
-        exitButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-                ManagerGUI.mainFrame.dispose();
-                Configuration.getInstance().NOT_SYNCED_SERVERS.clear();
-            }
+        exitButton.addActionListener(e -> {
+            dialog.dispose();
+            ManagerGUI.mainFrame.dispose();
+            Configuration.getInstance().NOT_SYNCED_SERVERS.clear();
         });
         
         JButton cancelButton = new JButton(rb.getString(rbPrefix + "answer_no"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(exitButton);
@@ -2777,7 +2582,7 @@ public class Dialogs {
      *
      * @param frame The parent frame
      */
-    public static void showAboutBox(JFrame frame) {
+    static void showAboutBox(JFrame frame) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         JPanel panel = new JPanel();
@@ -2800,12 +2605,7 @@ public class Dialogs {
         panel.add(copyrightLabel, "align center");
 
         JButton closeButton = new JButton(rb.getString("detailsFrame.closebutton"));
-        closeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                popup.hide();
-            }
-        });
+        closeButton.addActionListener(e -> popup.hide());
         panel.add(closeButton, "align center");
 
         // style
@@ -2843,9 +2643,8 @@ public class Dialogs {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             return file.getPath();
-        } else {
-            return null;
         }
+        return null;
 
     }
 
