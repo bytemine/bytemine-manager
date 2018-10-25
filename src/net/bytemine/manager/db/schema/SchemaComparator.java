@@ -20,7 +20,7 @@ import java.util.Vector;
 public class SchemaComparator {
 
     // all differences of the tables
-    private Vector<String[]> entries = new Vector<String[]>();
+    private Vector<String[]> entries = new Vector<>();
 
     /**
      * Compares the two models
@@ -33,19 +33,15 @@ public class SchemaComparator {
         HashMap<String, HashMap<String, String>> completeTables = oldModel.getTables();
         HashMap<String, HashMap<String, String>> incompleteTables = newModel.getTables();
 
-        for (Iterator<String> iterator = completeTables.keySet().iterator(); iterator.hasNext();) {
-            String tableName = (String) iterator.next();
+        completeTables.keySet().forEach(tableName -> {
             if (!incompleteTables.containsKey(tableName)) {
                 // the new schema does not contain this table
                 // will result in 'CREATE table <tableName>' statement
                 createEntry(tableName);
             }
             HashMap<String, String> tableEntries = completeTables.get(tableName);
-            for (Iterator<String> iterator2 = tableEntries.keySet().iterator(); iterator2
-                    .hasNext();) {
-                String columnName = (String) iterator2.next();
+            tableEntries.keySet().forEach(columnName -> {
                 String columnType = tableEntries.get(columnName);
-
                 if (!incompleteTables.containsKey(tableName)) {
                     // the new schema does not contain this table
                     createEntry(tableName, columnName, columnType);
@@ -56,8 +52,8 @@ public class SchemaComparator {
                         createEntry(tableName, columnName, columnType);
                     }
                 }
-            }
-        }
+            });
+        });
 
         return entries;
     }
