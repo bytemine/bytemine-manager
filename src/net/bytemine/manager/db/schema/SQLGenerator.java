@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author Daniel Rauer
  */
-public class SQLGenerator {
+class SQLGenerator {
 
     private Logger logger = Logger.getLogger(SQLGenerator.class.getName());
 
@@ -34,15 +34,13 @@ public class SQLGenerator {
      * @return A List with SQL commands
      * @throws Exception
      */
-    public List<String> generateSQL(Vector<String[]> entries) throws Exception {
+    List<String> generateSQL(Vector<String[]> entries) throws Exception {
         List<String> statements = new ArrayList<String>();
         try {
             SQLStatementModel model = null;
 
             // iterate over all entries
-            for (Iterator<String[]> iterator = entries.iterator(); iterator.hasNext();) {
-                String[] entry = (String[]) iterator.next();
-
+            for (String[] entry : entries) {
                 if (!entry[0].equals(currentTableName)) {
                     // the table name has changed, so a new model is needed
                     currentTableName = entry[0];
@@ -59,9 +57,13 @@ public class SQLGenerator {
                 if (entry[1] == null)
                     // tableName, null, null
                     // table is not existing
+                {
+                    assert model != null;
                     model.setCreate(true);
+                }
                 else {
                     // tableName, columnName, columnType
+                    assert model != null;
                     model.addColumnNameAndType(entry[1], entry[2]);
                 }
             }
