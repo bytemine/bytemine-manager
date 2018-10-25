@@ -24,9 +24,9 @@ public class SQLStatementModel {
     // flag if create or alter statement shall be created
     private boolean create = false;
     private String tableName;
-    private HashMap<String, String> columnNameAndType = new HashMap<String, String>();
+    private HashMap<String, String> columnNameAndType = new HashMap<>();
     // a list with all statements for one table
-    private List<String> statements = new ArrayList<String>();
+    private List<String> statements = new ArrayList<>();
 
 
     /**
@@ -34,7 +34,7 @@ public class SQLStatementModel {
      *
      * @return A List with all sql statements for one table
      */
-    public List<String> createSQL() {
+    List<String> createSQL() {
         if (create)
             createCreateStatment();
         else
@@ -48,16 +48,13 @@ public class SQLStatementModel {
      * generates a create statement
      */
     private void createCreateStatment() {
-        StringBuffer createStatement = new StringBuffer();
-        createStatement.append("CREATE TABLE " + tableName + "(");
+        StringBuilder createStatement = new StringBuilder();
+        createStatement.append("CREATE TABLE ").append(tableName).append("(");
         for (Iterator<String> iterator = columnNameAndType.keySet().iterator(); iterator.hasNext();) {
-            String columnName = (String) iterator.next();
+            String columnName = iterator.next();
             String columnType = columnNameAndType.get(columnName);
-            createStatement.append(columnName + " " + columnType);
-            if (iterator.hasNext())
-                createStatement.append(", ");
-            else
-                createStatement.append(")");
+            createStatement.append(columnName).append(" ").append(columnType);
+            createStatement.append(iterator.hasNext() ? ", " : ")");
         }
         statements.add(createStatement.toString());
     }
@@ -67,15 +64,13 @@ public class SQLStatementModel {
      * generates an alter statement
      */
     private void createAlterStatments() {
-        for (Iterator<String> iterator = columnNameAndType.keySet().iterator(); iterator.hasNext();) {
-            StringBuffer alterStatement = new StringBuffer();
-            alterStatement.append("ALTER TABLE " + tableName + " ADD ");
-            String columnName = (String) iterator.next();
-            String columnType = columnNameAndType.get(columnName);
-            alterStatement.append(columnName + " " + columnType);
-
+        columnNameAndType.keySet().forEach(s -> {
+            StringBuilder alterStatement = new StringBuilder();
+            alterStatement.append("ALTER TABLE ").append(tableName).append(" ADD ");
+            String columnType = columnNameAndType.get(s);
+            alterStatement.append(s).append(" ").append(columnType);
             statements.add(alterStatement.toString());
-        }
+        });
     }
 
 
@@ -91,7 +86,7 @@ public class SQLStatementModel {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
+    void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
@@ -103,7 +98,7 @@ public class SQLStatementModel {
         this.columnNameAndType = columnNameAndType;
     }
 
-    public void addColumnNameAndType(String columnName, String columnType) {
+    void addColumnNameAndType(String columnName, String columnType) {
         this.columnNameAndType.put(columnName, columnType);
 	}
 }
