@@ -48,7 +48,7 @@ public class GroupDetails {
     private JTextArea descriptionField = null;
 
     
-    public GroupDetails(JFrame parent) {
+    GroupDetails(JFrame parent) {
         parentFrame = parent;
         this.groupid = "-1";
     }
@@ -63,7 +63,7 @@ public class GroupDetails {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
@@ -96,7 +96,7 @@ public class GroupDetails {
         
         // new group to create or existing group to update
         int gId = Integer.parseInt(groupid);
-        final boolean newGroup = (gId <= 0) ? true : false;
+        final boolean newGroup = gId <= 0;
         
         final String[] details = GroupQueries.getGroupDetails(groupid);
 

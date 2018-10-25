@@ -480,14 +480,8 @@ public class UserDetails {
                             
                             String clientValidFor= clientValidForField.getText();
                             String clientValidityUnit= (String) clientValidityUnitBox.getSelectedItem();
-                            if(! clientValidityUnit.equals(rb.getString("units.days"))) {
-                                if (clientValidityUnit.equals(rb.getString("units.weeks"))) {
-                                    clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 7);
-                                } else if (clientValidityUnit.equals(rb.getString("units.years"))) {
-                                    clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 365);
-                                }
-                            }
-                            
+                            clientValidFor = Dialogs.getString(rb, clientValidFor, clientValidityUnit);
+
                             int userid = UserAction.createUserAndCertificate(
                                     usernameField.getText(),
                                     newpasswordField.getText(),
