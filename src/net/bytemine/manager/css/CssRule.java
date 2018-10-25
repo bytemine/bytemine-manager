@@ -34,18 +34,15 @@ public class CssRule {
     private String value;
 
 
-    public CssRule(Class<?> clss, String propertyName, String value) {
+    CssRule(Class<?> clss, String propertyName, String value) {
         this.clss = clss;
         this.propertyName = propertyName;
         this.value = value;
     }
 
 
-    public boolean matches(Object obj) {
-        if (clss.isInstance(obj)) {
-            return true;
-        }
-        return false;
+    boolean matches(Object obj) {
+        return clss.isInstance(obj);
     }
 
 
@@ -54,7 +51,7 @@ public class CssRule {
      *
      * @param obj The component to style
      */
-    public void apply(Object obj) {
+    void apply(Object obj) {
         JComponent component = null;
         try {
             component = (JComponent) obj;
@@ -76,33 +73,34 @@ public class CssRule {
                     BorderFactory.createCompoundBorder(component.getBorder(), m_border);
             component.setBorder(c_border);
         }
-        if (propertyName.equals("alignment")) {
-            if (component instanceof JLabel) {
-                int align = -1;
-                if (value.equals("left")) {
-                    align = SwingConstants.LEFT;
-                }
-                if (value.equals("center")) {
-                    align = SwingConstants.CENTER;
-                }
-                if (value.equals("right")) {
-                    align = SwingConstants.RIGHT;
-                }
-                ((JLabel) component).setHorizontalAlignment(align);
+        if (propertyName.equals("alignment") && component instanceof JLabel) {
+            int align = -1;
+            if (value.equals("left")) {
+                align = SwingConstants.LEFT;
             }
+            if (value.equals("center")) {
+                align = SwingConstants.CENTER;
+            }
+            if (value.equals("right")) {
+                align = SwingConstants.RIGHT;
+            }
+            ((JLabel) component).setHorizontalAlignment(align);
         }
         if (propertyName.equals("font-style")) {
-            if (value.equals("bold"))
-                component.setFont(component.getFont().deriveFont(Font.BOLD));
-            else if (value.equals("italics"))
-                component.setFont(component.getFont().deriveFont(Font.ITALIC));
-            else if (value.equals("plain"))
-                component.setFont(component.getFont().deriveFont(Font.PLAIN));
-        }
-        if (propertyName.equals("layout")) {
-            if (value.equals("column")) {
-                component.setLayout(new BoxLayout(component, BoxLayout.Y_AXIS));
+            switch (value) {
+                case "bold":
+                    component.setFont(component.getFont().deriveFont(Font.BOLD));
+                    break;
+                case "italics":
+                    component.setFont(component.getFont().deriveFont(Font.ITALIC));
+                    break;
+                case "plain":
+                    component.setFont(component.getFont().deriveFont(Font.PLAIN));
+                    break;
             }
+        }
+        if (propertyName.equals("layout") && value.equals("column")) {
+            component.setLayout(new BoxLayout(component, BoxLayout.Y_AXIS));
         }
     }
 
@@ -127,10 +125,8 @@ public class CssRule {
                 dialog.setFont(dialog.getFont().deriveFont(Font.ITALIC));
             }
         }
-        if (propertyName.equals("layout")) {
-            if (value.equals("column")) {
-                dialog.setLayout(new BoxLayout(dialog, BoxLayout.Y_AXIS));
-            }
+        if (propertyName.equals("layout") && value.equals("column")) {
+            dialog.setLayout(new BoxLayout(dialog, BoxLayout.Y_AXIS));
         }
     }
 
