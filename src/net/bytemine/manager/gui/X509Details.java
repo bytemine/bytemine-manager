@@ -244,7 +244,8 @@ public class X509Details {
         		location = GuiUtils.getOffsetLocation(parentFrame);
         	else if (parent != null)
         		location = GuiUtils.getOffsetLocation(parent);
-        	detailsFrame.setLocation(location.x, location.y);
+            assert location != null;
+            detailsFrame.setLocation(location.x, location.y);
         } else {
         	detailsFrame.setLocation(locationX, locationY);
         	detailsFrame.setPreferredSize(new Dimension(mainWidth,mainHeight));
