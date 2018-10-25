@@ -41,7 +41,7 @@ public class SchemaUpdater {
     private String xmlFile;
 
 
-    public SchemaUpdater(String newClassname, String newUrl) {
+    private SchemaUpdater(String newClassname, String newUrl) {
         this.classname = newClassname;
         this.url = newUrl;
     }
@@ -132,13 +132,12 @@ public class SchemaUpdater {
     private void executeSQL(List<String> statements) throws Exception {
         Statement st = DBConnector.getInstance().getConnection().createStatement();
 
-        for (Iterator<String> iterator = statements.iterator(); iterator.hasNext();) {
-            String sqlStatement = (String) iterator.next();
+        for (String sqlStatement : statements) {
             logger.info("executing SQL: " + sqlStatement);
 
             try {
                 st.executeUpdate(sqlStatement);
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 logger.log(Level.SEVERE, "error executing schema update SQL: " + sqlStatement, e);
                 throw e;
             }
@@ -172,9 +171,8 @@ public class SchemaUpdater {
             }
 
             // detect column names and types for each table
-            for (Iterator<String> iterator = tableNames.iterator(); iterator.hasNext();) {
-                String tableName = (String) iterator.next();
-                HashMap<String, String> columnNameAndType = new HashMap<String, String>();
+            for (String tableName : tableNames) {
+                HashMap<String, String> columnNameAndType = new HashMap<>();
                 ResultSet rs2 = meta.getColumns(null, null, tableName, null);
                 while (rs2.next()) {
                     String columnName = rs2.getString(4);
@@ -208,13 +206,12 @@ public class SchemaUpdater {
                         xmlURL.openStream()));
 
         String inputLine;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null)
             sb.append(inputLine);
 
-        SchemaModel model = (SchemaModel) xs.fromXML(sb.toString());
-        return model;
+        return (SchemaModel) xs.fromXML(sb.toString());
     }
 
 
