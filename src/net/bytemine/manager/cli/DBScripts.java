@@ -24,47 +24,45 @@ public class DBScripts {
         try {
             if (args.length < 1) {
                 printUsageManual();
-            } else {
-                if ("prepareDB".equals(args[0])) {
-                    boolean keepConfiguration = false;
-                    if (args.length > 1 && "true".equals(args[1]))
-                        keepConfiguration = true;
+            } else if ("prepareDB".equals(args[0])) {
+                boolean keepConfiguration = false;
+                if (args.length > 1 && "true".equals(args[1]))
+                    keepConfiguration = true;
 
-                    String driverClassname = null;
-                    if (args.length > 2)
-                        driverClassname = args[2];
-                    String jdbcUrl = null;
-                    if (args.length > 3)
-                        jdbcUrl = args[3];
+                String driverClassname = null;
+                if (args.length > 2)
+                    driverClassname = args[2];
+                String jdbcUrl = null;
+                if (args.length > 3)
+                    jdbcUrl = args[3];
 
-                    if (driverClassname != null && jdbcUrl != null) {
-                        Connection dbConnection = DBConnector.getInstance(driverClassname, jdbcUrl).getConnection();
-                        DBTasks.createTables(dbConnection, keepConfiguration);
-                    } else
-                        DBTasks.createTables(keepConfiguration);
-                } else if ("resetDB".equals(args[0])) {
-                    boolean keepConfiguration = false;
-                    if (args.length > 1 && "true".equals(args[1]))
-                        keepConfiguration = true;
+                if (driverClassname != null && jdbcUrl != null) {
+                    Connection dbConnection = DBConnector.getInstance(driverClassname, jdbcUrl).getConnection();
+                    DBTasks.createTables(dbConnection, keepConfiguration);
+                } else
+                    DBTasks.createTables(keepConfiguration);
+            } else if ("resetDB".equals(args[0])) {
+                boolean keepConfiguration = false;
+                if (args.length > 1 && "true".equals(args[1]))
+                    keepConfiguration = true;
 
-                    DBTasks.resetDB(keepConfiguration);
-                } else if ("export-schema".equals(args[0])) {
-                    String path = args[1];
+                DBTasks.resetDB(keepConfiguration);
+            } else if ("export-schema".equals(args[0])) {
+                String path = args[1];
 
-                    String driverClassname = null;
-                    if (args.length > 2)
-                        driverClassname = args[2];
-                    String jdbcUrl = null;
-                    if (args.length > 3)
-                        jdbcUrl = args[3];
+                String driverClassname = null;
+                if (args.length > 2)
+                    driverClassname = args[2];
+                String jdbcUrl = null;
+                if (args.length > 3)
+                    jdbcUrl = args[3];
 
-                    if (driverClassname != null && jdbcUrl != null) {
-                        Connection dbConnection = DBConnector.getInstance(driverClassname, jdbcUrl).getConnection();
-                        DBTasks.exportSchema(path, dbConnection);
-                    }
-                } else {
-                    printUsageManual();
+                if (driverClassname != null && jdbcUrl != null) {
+                    Connection dbConnection = DBConnector.getInstance(driverClassname, jdbcUrl).getConnection();
+                    DBTasks.exportSchema(path, dbConnection);
                 }
+            } else {
+                printUsageManual();
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
