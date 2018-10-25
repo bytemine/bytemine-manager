@@ -7,6 +7,7 @@
 
 package net.bytemine.manager.action;
 
+import java.awt.*;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import net.bytemine.crypto.utility.CryptoUtils;
 import net.bytemine.manager.Configuration;
@@ -49,19 +50,23 @@ public class ValidatorAction {
      * @param yubikeyid The content of the yubikeyid field
      * @return true, if the entries are valid
      */
-    public static boolean validateUserCreation(String username, String password, String yubikeyid) {
+    public static boolean validateUserCreation(String username, String password, String yubikeyid) throws ValidationException {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         int minimumPasswordLength = Configuration.getInstance().USER_PASSWORD_LENGTH;
 
-        assert username != null && !"".equals(username) : rb.getString("dialog.newuser.error.text");
-        assert !UserQueries.isUserExisting(username) : rb.getString("dialog.newuser.validationerror2.text");
-        assert password != null && !"".equals(password) &&
-                password.length() >= minimumPasswordLength : rb.getString("dialog.newuser.validationerror.text") +
-                " " + minimumPasswordLength + " " +
-                rb.getString("dialog.newuser.validationerror.text2");
-        assert CryptoUtils.testCryptCharacters(password) : rb.getString("error.password.usascii");
-        assert username.matches("[A-Za-z0-9 ]+") : rb.getString("error.username.characters");
-        assert yubikeyid == null || "".equals(yubikeyid) || yubikeyid.length() == 12 : rb.getString("error.yubikeyid.characters");
+        if (username == null || username.isEmpty()) throw new ValidationException(rb.getString("dialog.newuser.error.text"));
+        if (UserQueries.isUserExisting(username))
+            throw new ValidationException(rb.getString("dialog.newuser.validationerror2.text"));
+        if (password == null || "".equals(password) ||
+                password.length() < minimumPasswordLength)
+            throw new ValidationException(rb.getString("dialog.newuser.validationerror.text") +
+                    " " + minimumPasswordLength + " " +
+                    rb.getString("dialog.newuser.validationerror.text2"));
+        if (!CryptoUtils.testCryptCharacters(password))
+            throw new ValidationException(rb.getString("error.password.usascii"));
+        if (!username.matches("[A-Za-z0-9 ]+")) throw new ValidationException(rb.getString("error.username.characters"));
+        if (yubikeyid != null && !"".equals(yubikeyid) && yubikeyid.length() != 12)
+            throw new ValidationException(rb.getString("error.yubikeyid.characters"));
         return true;
     }
 
@@ -76,22 +81,29 @@ public class ValidatorAction {
      * @return true, if username and password are valid
      */
     public static boolean validateUserUpdate(
-            String username, String oldUsername, String password, String yubikeyid) {
+            String username, String oldUsername, String password, String yubikeyid) throws ValidationException {
 
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         int minimumPasswordLength = Configuration.getInstance().USER_PASSWORD_LENGTH;
 
-        assert username != null && !"".equals(username) : rb.getString("dialog.newuser.error.text");
-        assert username.equals(oldUsername) || !UserQueries.isUserExisting(username) : rb.getString("dialog.newuser.validationerror2.text");
-        assert username.matches("[A-Za-z0-9 ]+") : rb.getString("error.username.characters");
+        if (username == null || username.isEmpty())
+            throw new ValidationException(rb.getString("dialog.newuser.error.text"));
+        if (!username.equals(oldUsername) && UserQueries.isUserExisting(username))
+            throw new ValidationException(rb.getString("dialog.newuser.validationerror2.text"));
+        if (!username.matches("[A-Za-z0-9 ]+")) throw new ValidationException(rb.getString("error.username.characters"));
         if (password == null || "".equals(password))
             return true;
-        assert password.length() >= minimumPasswordLength : rb.getString("dialog.newuser.validationerror.text") +
-                " " + minimumPasswordLength + " " +
-                rb.getString("dialog.newuser.validationerror.text2");
-        assert CryptoUtils.testCryptCharacters(password) : rb.getString("error.password.usascii");
+        if (password.length() < minimumPasswordLength)
+            throw new ValidationException(rb.getString("dialog.newuser.validationerror.text") +
+                    " " + minimumPasswordLength + " " +
+                    rb.getString("dialog.newuser.validationerror.text2"));
+        if (!CryptoUtils.testCryptCharacters(password)) {
+                throw new ValidationException(rb.getString("error.password.usascii"));
+            }
         if (yubikeyid != null && !"".equals(yubikeyid)) {
-            assert yubikeyid.length() == 12 : rb.getString("error.yubikeyid.characters");
+            if (yubikeyid.length() != 12) {
+                throw new ValidationException(rb.getString("error.yubikeyid.characters"));
+            }
             return true;
         }
         return true;
@@ -130,14 +142,16 @@ public class ValidatorAction {
 
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-        assert !"".equals(name) : rb.getString("server.details.errorName");
-        assert name.equals(oldName) || !ServerQueries.isServerExisting(name) : rb.getString("server.details.duplicateName");
-        assert !"".equals(hostname) : rb.getString("server.details.errorHostname");
-        assert !"".equals(username) : rb.getString("server.details.errorUsername");
-        assert !"".equals(keyfile) || !authTypeKeyfile : rb.getString("server.details.errorKeyfile");
-        if (!Configuration.getInstance().USE_PAM && "".equals(userfilePath))
-            throw new AssertionError(rb.getString("server.details.errorUserfile"));
-        assert !"".equals(exportPath) : rb.getString("server.details.errorExportPath");
+        if (name.isEmpty()) throw new ValidationException(rb.getString("server.details.errorName"));
+        if (!name.equals(oldName) && ServerQueries.isServerExisting(name))
+            throw new AssertionError(rb.getString("server.details.duplicateName"));
+        if (hostname.isEmpty()) throw new ValidationException(rb.getString("server.details.errorHostname"));
+        if (username.isEmpty()) throw new ValidationException(rb.getString("server.details.errorUsername"));
+        if (keyfile.isEmpty() && authTypeKeyfile)
+            throw new ValidationException(rb.getString("server.details.errorKeyfile"));
+        if (!Configuration.getInstance().USE_PAM && userfilePath.isEmpty())
+            throw new ValidationException(rb.getString("server.details.errorUserfile"));
+        if (exportPath.isEmpty()) throw new ValidationException(rb.getString("server.details.errorExportPath"));
 
         try {
             Integer.parseInt(statusInterval);
@@ -169,7 +183,7 @@ public class ValidatorAction {
             );
         }
 
-        assert !vpnCC || !"".equals(vpnCCPath) : rb.getString("server.details.errorVpnCCPath");
+        if (vpnCC && "".equals(vpnCCPath)) throw new ValidationException(rb.getString("server.details.errorVpnCCPath"));
 
         if (Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES && !networkAddress.trim().matches("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}"))
             throw new AssertionError(rb.getString("server.details.errorUserIp"));
@@ -192,8 +206,8 @@ public class ValidatorAction {
             if (userServerIp.get(userId).isEditable()) {
         		int clientIP;
                 try {
-        		    clientIP = Integer.parseInt(ip);
-                } catch (Exception ex) {
+                    clientIP = Integer.parseInt(ip);
+                } catch (NumberFormatException ex) {
                     return userServerIp.get(userId);
                 }
 
@@ -236,18 +250,18 @@ public class ValidatorAction {
     		String ip = (userServerIp.get(userId)).getText();
     		if (StringUtils.isEmptyOrWhitespaces(ip))
     		    continue;
-    		
+
     		String lastOctet;
     		int checkIp;
-    		
-    		try {
-    			lastOctet = ip;
-    			checkIp = Integer.parseInt(lastOctet);
-    		} catch (Exception ex) {
-    		    logger.log(Level.SEVERE, "empty static OpenVPN IP detected for user with ID: " + userId);
-    			return ip;
-    		}
-    		
+
+            try {
+                lastOctet = ip;
+                checkIp = Integer.parseInt(lastOctet);
+            } catch (NumberFormatException ex) {
+                logger.log(Level.SEVERE, "empty static OpenVPN IP detected for user with ID: " + userId);
+                return ip;
+            }
+
     		int i = 1;
     		while (i < 255) {
     			if (checkIp == i)
@@ -271,12 +285,13 @@ public class ValidatorAction {
     public static boolean validateGroupCreation(String name, String description) throws ValidationException {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         
-        if (name == null || "".equals(name))
+        if (name == null || name.isEmpty())
             throw new ValidationException(
                     rb.getString("dialog.newgroup.error.text"),
                     rb.getString("dialog.newgroup.error.title")
             );
-        assert !GroupQueries.isGroupExisting(name) : rb.getString("dialog.newgroup.validationerror2.text");
+        if (GroupQueries.isGroupExisting(name))
+            throw new ValidationException(rb.getString("dialog.newgroup.validationerror2.text"));
         return true;
     }
     
@@ -292,12 +307,13 @@ public class ValidatorAction {
     public static boolean validateGroupUpdate(String name, String oldName, String description) throws ValidationException {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-        if (name == null || "".equals(name))
+        if (name == null || name.isEmpty())
             throw new ValidationException(
                     rb.getString("dialog.newgroup.error.text"),
                     rb.getString("dialog.newgroup.error.title")
             );
-        assert oldName.equals(name) || !GroupQueries.isGroupExisting(name) : rb.getString("dialog.newgroup.validationerror2.text");
+        if (!oldName.equals(name) && GroupQueries.isGroupExisting(name))
+            throw new ValidationException(rb.getString("dialog.newgroup.validationerror2.text"));
         return true;
     }
     
@@ -317,7 +333,7 @@ public class ValidatorAction {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         // database path has changed
-        if (dbPath != null && !"".equals(dbPath) && !dbPath.toLowerCase().equals(Configuration.getInstance().JDBC_PATH.toLowerCase())) {
+        if (dbPath != null && !dbPath.isEmpty() & !dbPath.toLowerCase().equals(Configuration.getInstance().JDBC_PATH.toLowerCase())) {
             File dbFile = new File(dbPath);
             if (!dbFile.exists()) {
                 // copy database to new location
@@ -327,7 +343,7 @@ public class ValidatorAction {
                     return rb.getString("dialog.configuration.error.dbcopy");
             }
         } else {
-            if (CAEnabled && "".equals(clientCertExportPath))
+            if (CAEnabled && clientCertExportPath.isEmpty())
                 return rb.getString("dialog.configuration.error.exportPath");
 
             if (!CAEnabled && !CCEnabled)
@@ -358,12 +374,12 @@ public class ValidatorAction {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         if (!importTypeFile) {
-            if("".equals(host) ||
-               "".equals(port) ||
-               "".equals(dn) ||
-               "".equals(objectClass) ||
-               "".equals(cn) ||
-               ("".equals(certAttrName) && "".equals(certImportDir))
+            if(!host.isEmpty() ||
+               !port.isEmpty() ||
+               !dn.isEmpty() ||
+               !objectClass.isEmpty() ||
+                !cn.isEmpty()||
+                    !certAttrName.isEmpty() && !certImportDir.isEmpty()
             )
                 return rb.getString("dialog.configuration.error.ldap");
             try {
@@ -416,17 +432,11 @@ public class ValidatorAction {
             }
         }
 
-        if (serverValidTo == null)
+        if (!StringUtils.isDigit(serverValidTo))
             message.append(rb.getString("dialog.x509configuration.errorServerValidTo")).append("\n");
-        else if (!StringUtils.isDigit(serverValidTo)) {
-            message.append(rb.getString("dialog.x509configuration.errorServerValidTo")).append("\n");
-        }
 
-        if (clientValidTo == null)
+        if (!StringUtils.isDigit(clientValidTo))
             message.append(rb.getString("dialog.x509configuration.errorClientValidTo")).append("\n");
-        else if (!StringUtils.isDigit(clientValidTo)) {
-            message.append(rb.getString("dialog.x509configuration.errorClientValidTo")).append("\n");
-        }
 
         if (keyStrength == null)
             message.append(rb.getString("dialog.x509configuration.errorKeyStrength")).append("\n");
@@ -493,9 +503,13 @@ public class ValidatorAction {
     public static boolean validateSupportRequest(String name, String mail, String message) throws ValidationException {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-        assert name != null && !"".equals(name) : rb.getString("supportformular.error.name");
-        assert mail != null && !"".equals(mail) && isValidEmailAddress(mail) : rb.getString("supportformular.error.mail");
-        assert message != null && !"".equals(message) : rb.getString("supportformular.error.message");
+        //assert name != null && !"".equals(name) : rb.getString("supportformular.error.name");
+        if (name == null || "".equals(name))
+            throw new ValidationException("supportformular.error.name");
+        if (mail == null || "".equals(mail) || !isValidEmailAddress(mail))
+            throw new ValidationException(rb.getString("supportformular.error.mail"));
+        if (message == null || "".equals(message))
+            throw new ValidationException(rb.getString("supportformular.error.message"));
         return true;
     }
 
@@ -513,5 +527,32 @@ public class ValidatorAction {
             return m.matches();
         }
         return false;
+    }
+
+    // Draw exception on the screen
+    public static void onValidationException(String cause) {
+        JFrame frame = new JFrame("Error!");
+        Container container = frame.getContentPane();
+        ErrorCanvas canvas = new ErrorCanvas(cause);
+        container.add(canvas);
+        frame.setSize(300, 300);
+        frame.setVisible(true);
+    }
+}
+
+class ErrorCanvas extends JComponent {
+
+    private String msg;
+
+    ErrorCanvas(String msg) {
+        this.msg = msg;
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        if(g instanceof Graphics2D) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.drawString(msg, 70, 20);
+        }
     }
 }
