@@ -71,11 +71,9 @@ public class ChangeLog {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(layout);
 
-        StringBuffer logFormatted = new StringBuffer("<html>");
-        logFormatted.append(changeLog.replaceAll("\n", "<br />"));
-        logFormatted.append("</html>");
-
-        JLabel log = new JLabel(logFormatted.toString());
+        String logFormatted = "<html>" + changeLog.replaceAll("\n", "<br />") +
+                "</html>";
+        JLabel log = new JLabel(logFormatted);
         mainPanel.add(log, "wrap");
 
         JButton closeButton = new JButton(rb.getString("changelog.closebutton"));
