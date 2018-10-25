@@ -10,7 +10,9 @@ package net.bytemine.manager.baconfig;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 
+import net.sourceforge.yamlbeans.YamlException;
 import net.sourceforge.yamlbeans.YamlReader;
 import net.sourceforge.yamlbeans.YamlWriter;
 
@@ -32,7 +34,7 @@ public class Importer {
             //java.lang.System.out.println(config.getNetwork().getInterfaces().get(0).getLladdr());
             //java.lang.System.out.println(config.getNetwork().getTun_count());
             //java.lang.System.out.println(config.getSystem().getNtp_server().get(0));
-            
+
             YamlWriter writer = new YamlWriter(new FileWriter("examples/ba-config-out.yml"));
             // writes also false values
             writer.getConfig().writeConfig.setWriteDefaultValues(true);
@@ -48,9 +50,9 @@ public class Importer {
             writer.getConfig().setClassTag("ruby/object:BytemineAppliance::Config::Network::Route", Route.class);
             writer.getConfig().setClassTag("ruby/object:BytemineAppliance::Config::System", System.class);
             writer.getConfig().setClassTag("ruby/object:BytemineAppliance::Config::System::Startup", Startup.class);
-            writer.write(config); 
+            writer.write(config);
             writer.close();
-        } catch (Exception e) {
+        } catch (IOException | YamlException e) {
             e.printStackTrace();
         }
 
