@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.print.PrinterException;
 import java.net.ConnectException;
@@ -75,7 +76,7 @@ public class ControlCenterTab {
 
     private Session sshSession;
     private Server server;
-    public SSHCommunicator communicator;
+    private SSHCommunicator communicator;
     public SSHConnector sshConnection;
     private Timer statusTimer;
 
@@ -94,9 +95,9 @@ public class ControlCenterTab {
     private Hashtable<String, JScrollPane> clientTablePanes = new Hashtable<String, JScrollPane>();
 
     private JTextArea outputField;
-    public Dimension commandOutputDialogSize = new Dimension(300,400);
+    private Dimension commandOutputDialogSize = new Dimension(300,400);
 
-    public ControlCenterTab(Server server) {
+    ControlCenterTab(Server server) {
         this.server = server;
     }
 
@@ -106,7 +107,7 @@ public class ControlCenterTab {
      *
      * @return a panel representing the whole cc tab
      */
-    public JPanel createCCTab() {
+    JPanel createCCTab() {
         ccPanel = new JPanel(new BorderLayout());
 
         channelTabs = new JTabbedPane();
@@ -145,8 +146,6 @@ public class ControlCenterTab {
                 sshConnection = new SSHConnector(server);
                 sshConnection.createSession();
             }
-        } catch (ConnectException e) {
-            new VisualException(e);
         } catch (Exception e) {
             new VisualException(e);
         }
@@ -175,7 +174,7 @@ public class ControlCenterTab {
      *
      * @param channelNumber The channelNumber
      */
-    public void openUserCommandDialog(String channelNumber) {
+    private void openUserCommandDialog(String channelNumber) {
     	// outputfield
     	outputField = new JTextArea("");
     	outputField.setEditable(false);
@@ -227,27 +226,20 @@ public class ControlCenterTab {
         if (availableChannels != null) {
             List<String> channels = Collections.list(availableChannels.keys());
             Collections.sort(channels);
-            for (Iterator<String> iterator = channels.iterator(); iterator
-                    .hasNext();) {
-                String chNr = (String) iterator.next();
-                String[] channelStr = availableChannels.get(chNr);
-
+            channels.stream().map(availableChannels::get).forEach(channelStr -> {
                 final String channelNumber = channelStr[0];
                 final String channelType = channelStr[1];
                 boolean knownServiceType = SSHUtils.isServiceCodeKnown(channelType);
                 final String channelName = channelStr[2];
-
                 String channelEntry = channelNumber + " " + channelType + ", " + channelName;
                 channelOverviewPanel.add(new JLabel(channelEntry), "gapleft 5, growx");
-
                 final JButton connectButton = new JButton(rb.getString("ccTab.connect"));
                 final JButton disconnectButton = new JButton(rb.getString("ccTab.disconnect"));
                 disconnectButton.setToolTipText(rb.getString("ccTab.disconnect_tt"));
-                
                 if (!knownServiceType)
                     connectButton.setEnabled(false);
-                connectButton.addMouseListener(new java.awt.event.MouseAdapter() {
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                connectButton.addMouseListener(new MouseAdapter() {
+                    public void mouseClicked(MouseEvent evt) {
                         if (connectButton.isEnabled()) {
                             communicator.openChannel(channelNumber);
                             // connect succesful
@@ -257,8 +249,8 @@ public class ControlCenterTab {
                     }
                 });
                 disconnectButton.setEnabled(false);
-                disconnectButton.addMouseListener(new java.awt.event.MouseAdapter() {
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                disconnectButton.addMouseListener(new MouseAdapter() {
+                    public void mouseClicked(MouseEvent evt) {
                         if (disconnectButton.isEnabled()) {
                             communicator.closeChannel(channelNumber);
                             // disconnect successful
@@ -269,10 +261,9 @@ public class ControlCenterTab {
                 });
                 channelOverviewPanel.add(connectButton, "gapleft 5");
                 channelOverviewPanel.add(disconnectButton, "gapleft 5, wrap");
-
                 connectButtons.put(channelNumber, connectButton);
                 disconnectButtons.put(channelNumber, disconnectButton);
-            }
+            });
         }
         JScrollPane channelOverviewPane = new JScrollPane(channelOverviewPanel);
         CssRuleManager.getInstance().format(channelOverviewPanel);
@@ -413,7 +404,7 @@ public class ControlCenterTab {
         // The client table
         final JTable clientTable = new JTable(
                 new SSHClientTableModel(
-                        new Vector<String[]>()));
+                        new Vector<>()));
         
         // Log area
         JTextArea logArea = new JTextArea();
@@ -449,7 +440,7 @@ public class ControlCenterTab {
         TableCellRenderer renderer = new CustomTableCellRendererCC();
         try {
             clientTable.setDefaultRenderer(Class.forName("java.lang.Object"), renderer);
-        } catch(ClassNotFoundException ex) {}
+        } catch(ClassNotFoundException ignored) {}
 
         clientTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
@@ -605,18 +596,14 @@ public class ControlCenterTab {
         statusTimer.cancel();
 
         Set<String> keys = channelPanels.keySet();
-        List<String> channelNrs = new ArrayList<String>();
-        for (Iterator<String> iterator = keys.iterator(); iterator.hasNext();) {
-            String channelNr = (String) iterator.next();
+        List<String> channelNrs = new ArrayList<>();
+        keys.forEach(channelNr -> {
             JPanel channelPanel = channelPanels.get(channelNr);
             if (channelPanel != null)
                 channelTabs.remove(channelPanel);
             channelNrs.add(channelNr);
-        }
-        for (Iterator<String> iterator = channelNrs.iterator(); iterator.hasNext();) {
-            String channelNr = (String) iterator.next();
-            channelPanels.remove(channelNr);
-        }
+        });
+        channelNrs.forEach(channelNr -> channelPanels.remove(channelNr));
 
         channelTabs.setVisible(false);
         channelTabs.getParent().repaint();
@@ -633,12 +620,9 @@ public class ControlCenterTab {
             debugFrame.dispose();
         ManagerGUI.getTabs().remove(ccPanel);
         ManagerGUI.getOpenCCTabs().remove(server.getHostname());
-        if (ManagerGUI.getOpenCCTabs().isEmpty())
-            // jump to server table
-            ManagerGUI.getTabs().setSelectedIndex(1);
-        else
-            // jump to last CC tab
-            ManagerGUI.getTabs().setSelectedIndex(ManagerGUI.getTabs().getComponentCount()-1);
+        // jump to server table
+        // jump to last CC tab
+        ManagerGUI.getTabs().setSelectedIndex(ManagerGUI.getOpenCCTabs().isEmpty() ? 1 : ManagerGUI.getTabs().getComponentCount() - 1);
         Session session = SSHSessionPool.getInstance().getSession(server.getHostname());
         if (session != null && session.isConnected()) {
             session.disconnect();
@@ -666,11 +650,7 @@ public class ControlCenterTab {
 
         JMenuItem detailsMenu = new JMenuItem();
         detailsMenu.setText(rb.getString("sshClientContextMenu.kill"));
-        detailsMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                communicator.killUser(channelNumber, username);
-            }
-        });
+        detailsMenu.addActionListener(e -> communicator.killUser(channelNumber, username));
 
         contextMenu.add(detailsMenu);
         CssRuleManager.getInstance().format(contextMenu);
