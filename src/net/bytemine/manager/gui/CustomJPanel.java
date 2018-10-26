@@ -80,7 +80,7 @@ public class CustomJPanel extends JPanel {
     }
 
     public void removeAll() {
-        components = new ArrayList<Object>();
+        components = new ArrayList<>();
         super.removeAll();
     }
 

@@ -246,25 +246,7 @@ public class UserDetails {
                 ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
         );
         expandButton.setSize(20, 20);
-        expandButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            boolean expanded = false;
-
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    extensionPanel.setVisible(!expanded);
-                    if (expanded)
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
-                        );
-                    else
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_COLLAPSE, "collapse")
-                        );
-                    mainPanel.revalidate();
-                    expanded = !expanded;
-                }
-            }
-        });
+        ServerDetails.onMouseClicked(mainPanel, extensionPanel, expandButton);
         JPanel expandTopPanel = new JPanel(new MigLayout("insets 0"));
         JLabel expandLabel = new JLabel(rb.getString("user.details.expandOptions"));
         expandLabel.setFont(Constants.FONT_PLAIN);

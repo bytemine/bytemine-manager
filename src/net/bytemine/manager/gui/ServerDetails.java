@@ -9,28 +9,14 @@
 package net.bytemine.manager.gui;
 
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.*;
+import java.util.*;
 
 import javax.swing.JTextField;
-import java.util.Hashtable;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
 import java.io.File;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.ResourceBundle;
-import java.util.Vector;
 import java.util.logging.Logger;
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -106,31 +92,31 @@ public class ServerDetails {
     final JRadioButton authTypeKeyfile = new JRadioButton();
     final JCheckBox staticIpField = new JCheckBox();
     
-    final JComboBox serverTypeBox = new JComboBox(
+    final JComboBox<? extends String> serverTypeBox = new JComboBox<>(
             new String[]{
                     rb.getString("server.details.type.openvpn"),
                     rb.getString("server.details.type.appliance")
             });
-    final JComboBox serverVpnProtocolBox = new JComboBox(
+    final JComboBox<? extends String> serverVpnProtocolBox = new JComboBox<>(
             new String[]{
                     rb.getString("server.vpn.protocol.tcp"),
                     rb.getString("server.vpn.protocol.udp")
             });
-    final JComboBox serverVpnDeviceBox = new JComboBox(
+    final JComboBox<? extends String> serverVpnDeviceBox = new JComboBox<>(
             new String[]{
                     rb.getString("server.vpn.device.tun"),
                     rb.getString("server.vpn.device.tun0"),
                     rb.getString("server.vpn.device.tun1"),
             });
-    final JLabel vpnNetworkAddress = new JLabel();
-    final int vpnSubnetMask = 24;
-    JLabel netmaskLabel = new JLabel();
-    final static String formatClientIp = "%1$-1s.%2$-1s.%3$-1s.";
-    final static String formatNetmask = "%1$-1s.%2$-1s.%3$-1s.%4$-1s";
-    final List<JLabel> networkIPList = new ArrayList<JLabel>();
-    final JTextField ip1 = new JTextField(3);
-    final JTextField ip2 = new JTextField(3);
-    final JTextField ip3 = new JTextField(3);
+    private final JLabel vpnNetworkAddress = new JLabel();
+    private final int vpnSubnetMask = 24;
+    private JLabel netmaskLabel = new JLabel();
+    private final static String formatClientIp = "%1$-1s.%2$-1s.%3$-1s.";
+    private final static String formatNetmask = "%1$-1s.%2$-1s.%3$-1s.%4$-1s";
+    private final List<JLabel> networkIPList = new ArrayList<>();
+    private final JTextField ip1 = new JTextField(3);
+    private final JTextField ip2 = new JTextField(3);
+    private final JTextField ip3 = new JTextField(3);
     
 
     public ServerDetails(JFrame parent, String id) {
@@ -140,12 +126,12 @@ public class ServerDetails {
     }
 
 
-    public void showServerDetailsFrame() {
+    void showServerDetailsFrame() {
 
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
@@ -177,18 +163,15 @@ public class ServerDetails {
         serverDetailsFrame.setIconImage(ImageUtils.readImage(Configuration.getInstance().ICON_PATH));
         serverDetailsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        userServerIp = new Hashtable<String,JTextField>();
+        userServerIp = new Hashtable<>();
         initializeUserServerIpHashtable();
         
         tabbedPane = new JTabbedPane();
         tabbedPane = createServerDetailsPanel(serverDetailsFrame);
-        tabbedPane.addChangeListener (new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                if(staticIpTabActive && tabbedPane.getSelectedIndex()==2) {
-                    for(JLabel c : networkIPList)
-                        c.setText(String.format(formatClientIp, ip1.getText(), ip2.getText(), ip3.getText()));
-                    netmaskLabel.setText(String.format(formatNetmask, ip1.getText(), ip2.getText(), ip3.getText(), 0));
-                }
+        tabbedPane.addChangeListener (arg0 -> {
+            if(staticIpTabActive && tabbedPane.getSelectedIndex()==2) {
+                networkIPList.forEach(c -> c.setText(String.format(formatClientIp, ip1.getText(), ip2.getText(), ip3.getText())));
+                netmaskLabel.setText(String.format(formatNetmask, ip1.getText(), ip2.getText(), ip3.getText(), 0));
             }
         });
         
@@ -213,15 +196,12 @@ public class ServerDetails {
      * @return JTabbedPane with server details
      */
     public JTabbedPane createServerDetailsPanel() {
-    	userServerIp = new Hashtable<String,JTextField>();
+    	userServerIp = new Hashtable<>();
         initializeUserServerIpHashtable();
         final JTabbedPane tabbedPane = createServerDetailsPanel(null);
-        tabbedPane.addChangeListener (new ChangeListener() {
-            public void stateChanged(ChangeEvent arg0) {
-                if(staticIpTabActive && tabbedPane.getSelectedIndex()==2) {
-                    for(JLabel c : networkIPList)
-                        c.setText(String.format(formatClientIp, ip1.getText(), ip2.getText(), ip3.getText()));
-                }
+        tabbedPane.addChangeListener (arg0 -> {
+            if(staticIpTabActive && tabbedPane.getSelectedIndex()==2) {
+                networkIPList.forEach(c -> c.setText(String.format(formatClientIp, ip1.getText(), ip2.getText(), ip3.getText())));
             }
         });
         return tabbedPane;
@@ -234,7 +214,7 @@ public class ServerDetails {
         JTextField field;
         JButton saveButton ;
         
-        public keyStandardListenerNumber(JTextField field, JButton button) {
+        keyStandardListenerNumber(JTextField field, JButton button) {
             this.field = field;
             this.saveButton = button;
         }
@@ -270,7 +250,7 @@ public class ServerDetails {
     	JTextField field;
     	JButton saveButton ;
     	
-    	public keyStandardListener(JTextField field, JButton button) {
+    	keyStandardListener(JTextField field, JButton button) {
     		this.field = field;
     		this.saveButton = button;
     	}
@@ -279,7 +259,7 @@ public class ServerDetails {
         }
         
         public void keyReleased(KeyEvent e) {
-            if (!"".equals(this.field.getText())) 
+            if (!this.field.getText().isEmpty())
                 field.setBackground(Color.WHITE);
             ManagerGUI.serverUserTreeModel.setUnsavedData(true);
             saveButton.setText(rb.getString("server.details.savebutton") + " *");
@@ -297,12 +277,12 @@ public class ServerDetails {
      * @param myWindow the JFrame we're openend in. null if we're in the main window.
      * @return JTabbedPane with server details
      */
-    public JTabbedPane createServerDetailsPanel(final JFrame myWindow) {
+    private JTabbedPane createServerDetailsPanel(final JFrame myWindow) {
     	
         if (serverid == null)
             serverid = "-1";
         int sId = Integer.parseInt(serverid);
-        final boolean newServer = (sId <= 0) ? true : false;
+        final boolean newServer = sId <= 0;
         
         // retrieve data from database
         final String[] details = ServerQueries.getServerDetails(serverid);
@@ -390,7 +370,7 @@ public class ServerDetails {
             }
             
             public void keyReleased(KeyEvent e) {
-                if (!"".equals(nameField.getText()))
+                if (!nameField.getText().isEmpty())
                     nameField.setBackground(Color.WHITE);
                 if (newServer)
                     cnField.setText(nameField.getText());
@@ -412,7 +392,7 @@ public class ServerDetails {
 
         // wrapper
         String wrapperCommand = details[13];
-        if (wrapperCommand == null || "".equals(wrapperCommand))
+        if (wrapperCommand == null || wrapperCommand.isEmpty())
             wrapperCommand = Configuration.getInstance().SERVER_WRAPPER_COMMAND;
         final JTextField wrapperField = new JTextField(wrapperCommand, 10);
 
@@ -445,7 +425,7 @@ public class ServerDetails {
         int serverType = Server.SERVER_TYPE_REGULAR_OPENVPN;
         try {
             serverType = Integer.parseInt(details[12]);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("server type is not an int!");
         }
         
@@ -456,77 +436,45 @@ public class ServerDetails {
             wrapperField.setEnabled(false);
         }
         
-        serverTypeBox.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent e) {
-                ManagerGUI.serverUserTreeModel.setUnsavedData(true);
-                saveButton.setText(rb.getString("server.details.savebutton") + " *");
-                
-                int selectedIndex = serverTypeBox.getSelectedIndex();
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    if (selectedIndex == Server.SERVER_TYPE_REGULAR_OPENVPN) {
-                        wrapperField.setEnabled(true);
-                        if (details[4] == null || details[4].isEmpty())
-                            usernameField.setText("");
-                        else
-                            usernameField.setText(details[4]);
-                        
-                        if (details[6] == null || details[6].isEmpty())
-                            userfileField.setText("");
-                        else
-                            userfileField.setText(details[6]);
-                        
-                        if (details[7] == null || details[7].isEmpty())
-                            exportPathField.setText("");
-                        else
-                            exportPathField.setText(details[7]);
-                        
-                        if (details[18] == null || details[18].isEmpty())
-                        	ccdField.setText("");
-                        else
-                        	ccdField.setText(details[18]);
-                        
-                        if (details[19] == null || details[19].isEmpty())
-                            vpnNetworkAddress.setText("");
-                        else
-                            vpnNetworkAddress.setText(details[19]);
-                        
-                        setIpField(vpnNetworkAddress.getText());
-                    } else if (selectedIndex == Server.SERVER_TYPE_BYTEMINE_APPLIANCE) {
-                        wrapperField.setEnabled(false);
-                        if (details[4] == null || details[4].isEmpty())
-                            usernameField.setText(Configuration.getInstance().SERVER_USERNAME);
-                        else
-                            usernameField.setText(details[4]);
-                        
-                        if (details[6] == null || details[6].isEmpty())
-                            userfileField.setText(Configuration.getInstance().SERVER_PASSWD_PATH);
-                        else
-                            userfileField.setText(details[6]);
-                        
-                        if (details[7] == null || details[7].isEmpty())
-                            exportPathField.setText(Configuration.getInstance().SERVER_KEYS_PATH);
-                        else
-                            exportPathField.setText(details[7]);
-                        
-                        if (details[18] == null || details[18].isEmpty())
-                        	ccdField.setText(Configuration.getInstance().SERVER_CC_PATH);
-                        else
-                        	ccdField.setText(details[18]);
-                        
-                        if (details[19] == null || details[19].isEmpty())
-                            vpnNetworkAddress.setText(Configuration.getInstance().SERVER_NETWORK_ADDRESS);
-                        else
-                            vpnNetworkAddress.setText(details[19]);
-                        
-                        setIpField(vpnNetworkAddress.getText());
-                        
-                        if (details[21] == null || details[21].isEmpty())
-                            serverVpnDeviceBox.setSelectedIndex(Configuration.getInstance().SERVER_DEVICE);
-                        else
-                            vpnNetworkAddress.setText(details[21]);
-                    }
+        serverTypeBox.addItemListener(e -> {
+            ManagerGUI.serverUserTreeModel.setUnsavedData(true);
+            saveButton.setText(rb.getString("server.details.savebutton") + " *");
 
+            int selectedIndex = serverTypeBox.getSelectedIndex();
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (selectedIndex == Server.SERVER_TYPE_REGULAR_OPENVPN) {
+                    wrapperField.setEnabled(true);
+                    usernameField.setText(details[4] == null || details[4].isEmpty() ? "" : details[4]);
+
+                    userfileField.setText(details[6] == null || details[6].isEmpty() ? "" : details[6]);
+
+                    exportPathField.setText(details[7] == null || details[7].isEmpty() ? "" : details[7]);
+
+                    ccdField.setText(details[18] == null || details[18].isEmpty() ? "" : details[18]);
+
+                    vpnNetworkAddress.setText(details[19] == null || details[19].isEmpty() ? "" : details[19]);
+
+                    setIpField(vpnNetworkAddress.getText());
+                } else if (selectedIndex == Server.SERVER_TYPE_BYTEMINE_APPLIANCE) {
+                    wrapperField.setEnabled(false);
+                    usernameField.setText(details[4] == null || details[4].isEmpty() ? Configuration.getInstance().SERVER_USERNAME : details[4]);
+
+                    userfileField.setText(details[6] == null || details[6].isEmpty() ? Configuration.getInstance().SERVER_PASSWD_PATH : details[6]);
+
+                    exportPathField.setText(details[7] == null || details[7].isEmpty() ? Configuration.getInstance().SERVER_KEYS_PATH : details[7]);
+
+                    ccdField.setText(details[18] == null || details[18].isEmpty() ? Configuration.getInstance().SERVER_CC_PATH : details[18]);
+
+                    vpnNetworkAddress.setText(details[19] == null || details[19].isEmpty() ? Configuration.getInstance().SERVER_NETWORK_ADDRESS : details[19]);
+
+                    setIpField(vpnNetworkAddress.getText());
+
+                    if (details[21] == null || details[21].isEmpty())
+                        serverVpnDeviceBox.setSelectedIndex(Configuration.getInstance().SERVER_DEVICE);
+                    else
+                        vpnNetworkAddress.setText(details[21]);
                 }
+
             }
         });
         serverTypeBox.setFont(Constants.FONT_PLAIN);
@@ -564,27 +512,18 @@ public class ServerDetails {
         int authType = Server.AUTH_TYPE_PASSWORD;
         try {
             authType = Integer.parseInt(details[3]);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             logger.warning("auth type is not an int!");
         }
 
         // field: keyfilepath 		Panel: 1
         final JLabel keyfileLabel = new JLabel(rb.getString("server.details.keyfilepath"));
-        if (authType == Server.AUTH_TYPE_PASSWORD)
-            keyfileLabel.setFont(Constants.FONT_PLAIN);
-        else
-            keyfileLabel.setFont(Constants.FONT_BOLD);
+        keyfileLabel.setFont(authType == Server.AUTH_TYPE_PASSWORD ? Constants.FONT_PLAIN : Constants.FONT_BOLD);
         mainPanel.add(keyfileLabel, "align left");
         
         // set default keyfile-path to user.home/.ssh/id_rsa.pub
-        String x = null;
-        
-        if (null == details[5]) {
-        	x = System.getProperty("user.home")+"/.ssh/id_rsa";
-        } else {
-        	x = details[5];
-        }
-        	
+        String x = null == details[5] ? System.getProperty("user.home") + "/.ssh/id_rsa" : details[5];
+
         final JTextField keyfileField = new JTextField(x, 10);
         
         final JButton filechooserButton = new JButton();
@@ -617,31 +556,25 @@ public class ServerDetails {
             keyfileField.setEnabled(true);
             filechooserButton.setEnabled(true);
         }
-        authTypePassword.addActionListener(new ActionListener() {
+        authTypePassword.addActionListener(e -> {
+            keyfileField.setEnabled(false);
+            keyfileLabel.setFont(Constants.FONT_PLAIN);
+            filechooserButton.setEnabled(false);
 
-            public void actionPerformed(ActionEvent e) {
-                keyfileField.setEnabled(false);
-                keyfileLabel.setFont(Constants.FONT_PLAIN);
-                filechooserButton.setEnabled(false);
-                
-                ManagerGUI.serverUserTreeModel.setUnsavedData(true);
-                saveButton.setText(rb.getString("server.details.savebutton") + " *");
-                if (serverDetailsFrame != null)
-                    serverDetailsFrame.setTitle(title + " *");
-            }
+            ManagerGUI.serverUserTreeModel.setUnsavedData(true);
+            saveButton.setText(rb.getString("server.details.savebutton") + " *");
+            if (serverDetailsFrame != null)
+                serverDetailsFrame.setTitle(title + " *");
         });
-        authTypeKeyfile.addActionListener(new ActionListener() {
+        authTypeKeyfile.addActionListener(e -> {
+            keyfileField.setEnabled(true);
+            keyfileLabel.setFont(Constants.FONT_BOLD);
+            filechooserButton.setEnabled(true);
 
-            public void actionPerformed(ActionEvent e) {
-                keyfileField.setEnabled(true);
-                keyfileLabel.setFont(Constants.FONT_BOLD);
-                filechooserButton.setEnabled(true);
-                
-                ManagerGUI.serverUserTreeModel.setUnsavedData(true);
-                saveButton.setText(rb.getString("server.details.savebutton") + " *");
-                if (serverDetailsFrame != null)
-                    serverDetailsFrame.setTitle(title + " *");
-            }
+            ManagerGUI.serverUserTreeModel.setUnsavedData(true);
+            saveButton.setText(rb.getString("server.details.savebutton") + " *");
+            if (serverDetailsFrame != null)
+                serverDetailsFrame.setTitle(title + " *");
         });
 
         // server path to passwd-file		Panel: 2
@@ -680,7 +613,7 @@ public class ServerDetails {
         JLabel sshportLabel = new JLabel(rb.getString("server.details.sshport"));
         sshportLabel.setFont(Constants.FONT_BOLD);
         mainPanel.add(sshportLabel, "align left");
-        String sshPort = (details[11] == null || "".equals(details[11])) ? Constants.DEFAULT_SSH_PORT : details[11];
+        String sshPort = (details[11] == null || details[11].isEmpty()) ? Constants.DEFAULT_SSH_PORT : details[11];
         final JTextField sshportField = new JTextField(sshPort, 5);
         sshportField.addKeyListener(new keyStandardListener(sshportField, saveButton));
         mainPanel.add(sshportField, "wrap");
@@ -690,7 +623,7 @@ public class ServerDetails {
         JLabel opnvpnLabel = new JLabel(rb.getString("server.details.vpnport"));
         opnvpnLabel.setFont(Constants.FONT_PLAIN);
         secondaryPanel.add(opnvpnLabel, "align left");     
-        String vpnPort = (details[15] == null || "".equals(details[15])) ? Constants.DEFAULT_OPENVPN_PORT : details[15];	
+        String vpnPort = (details[15] == null || details[15].isEmpty()) ? Constants.DEFAULT_OPENVPN_PORT : details[15];
         final JTextField vpnportField = new JTextField(vpnPort, 5);
         vpnportField.addKeyListener(new keyStandardListener(vpnportField, saveButton));
         secondaryPanel.add(vpnportField,  "wrap");
@@ -705,14 +638,10 @@ public class ServerDetails {
         int vpnProtocol = Server.SERVER_OPENVPN_PROTOCOL_UDP;
         try {
         	vpnProtocol = Integer.parseInt(details[16]);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
-        
-        if (vpnProtocol == Server.SERVER_OPENVPN_PROTOCOL_TCP) {
-        	serverVpnProtocolBox.setSelectedIndex(0);
-        } else {
-        	serverVpnProtocolBox.setSelectedIndex(1);
-        }
+
+        serverVpnProtocolBox.setSelectedIndex(vpnProtocol == Server.SERVER_OPENVPN_PROTOCOL_TCP ? 0 : 1);
             
         this.serverVpnProtocolBox.setFont(Constants.FONT_PLAIN);
         secondaryPanel.add(this.serverVpnProtocolBox, "wrap");
@@ -725,7 +654,7 @@ public class ServerDetails {
         serverValidForField.setHorizontalAlignment(JTextField.RIGHT);
         serverValidForField.setText(Configuration.getInstance().X509_SERVER_VALID_FOR);
 
-        final JComboBox serverValidityUnitBox = new JComboBox();
+        final JComboBox<String> serverValidityUnitBox = new JComboBox<>();
         serverValidityUnitBox.addItem(rb.getString("units.days"));
         serverValidityUnitBox.addItem(rb.getString("units.weeks"));
         serverValidityUnitBox.addItem(rb.getString("units.years"));
@@ -747,10 +676,7 @@ public class ServerDetails {
         setIpField(vpnNetworkAddress.getText());
         
         JLabel netmaskLabel = new JLabel(rb.getString("server.details.tab3network"));
-        if (Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES)
-            netmaskLabel.setFont(Constants.FONT_BOLD);
-        else
-            netmaskLabel.setFont(Constants.FONT_PLAIN);
+        netmaskLabel.setFont(Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES ? Constants.FONT_BOLD : Constants.FONT_PLAIN);
                 
         secondaryPanel.add(netmaskLabel);
         final JPanel ipPanel = new JPanel(new MigLayout("insets 0"));
@@ -761,47 +687,11 @@ public class ServerDetails {
         ipPanel.add(ip3);
         ipPanel.add(new JLabel(".0 /24"));
         secondaryPanel.add(ipPanel, "wrap");
-        
-        ip1.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                try {
-                    if (Integer.parseInt(ip1.getText()) > 255)
-                        throw new Exception();
-                    ip1.setBackground(Constants.COLOR_WHITE);
-                } catch(Exception e) {
-                    if (ip1.getText().length() > 0)
-                        ip1.setBackground(Constants.COLOR_ERROR);
-                }
-                vpnNetworkAddress.setText(String.format("%s.%s.%s.", ip1.getText(), ip2.getText(), ip3.getText()));
-            }
-        });
-        ip2.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                try {
-                    if (Integer.parseInt(ip2.getText()) > 255)
-                        throw new Exception();
-                    ip2.setBackground(Constants.COLOR_WHITE);
-                } catch(Exception e) {
-                    if (ip2.getText().length() > 0)
-                        ip2.setBackground(Constants.COLOR_ERROR);
-                }
-                vpnNetworkAddress.setText(String.format("%s.%s.%s.", ip1.getText(), ip2.getText(), ip3.getText()));
-            }
-        });
-        ip3.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                try {
-                    if (Integer.parseInt(ip3.getText()) > 255)
-                        throw new Exception();
-                    ip3.setBackground(Constants.COLOR_WHITE);
-                } catch(Exception e) {
-                    if (ip3.getText().length() > 0)
-                        ip3.setBackground(Constants.COLOR_ERROR);
-                }
-                vpnNetworkAddress.setText(String.format("%s.%s.%s.", ip1.getText(), ip2.getText(), ip3.getText()));
-            }
-        });  
-        
+
+        setBackground(ip1);
+        setBackground(ip2);
+        setBackground(ip3);
+
         // label for vpnDevice       panel 2
         JLabel vpnDevLabel = new JLabel(rb.getString("server.details.vpnDevice"));
         vpnDevLabel.setFont(Constants.FONT_PLAIN);
@@ -856,13 +746,11 @@ public class ServerDetails {
         }
         
         
-        staticIpField.addItemListener(new java.awt.event.ItemListener() {
-        	public void itemStateChanged(java.awt.event.ItemEvent e) {
-        		if(staticIpField.isSelected())
-        			showIpForUserTab();
-        		else
-        			hideIpForUserTab();
-        	}
+        staticIpField.addItemListener(e -> {
+            if(staticIpField.isSelected())
+                showIpForUserTab();
+            else
+                hideIpForUserTab();
         });
         secondaryPanel.add(staticIpField, "wrap");
         secondaryPanel.add(ccdLabel, "align left, growx 2");
@@ -877,25 +765,7 @@ public class ServerDetails {
                 ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
         );
         expandButton.setSize(20, 20);
-        expandButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            boolean expanded = false;
-
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    extensionPanel.setVisible(!expanded);
-                    if (expanded)
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
-                        );
-                    else
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_COLLAPSE, "collapse")
-                        );
-                    mainPanel.revalidate();
-                    expanded = !expanded;
-                }
-            }
-        });
+        onMouseClicked(mainPanel, extensionPanel, expandButton);
         JPanel expandTopPanel = new JPanel(new MigLayout("insets 0"));
         JLabel expandLabel = new JLabel(rb.getString("server.details.expandOptions"));
         expandLabel.setFont(Constants.FONT_PLAIN);
@@ -966,7 +836,7 @@ public class ServerDetails {
                 Server server = new Server(serverid);
                 server = ServerDAO.getInstance().read(server);
 
-                X509Manager x509Manager = null;
+                X509Manager x509Manager;
                 if (parentFrame != null) {
                     x509Manager = new X509Manager(parentFrame, server);
                     x509Manager.showX509ManagerFrame();
@@ -1022,8 +892,7 @@ public class ServerDetails {
 
                 JPanel bPanel = new JPanel();
                 bPanel.add(x509Field);
-                if (!newServer)
-                    bPanel.add(reassignButton);
+                bPanel.add(reassignButton);
                 mainPanel.add(bPanel, "wrap");
             }
         }
@@ -1031,33 +900,27 @@ public class ServerDetails {
 
         final JButton vpnStartButton = new JButton(rb.getString("server.details.vpnStartButton"));
         vpnStartButton.setToolTipText(rb.getString("server.details.vpnStartButton_tt"));
-        vpnStartButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                Server server = Server.getServerById(Integer.parseInt(serverid));
-                try {
-                    Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame, server);
-                } catch (Exception ex) {
-                    logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
-                }
+        vpnStartButton.addActionListener(e -> {
+            Server server = Server.getServerById(Integer.parseInt(serverid));
+            try {
+                Dialogs.showOpenVpnStartDaemonDialog(ManagerGUI.mainFrame, server);
+            } catch (Exception ex) {
+                logger.warning("showOpenVpnStartDaemonDialog throwed: " + ex.toString());
             }
         });
 
         final JButton syncUsersButton = new JButton(rb.getString("serverContextMenu.sync"));
         syncUsersButton.setToolTipText(rb.getString("server.details.syncbutton_tt"));
-        syncUsersButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    new UserSync(idField.getText());
-                } catch (Exception ex) {
-                    CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                            ex.getMessage(),
-                            rb.getString("error.syncusers.title"),
-                            JOptionPane.ERROR_MESSAGE);
-                }
-                ManagerGUI.refreshUserTable();
+        syncUsersButton.addActionListener(e -> {
+            try {
+                new UserSync(idField.getText());
+            } catch (Exception ex) {
+                CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
+                        ex.getMessage(),
+                        rb.getString("error.syncusers.title"),
+                        JOptionPane.ERROR_MESSAGE);
             }
+            ManagerGUI.refreshUserTable();
         });
 
 
@@ -1105,8 +968,7 @@ public class ServerDetails {
                     	
                     	ipField = ValidatorAction.validateServerCreationUserServerIp(userServerIp);
                     	if (ipField != null) {
-                    		valid = false;
-                    		throw new ValidationException(
+                            throw new ValidationException(
                                     rb.getString("server.details.errorUserIp"),
                                     rb.getString("server.details.errortitle"),
                                     11
@@ -1121,7 +983,8 @@ public class ServerDetails {
                         if (newServer) {
                             String serverValidFor= serverValidForField.getText();
                             String serverValidityUnit= (String) serverValidityUnitBox.getSelectedItem();
-                            if (! serverValidityUnit.equals(rb.getString("units.days"))) {
+                            assert serverValidityUnit != null;
+                            if (!Objects.equals(serverValidityUnit, rb.getString("units.days"))) {
                                 if (serverValidityUnit.equals(rb.getString("units.weeks")))
                                     serverValidFor= Integer.toString(Integer.parseInt(serverValidFor) * 7);
                                 else if (serverValidityUnit.equals(rb.getString("units.years")))
@@ -1268,15 +1131,12 @@ public class ServerDetails {
                             		vpnportField.setBackground(Constants.COLOR_ERROR); break; 
                             case 10:ccdField.requestFocus();panels.setSelectedIndex(1);
                             		ccdField.setBackground(Constants.COLOR_ERROR); break;
-                            case 11:ipField.requestFocus();panels.setSelectedIndex(2);
+                            case 11:
+                                assert ipField != null;
+                                ipField.requestFocus();panels.setSelectedIndex(2);
                     				ipField.setBackground(Constants.COLOR_ERROR); break;
                             case 12:panels.setSelectedIndex(1);
-                                    for (Component c : ipPanel.getComponents()) {
-                                        if (c instanceof JTextField) { 
-                                            if("".equals(((JTextField)c).getText()))
-                                                c.setBackground((Constants.COLOR_ERROR));
-                                        }
-                                    }
+                                Arrays.stream(ipPanel.getComponents()).filter(c -> c instanceof JTextField).filter(c -> "".equals(((JTextField) c).getText())).forEach(c -> c.setBackground((Constants.COLOR_ERROR)));
                             default: break;
                         }
                     }
@@ -1307,15 +1167,12 @@ public class ServerDetails {
         buttonPanel.add(saveButton);
         buttonPanel.add(deleteButton);
         JButton cancelButton = new JButton(rb.getString("server.details.closebutton"));
-        cancelButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                ManagerGUI.serverUserTreeModel.setUnsavedData(false);
-                if (serverDetailsFrame != null)
-                    serverDetailsFrame.dispose();
-                else
-                    ManagerGUI.clearRightPanel();
-            }
+        cancelButton.addActionListener(e -> {
+            ManagerGUI.serverUserTreeModel.setUnsavedData(false);
+            if (serverDetailsFrame != null)
+                serverDetailsFrame.dispose();
+            else
+                ManagerGUI.clearRightPanel();
         });
 
         buttonPanel.add(cancelButton);
@@ -1329,7 +1186,49 @@ public class ServerDetails {
         return panels;
     }
 
-    
+    static void onMouseClicked(JPanel mainPanel, JPanel extensionPanel, JButton expandButton) {
+        expandButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            boolean expanded = false;
+
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (((JButton) evt.getSource()).isEnabled()) {
+                    extensionPanel.setVisible(!expanded);
+                    if (expanded)
+                        expandButton.setIcon(
+                                ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
+                        );
+                    else
+                        expandButton.setIcon(
+                                ImageUtils.createImageIcon(Constants.ICON_COLLAPSE, "collapse")
+                        );
+                    mainPanel.revalidate();
+                    expanded = !expanded;
+                }
+            }
+        });
+    }
+
+    private void setBackground(JTextField ip1) {
+        ip1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(KeyEvent evt) {
+                setTextFieldBackground(ip1);
+                vpnNetworkAddress.setText(String.format("%s.%s.%s.", ip1.getText(), ip2.getText(), ip3.getText()));
+            }
+        });
+    }
+
+    private void setTextFieldBackground(JTextField ip1) {
+        try {
+            if (Integer.parseInt(ip1.getText()) > 255)
+                throw new Exception();
+            ip1.setBackground(Constants.COLOR_WHITE);
+        } catch (Exception e) {
+            if (ip1.getText().length() > 0)
+                ip1.setBackground(Constants.COLOR_ERROR);
+        }
+    }
+
+
     /**
      * Fills the UserServerIp-Hashtable with the values of the database
      *
@@ -1340,15 +1239,14 @@ public class ServerDetails {
 
         
         Vector<String[]> allUsers = UserQueries.getAllUsersAsVector(UserQueries.order_username);
-        
-        for (Iterator<String[]> it = allUsers.iterator(); it.hasNext();) {
-            String[] strings = it.next();
+
+        allUsers.forEach(strings -> {
             JTextField ip = new JTextField(20);
             ip.setText(ServerQueries.getIpFromUserServer(serverid, strings[0]));
             if (connectedUsers.contains(strings[0])) {
-            	userServerIp.put(strings[0], ip);
+                userServerIp.put(strings[0], ip);
             }
-        }
+        });
     }
     
 
@@ -1378,40 +1276,33 @@ public class ServerDetails {
         panel.add(new JLabel(rb.getString("server.details.tab3ip")), "wrap, gapbottom 5");
         
         Vector<String[]> allUsers = UserQueries.getAllUsersAsVector(UserQueries.order_username);
-        
-        for (Iterator<String[]> it = allUsers.iterator(); it.hasNext();) {
-            String[] strings = it.next();
-            	
+
+        allUsers.forEach(strings -> {
             JLabel username = new JLabel(strings[1]);
             JLabel clientIPNetwork = new JLabel(String.format(formatClientIp, ip1.getText(), ip2.getText(), ip3.getText()));
             clientIPNetwork.setFont(Constants.FONT_PLAIN);
             final JTextField clientIP = new JTextField(3);
             clientIP.setDocument(new JTextFieldLimit(3));
-        	
-        	 if (userServerIp.containsKey(strings[0]))
-        		 clientIP.setText(userServerIp.get(strings[0]).getText());
-             else
-            	 clientIP.setText(ServerQueries.getIpFromUserServer(serverid, strings[0]));
-       	
-        	clientIP.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyReleased(java.awt.event.KeyEvent evt) {
+            if (userServerIp.containsKey(strings[0]))
+                clientIP.setText(userServerIp.get(strings[0]).getText());
+            else
+                clientIP.setText(ServerQueries.getIpFromUserServer(serverid, strings[0]));
+            clientIP.addKeyListener(new KeyAdapter() {
+                public void keyReleased(KeyEvent evt) {
                     checkIp(clientIP);
                 }
-        	});
- 
+            });
             clientIP.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent fe) {
                     checkForDuplicateIp();
                 }
             });
-
-        	userServerIp.put(strings[0], clientIP);
-        	panel.add(username, "gapleft 3");
-        	panel.add(clientIPNetwork);
-        	networkIPList.add(clientIPNetwork);
-        	panel.add(clientIP, "wrap");
-        	username.setFont(Constants.FONT_PLAIN);
-            
+            userServerIp.put(strings[0], clientIP);
+            panel.add(username, "gapleft 3");
+            panel.add(clientIPNetwork);
+            networkIPList.add(clientIPNetwork);
+            panel.add(clientIP, "wrap");
+            username.setFont(Constants.FONT_PLAIN);
             if (connectedUsers.contains(strings[0]))
                 clientIP.setEditable(true);
             else {
@@ -1419,7 +1310,7 @@ public class ServerDetails {
                 clientIP.setText("");
             }
             checkForDuplicateIp();
-        }
+        });
         
         CssRuleManager.getInstance().format(panel);
 		return panel;
@@ -1445,13 +1336,10 @@ public class ServerDetails {
             
            for (Enumeration<String> en = userServerIp.keys(); en.hasMoreElements();) {
                String userID = en.nextElement();
-            
-                if (!userId.equals(userID)) {
-                    if (userServerIp.get(userID).getText().length()>0 && userServerIp.get(userId).getText().length()>0)
-                        if (userServerIp.get(userID).getText().equals(userServerIp.get(userId).getText())) {
-                            userServerIp.get(userID).setBackground(Constants.COLOR_ERROR);
-                        }
-                }
+
+               if (!userId.equals(userID) && userServerIp.get(userID).getText().length() > 0 && userServerIp.get(userId).getText().length() > 0 && userServerIp.get(userID).getText().equals(userServerIp.get(userId).getText())) {
+                   userServerIp.get(userID).setBackground(Constants.COLOR_ERROR);
+               }
            }
         }
     }
@@ -1461,14 +1349,7 @@ public class ServerDetails {
      * @param ip
      */
     private void checkIp(JTextField ip) {
-        try {
-            if (Integer.parseInt(ip.getText()) > 255)
-                throw new Exception();
-            ip.setBackground(Constants.COLOR_WHITE);
-        } catch(Exception e) {
-            if (ip.getText().length() > 0)
-                ip.setBackground(Constants.COLOR_ERROR);
-        }
+        setTextFieldBackground(ip);
     }
     
     
@@ -1521,37 +1402,30 @@ public class ServerDetails {
 
         Vector<String[]> allUsers = UserQueries.getAllUsersAsVector(UserQueries.order_username);
 
-        for (Iterator<String[]> it = allUsers.iterator(); it.hasNext();) {
-            String[] strings = it.next();
+        allUsers.forEach(strings -> {
             final String userid = strings[0];
             JCheckBox box = new JCheckBox(strings[1]);
             if (connectedUsers.contains(strings[0]))
                 box.setSelected(true);
             else
                 box.setSelected(false);
-
-            box.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    AbstractButton checkbox = (AbstractButton) e.getSource();
-                    boolean selected = checkbox.getModel().isSelected();
-                    if (selected && !connectedUsers.contains(userid)) {
-                        connectedUsers.add(userid);
-                        if(staticIpTabActive)
-                        	refreshIpForUserTab();
-                    }
-                    else if (!selected && connectedUsers.contains(userid)) {
-                        connectedUsers.remove(userid);
-                        if (staticIpTabActive) {
-                        	userServerIp.remove(userid);
-                        	refreshIpForUserTab();
-                        }
+            box.addActionListener(e -> {
+                AbstractButton checkbox = (AbstractButton) e.getSource();
+                boolean selected = checkbox.getModel().isSelected();
+                if (selected && !connectedUsers.contains(userid)) {
+                    connectedUsers.add(userid);
+                    if (staticIpTabActive)
+                        refreshIpForUserTab();
+                } else if (!selected && connectedUsers.contains(userid)) {
+                    connectedUsers.remove(userid);
+                    if (staticIpTabActive) {
+                        userServerIp.remove(userid);
+                        refreshIpForUserTab();
                     }
                 }
             });
-
             usrMgrPanel.add(box, "wrap");
-        }
+        });
 
         return new JScrollPane(usrMgrPanel);
     }
@@ -1574,7 +1448,7 @@ public class ServerDetails {
      * @param parent The parent component
      * @return String with the selected filename
      */
-    public static String keyfileChooser(Component parent) {
+    static String keyfileChooser(Component parent) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         // create a file chooser
@@ -1608,7 +1482,7 @@ public class ServerDetails {
         }
     }
     
-    public void setTabbedPane(JTabbedPane pane) {
+    void setTabbedPane(JTabbedPane pane) {
     	tabbedPane = pane;
     }
 
@@ -1618,7 +1492,7 @@ public class ServerDetails {
     }
 
 
-    public JFrame getServerDetailsFrame() {
+    JFrame getServerDetailsFrame() {
         return serverDetailsFrame;
     }
 
