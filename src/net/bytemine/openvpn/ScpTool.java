@@ -42,7 +42,7 @@ public class ScpTool {
     private SSHConnector sshConnector;
 
 
-    public ScpTool(Server server) throws ConnectException, Exception {
+    ScpTool(Server server) throws Exception {
         this.server = server;
 
         sshConnector = new SSHConnector(this.server);
@@ -63,7 +63,7 @@ public class ScpTool {
      * @param sourceFile The filename of the source file
      * @throws java.lang.Exception
      */
-    public byte[] getFromServer(String sourceFile) throws ConnectException, Exception {
+    byte[] getFromServer(String sourceFile) throws Exception {
 
         try {
             logger.info("ScpTool.getFrom start");
@@ -97,24 +97,17 @@ public class ScpTool {
                 in.read(buf, 0, 5);
 
                 long filesize = 0L;
-                while (true) {
-                    if (in.read(buf, 0, 1) < 0)
-                        break;
-                    if (buf[0] == ' ')
-                        break;
+                while (in.read(buf, 0, 1) >= 0 && buf[0] != ' ') {
                     filesize = filesize * 10L + (long) (buf[0] - '0');
                 }
 
 
-                String file = null;
                 for (int i = 0; ; i++) {
                     in.read(buf, i, 1);
                     if (buf[i] == (byte) 0x0a) {
-                        file = new String(buf, 0, i);
                         break;
                     }
                 }
-                file.toString();
 
 
                 // send '\0'
@@ -124,10 +117,7 @@ public class ScpTool {
 
                 int pointer;
                 while (true) {
-                    if (buf.length < filesize)
-                        pointer = buf.length;
-                    else
-                        pointer = (int) filesize;
+                    pointer = buf.length < filesize ? buf.length : (int) filesize;
                     pointer = in.read(buf, 0, pointer);
                     if (pointer < 0)
                         break;
@@ -164,7 +154,7 @@ public class ScpTool {
      * @param targetFile The filename of the target file
      * @throws java.lang.Exception
      */
-    public void postToServer(String content, String targetFile) throws Exception {
+    void postToServer(String content, String targetFile) throws Exception {
 
         try {
             logger.info("ScpTool.postTo start");
@@ -201,7 +191,6 @@ public class ScpTool {
                 out.write(buf, 0, len);
             }
             bais.close();
-            bais = null;
 
             // send '\0'
             buf[0] = 0;
@@ -224,15 +213,19 @@ public class ScpTool {
 
     public void disconnectSession() {
         int i = 1;
-        while (this.sshSession != null && this.sshSession.isConnected() && i < 100) {
-            this.sshSession.disconnect();
+        disconnectSSHSession(i, this.sshSession);
+        SSHSessionPool.getInstance().removeSession(server.getHostname());
+    }
+
+    public static void disconnectSSHSession(int i, Session sshSession) {
+        while (sshSession != null && sshSession.isConnected() && i < 100) {
+            sshSession.disconnect();
             try {
                 Thread.sleep(50);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
             i++;
         }
-        SSHSessionPool.getInstance().removeSession(server.getHostname());
     }
 
 
@@ -254,23 +247,28 @@ public class ScpTool {
         if (b == 0 || b == -1)
             return b;
 
+        CheckAcceptConnection(in, b, logger);
+        return b;
+    }
+
+    public static void CheckAcceptConnection(InputStream in, int b, Logger logger) throws IOException {
         if (b == 1 || b == 2) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             int c;
-            do {
+            c = in.read();
+            sb.append((char) c);
+            while (c != '\n') {
                 c = in.read();
                 sb.append((char) c);
-            } while (c != '\n');
+            }
 
             if (b == 1)  {// error
                 logger.severe("Error: " + sb.toString());
                 throw new IOException(sb.toString());
-            } else if (b == 2)  {// fatal error
-                logger.severe("Fatal Error:" + sb.toString());
-                throw new IOException(sb.toString());
-            }
+            }// fatal error
+            logger.severe("Fatal Error:" + sb.toString());
+            throw new IOException(sb.toString());
         }
-        return b;
     }
 
 
