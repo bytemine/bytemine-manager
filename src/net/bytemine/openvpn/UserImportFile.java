@@ -75,10 +75,9 @@ public class UserImportFile extends UserImport {
     /**
      * Does all the import job
      *
-     * @throws java.lang.Exception
      */
 
-    public void importUsers() throws Exception {
+    public void importUsers() {
         try {
             // status frame
             final StatusFrame statusFrame = new StatusFrame(StatusFrame.TYPE_IMPORT, ManagerGUI.mainFrame);
@@ -87,7 +86,7 @@ public class UserImportFile extends UserImport {
             SwingWorker<String, Void> importWorker = new SwingWorker<String, Void>() {
                 Thread t;
 
-                protected String doInBackground() throws Exception {
+                protected String doInBackground() {
                     try {
                         t = Thread.currentThread();
                         ThreadMgmt.getInstance().addThread(t);
@@ -132,10 +131,9 @@ public class UserImportFile extends UserImport {
     /**
      * Does all the import job (no threading)
      *
-     * @throws java.lang.Exception
      */
     
-    public void importUsersImmediately() throws Exception {
+    public void importUsersImmediately() {
     	try {
             // status frame
             final StatusFrame statusFrame = new StatusFrame(StatusFrame.TYPE_IMPORT, ManagerGUI.mainFrame);
@@ -184,6 +182,7 @@ public class UserImportFile extends UserImport {
         Vector<String> importedX509Ids = importCertificates();
         Hashtable<String, String> importedUsersTable = importUserfile();	// contains only the (new) users
         Hashtable<String, String> usersWithoutCertificate = tryLinkingCertificatesAndUsers(importedX509Ids, importedUsersTable);
+        assert usersWithoutCertificate != null;
         if (!usersWithoutCertificate.isEmpty()) {
             if (isCreateCertificatesForUsers())
                 createClientCertificates(usersWithoutCertificate);
@@ -220,10 +219,10 @@ public class UserImportFile extends UserImport {
     private Vector<String> importCertificates() throws Exception {
         Vector<String> importedX509Ids = new Vector<String>();
 
-        if (importDir == null || "".equals(importDir))
+        if (importDir == null || importDir.isEmpty())
             return importedX509Ids;
 
-        X509FileImporter x509Importer = null;
+        X509FileImporter x509Importer;
         x509Importer = new X509FileImporter(new File(importDir));
         importedX509Ids = x509Importer.importClientCertsAndKeys(createUsersFromCN == YES);
 
@@ -241,42 +240,40 @@ public class UserImportFile extends UserImport {
     private Hashtable<String, String> tryLinkingCertificatesAndUsers(Vector<String> importedX509Ids, Hashtable<String, String> importedUsers) {
         Hashtable<String, String> usersWithoutCertificate = HashtableUtils.copyDeep(importedUsers);
 
-        for (Iterator<String> it = importedX509Ids.iterator(); it.hasNext();) {
-            String x509id = it.next();
-
+        for (String x509id : importedX509Ids) {
             X509 x509 = X509.getX509ById(Integer.parseInt(x509id));
             String subject = x509.getSubject();
             String username = X509Utils.getCnFromSubject(subject);
-            
+
             // link users and certificates
             String userid = importedUsers.get(username);
             if (userid != null) {
-                
+
                 // link the user to the cert in _unassigned
                 if (linkCertificateAndUser(userid, x509)) {
-                    
-                	try{
-                		X509Action.exportToFilesystem(x509id);
-                	} catch(Exception e) {
-                	    logger.severe("Couldn't export cert to userdir, aborting import process"+e.toString());
-                        return null;
-                	}
-                    
 
-                    String oldX509File = x509.getPath()+x509.getFileName();
-                	x509.setPath(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + 
-                				 username + File.separator);
-                    x509.setFileName(username+"_"+Integer.toString(userid.hashCode())+".crt");
-                    
+                    try {
+                        X509Action.exportToFilesystem(x509id);
+                    } catch (Exception e) {
+                        logger.severe("Couldn't export cert to userdir, aborting import process" + e.toString());
+                        return null;
+                    }
+
+
+                    String oldX509File = x509.getPath() + x509.getFileName();
+                    x509.setPath(Configuration.getInstance().CERT_EXPORT_PATH + File.separator +
+                            username + File.separator);
+                    x509.setFileName(username + "_" + Integer.toString(userid.hashCode()) + ".crt");
+
                     // link the user to the cert in his folder
-                	if(linkCertificateAndUser(userid, x509)) {
-                        
-                		usersWithoutCertificate.remove(username);
-                		UserImport.decNotLinkedCerts();
-                        
+                    if (linkCertificateAndUser(userid, x509)) {
+
+                        usersWithoutCertificate.remove(username);
+                        UserImport.decNotLinkedCerts();
+
                         new File(oldX509File).delete();
-                        new File(oldX509File.replace(".crt", ".key")).delete();           
-                	}
+                        new File(oldX509File.replace(".crt", ".key")).delete();
+                    }
                 }
             }
 
@@ -300,8 +297,7 @@ public class UserImportFile extends UserImport {
             return usersWithoutCertificate;
         
         Hashtable<String, String> usersWithoutCertificateClone = HashtableUtils.copyDeep(usersWithoutCertificate);
-        for (Iterator<String> iterator = usersWithoutCertificateClone.keySet().iterator(); iterator.hasNext();) {
-            String username = (String) iterator.next();
+        for (String username : usersWithoutCertificateClone.keySet()) {
             int userid = UserQueries.getUserId(username);
             if (userid > -1) {
                 User user = new User(userid + "");
@@ -358,8 +354,7 @@ public class UserImportFile extends UserImport {
 
         // import userfile
         String content = readUserfile();
-        Hashtable<String, String> importedUsers = importUsersFromFile(content);
-        return importedUsers;
+        return importUsersFromFile(content);
     }
 
 
@@ -380,8 +375,7 @@ public class UserImportFile extends UserImport {
             throw new VisualException(rb.getString("error.importClients.noroot"));
         }
 
-        for (Iterator<String> iterator = usersWithoutCertificate.keySet().iterator(); iterator.hasNext();) {
-            String username = (String) iterator.next();
+        for (String username : usersWithoutCertificate.keySet()) {
             try {
                 UserImport.incGeneratedCerts();
 
@@ -426,9 +420,7 @@ public class UserImportFile extends UserImport {
             keyInputStream.read(content);
             keyInputStream.close();
 
-            String contentStr = StringUtils.bytes2String(content);
-
-            return contentStr;
+            return StringUtils.bytes2String(content);
         } catch (FileNotFoundException fnfe) {
             logger.log(Level.WARNING, "userfile not found", fnfe);
             throw new Exception(rb.getString("error.importClients.fileerror"));
@@ -451,9 +443,8 @@ public class UserImportFile extends UserImport {
 
         if (content != null) {
             String[] lines = content.split("\n");
-            for (int i = 0; i < lines.length; i++) {
-                String line = lines[i];
-                if (line == null || line.indexOf(":") < 0)
+            for (String line : lines) {
+                if (line == null || !line.contains(":"))
                     continue;
 
                 String username = line.substring(0, line.indexOf(":"));
@@ -464,7 +455,7 @@ public class UserImportFile extends UserImport {
                     // user is not existing in database
                     // do not crypt the already crypted password
                     try {
-                        user = new User(username, password, -1, false, username, "");	// set cn=username
+                        user = new User(username, password, -1, false, username, "");    // set cn=username
                         UserImport.incImportedUsers();
                         returnTable.put(username, user.getUserid() + "");
                     } catch (Exception e) {
@@ -478,7 +469,7 @@ public class UserImportFile extends UserImport {
 
                     // update the crypted password
                     user.updatePasswordWithoutCrypt(password);
-                 //   returnTable.put(username, user.getUserid() + ""); #FIXME not necessary 
+                    //   returnTable.put(username, user.getUserid() + ""); #FIXME not necessary
                 }
             }
         }
