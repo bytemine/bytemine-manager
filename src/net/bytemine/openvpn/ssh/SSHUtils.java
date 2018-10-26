@@ -8,6 +8,8 @@
 package net.bytemine.openvpn.ssh;
 
 
+import java.util.Arrays;
+
 /**
  * Some useful methods for ssh communication
  *
@@ -24,13 +26,7 @@ public class SSHUtils {
      * @return true, if the code is known
      */
     public static boolean isServiceCodeKnown(String serviceCode) {
-        for (int i = 0; i < SSHConstants.KNOWN_SERVICE_CODES.length; i++) {
-            String knownCode = SSHConstants.KNOWN_SERVICE_CODES[i];
-            if (knownCode.equals(serviceCode)) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(SSHConstants.KNOWN_SERVICE_CODES).anyMatch(knownCode -> knownCode.equals(serviceCode));
     }
 
 }
