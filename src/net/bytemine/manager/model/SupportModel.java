@@ -35,9 +35,9 @@ public class SupportModel {
     private String managerBuild;
     private String systemProperties;
 
-    public static final int TYPE_BUG = 1;
+    private static final int TYPE_BUG = 1;
     public static final int TYPE_REQUEST = 2;
-    public static final int TYPE_FEEDBACK = 3;
+    private static final int TYPE_FEEDBACK = 3;
     
     public SupportModel(String name, String customer, String mail, String phone, String message, int type) {
         this.name = name;
@@ -51,12 +51,12 @@ public class SupportModel {
         managerBuild = Configuration.getInstance().MANAGER_BUILD;
         createDate = new Date();
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         Properties sysProps = System.getProperties();
         Enumeration<?> systemPropertiesKeys = sysProps.keys();
         while (systemPropertiesKeys.hasMoreElements()) {
             String prop = (String) systemPropertiesKeys.nextElement();
-            sb.append("    " + prop + ": " + sysProps.getProperty(prop) + "\n");
+            sb.append("    ").append(prop).append(": ").append(sysProps.getProperty(prop)).append("\n");
         }
         systemProperties = sb.toString();
     }
@@ -68,19 +68,17 @@ public class SupportModel {
      */
     public String printRequest() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd. MMMMM yyyy HH:mm:ss");
-        StringBuffer sb = new StringBuffer();
-        sb.append("Support request from: " + this.name + "\n");
-        sb.append("Date of request: " + sdf.format(this.createDate) + "\n");
-        sb.append("Type of request: " + getPrintableType() + "\n");
-        sb.append("Customer number: " + this.customer + "\n");
-        sb.append("Email address: " + this.mail + "\n");
-        sb.append("Phone number: " + this.phone + "\n");
-        sb.append("Manager version: " + this.managerVersion + "\n");
-        sb.append("Manager build: " + this.managerBuild + "\n");
-        sb.append("Message:\n" + this.message + "\n");
-        sb.append("\n\n");
-        sb.append("System properties:\n" + this.systemProperties);
-        return sb.toString();
+        return ("Support request from: " + this.name + "\n") +
+                "Date of request: " + sdf.format(this.createDate) + "\n" +
+                "Type of request: " + getPrintableType() + "\n" +
+                "Customer number: " + this.customer + "\n" +
+                "Email address: " + this.mail + "\n" +
+                "Phone number: " + this.phone + "\n" +
+                "Manager version: " + this.managerVersion + "\n" +
+                "Manager build: " + this.managerBuild + "\n" +
+                "Message:\n" + this.message + "\n" +
+                "\n\n" +
+                "System properties:\n" + this.systemProperties;
     }
     
     /**
