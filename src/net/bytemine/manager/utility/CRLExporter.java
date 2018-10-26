@@ -47,7 +47,7 @@ public class CRLExporter {
      * @return The stored CRL
      * @throws Exception
      */
-    public static CRL storeCRL(
+    static CRL storeCRL(
             int crlNumber, String contentStr, X509CRL x509crl,
             String createDateStr, String nextUpdateStr, String issuer)
             throws Exception {
@@ -55,7 +55,7 @@ public class CRLExporter {
 
         String crlSerialized = X509Serializer.getInstance().toXML(x509crl);
 
-        CRL crl = null;
+        CRL crl;
         int crlId = CRLQueries.getMaxCRLId();
         if (crlId <= 0)
             crl = new CRL(createDateStr);
@@ -100,11 +100,10 @@ public class CRLExporter {
      * @param crl The X509CRL object to export
      * @throws Exception
      */
-    public static String exportCRLToFile(X509CRL crl) throws Exception {
-        StringBuffer contentBuffer = new StringBuffer();
-        contentBuffer.append(crl.toString());
-        contentBuffer.append(X509Utils.addCRLHeader(crl.getEncoded()));
-        return exportCRLToFile(contentBuffer.toString());
+    static String exportCRLToFile(X509CRL crl) throws Exception {
+        String contentBuffer = crl.toString() +
+                X509Utils.addCRLHeader(crl.getEncoded());
+        return exportCRLToFile(contentBuffer);
     }
 
     /**
