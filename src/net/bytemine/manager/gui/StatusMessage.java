@@ -18,7 +18,7 @@ public class StatusMessage {
     private String message;
     
     public static final int TYPE_ERROR = 0;
-    public static final int TYPE_INFO = 1;
+    static final int TYPE_INFO = 1;
     public static final int TYPE_CONFIRM = 2;
     
     public StatusMessage(String message) {

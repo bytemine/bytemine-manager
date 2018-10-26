@@ -56,7 +56,7 @@ public class SupportForm {
         sf.show();
     }
     
-    public SupportForm() {
+    SupportForm() {
         
     }
     
@@ -86,7 +86,7 @@ public class SupportForm {
             }
             
             public void keyReleased(KeyEvent e) {
-                if (!"".equals(nameField.getText()))
+                if (!nameField.getText().isEmpty())
                     nameField.setBackground(Color.WHITE);
             }
             
@@ -106,7 +106,7 @@ public class SupportForm {
             }
             
             public void keyReleased(KeyEvent e) {
-                if (!"".equals(mailField.getText()))
+                if (!mailField.getText().isEmpty())
                     mailField.setBackground(Color.WHITE);
             }
             
@@ -126,7 +126,7 @@ public class SupportForm {
             }
             
             public void keyReleased(KeyEvent e) {
-                if (!"".equals(message.getText()))
+                if (!message.getText().isEmpty())
                     message.setBackground(Color.WHITE);
             }
             
@@ -148,56 +148,48 @@ public class SupportForm {
         mainPanel.add(scroll, "height 100:550:700, growx, growy");
         
         sendButton = new JButton(rb.getString(rbPrefix + "sendbutton"));
-        sendButton.addActionListener(new ActionListener() {
-            
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    boolean valid = ValidatorAction.validateSupportRequest(
-                            nameField.getText(), mailField.getText(), message.getText());
-                    if (valid) {
-                        SupportModel model = new SupportModel(
-                                nameField.getText(), 
-                                customerField.getText(), 
-                                mailField.getText(), 
-                                phoneField.getText(), 
-                                message.getText(),
-                                SupportModel.TYPE_REQUEST);
+        sendButton.addActionListener(e -> {
+            try {
+                boolean valid = ValidatorAction.validateSupportRequest(
+                        nameField.getText(), mailField.getText(), message.getText());
+                if (valid) {
+                    SupportModel model = new SupportModel(
+                            nameField.getText(),
+                            customerField.getText(),
+                            mailField.getText(),
+                            phoneField.getText(),
+                            message.getText(),
+                            SupportModel.TYPE_REQUEST);
 
-                        // disable the buttons
-                        disableButtons();
-                        // send the request
-                        EmailUtils.sendSupportRequest(model);
-                    }
-                } catch (ValidationException ve) {
-                    // set focus on error field
-                    if (ve.getCode() > 0) {
-                        int code = ve.getCode();
-                        switch (code) {
-                            case 1: nameField.requestFocus(); nameField.setBackground(Constants.COLOR_ERROR); break;
-                            case 2: mailField.requestFocus(); mailField.setBackground(Constants.COLOR_ERROR); break;
-                            case 3: message.requestFocus(); message.setBackground(Constants.COLOR_ERROR); break;
-                            default: break;
-                        }
-                    }
-                    
-                    // show validation error dialog
-                    CustomJOptionPane.showMessageDialog(supportFrame,
-                            ve.getMessage(),
-                            ve.getTitle(),
-                            CustomJOptionPane.ERROR_MESSAGE);
-                    
-                } catch (Exception ex) {
-                    new VisualException(supportFrame, ex);
+                    // disable the buttons
+                    disableButtons();
+                    // send the request
+                    EmailUtils.sendSupportRequest(model);
                 }
+            } catch (ValidationException ve) {
+                // set focus on error field
+                if (ve.getCode() > 0) {
+                    int code = ve.getCode();
+                    switch (code) {
+                        case 1: nameField.requestFocus(); nameField.setBackground(Constants.COLOR_ERROR); break;
+                        case 2: mailField.requestFocus(); mailField.setBackground(Constants.COLOR_ERROR); break;
+                        case 3: message.requestFocus(); message.setBackground(Constants.COLOR_ERROR); break;
+                        default: break;
+                    }
+                }
+
+                // show validation error dialog
+                CustomJOptionPane.showMessageDialog(supportFrame,
+                        ve.getMessage(),
+                        ve.getTitle(),
+                        CustomJOptionPane.ERROR_MESSAGE);
+
+            } catch (Exception ex) {
+                new VisualException(supportFrame, ex);
             }
         });
         cancelButton = new JButton(rb.getString(rbPrefix + "cancelbutton"));
-        cancelButton.addActionListener(new ActionListener() {
-            
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dispose());
         JPanel buttonPanel = new JPanel(new MigLayout("align right"));
         buttonPanel.add(sendButton);
         buttonPanel.add(cancelButton);
@@ -232,7 +224,7 @@ public class SupportForm {
     /**
      * deactivates the buttons
      */
-    public void disableButtons() {
+    private void disableButtons() {
         sendButton.setEnabled(false);
         cancelButton.setEnabled(false);
     }
