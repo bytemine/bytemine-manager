@@ -81,7 +81,7 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
      *
      * @param x509id The ID of the certificate
      */
-    public static void revokeCertificateByID(int x509id) throws Exception {
+    private static void revokeCertificateByID(int x509id) throws Exception {
         X509 x509 = new X509(x509id);
         x509 = X509DAO.getInstance().read(x509);
 
@@ -146,16 +146,14 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
      *
      * @return The root certificate as X509Certificate
      */
-    public static X509Certificate loadRootCertificate() throws Exception {
+    static X509Certificate loadRootCertificate() throws Exception {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         String rootId = X509Queries.getRootCertId();
         if (rootId == null)
             throw new Exception(rb.getString("dialog.newuser.certerror.text"));
 
-        X509Certificate rootCert = loadCertificate(Integer.parseInt(rootId));
-
-        return rootCert;
+        return loadCertificate(Integer.parseInt(rootId));
     }
 
 
@@ -171,12 +169,10 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
 
         X509 rootX509 = X509.getX509ById(Integer.parseInt(rootId));
 
-        PrivateKey rootCertPrivateKey = (PrivateKey)
+        return (PrivateKey)
                 X509Serializer.getInstance().fromXML(
                         rootX509.getKey()
                 );
-
-        return rootCertPrivateKey;
     }
 
 
@@ -192,12 +188,10 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
 
         X509 interX509 = X509.getX509ById(Integer.parseInt(interId));
 
-        PrivateKey interCertPrivateKey = (PrivateKey)
+        return (PrivateKey)
                 X509Serializer.getInstance().fromXML(
                         interX509.getKey()
                 );
-
-        return interCertPrivateKey;
     }
 
 
@@ -208,12 +202,10 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
      */
     public static PrivateKey extractRootPrivateKey(X509 rootX509) throws Exception {
 
-        PrivateKey rootCertPrivateKey = (PrivateKey)
+        return (PrivateKey)
                 X509Serializer.getInstance().fromXML(
                         rootX509.getKey()
                 );
-
-        return rootCertPrivateKey;
     }
 
 
@@ -223,15 +215,13 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
      * @param x509Id The id of the certificate to load
      * @return The certificate as X509Certificate
      */
-    public static X509Certificate loadCertificate(int x509Id) throws Exception {
+    private static X509Certificate loadCertificate(int x509Id) throws Exception {
         X509 rootX509 = X509.getX509ById(x509Id);
 
-        X509Certificate cert = (X509Certificate)
+        return (X509Certificate)
                 X509Serializer.getInstance().fromXML(
                         rootX509.getCertSerialized()
                 );
-
-        return cert;
     }
 
 
@@ -247,9 +237,7 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
         if (rootId == null)
             throw new Exception(rb.getString("dialog.newuser.certerror.text"));
 
-        X509 rootX509 = X509.getX509ById(Integer.parseInt(rootId));
-
-        return rootX509;
+        return X509.getX509ById(Integer.parseInt(rootId));
     }
 
 
@@ -265,9 +253,7 @@ public class X509Utils extends net.bytemine.utility.X509Utils {
         if (interId == null)
             throw new Exception(rb.getString("dialog.newuser.certerror.text"));
 
-        X509 interX509 = X509.getX509ById(Integer.parseInt(interId));
-
-        return interX509;
+        return X509.getX509ById(Integer.parseInt(interId));
     }
 
 }
