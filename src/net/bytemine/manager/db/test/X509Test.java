@@ -22,7 +22,7 @@ public class X509Test {
     }
 
 
-    public static void createRootCertificate() {
+    private static void createRootCertificate() {
         try {
             // create new certificate
             //X509Generator generator = new X509Generator();
@@ -32,12 +32,10 @@ public class X509Test {
 
             // load this x509 by id
             X509 x509 = X509.getX509ById(id);
-            if (x509 != null)
-                System.out.println("Success: loaded x509 with id " + id + ": " + x509.getSerial());
-            else
-                System.out.println("Error: could not load x509 with id " + id);
+            System.out.println(x509 != null ? "Success: loaded x509 with id " + id + ": " + x509.getSerial() : "Error: could not load x509 with id " + id);
 
             // show some attributes
+            assert x509 != null;
             System.out.println("    Issuer: " + x509.getIssuer());
 
 
@@ -47,10 +45,7 @@ public class X509Test {
             // try to load, should fail
             x509 = X509.getX509ById(id);
 
-            if (x509 != null)
-                System.out.println("Error: x509 with id " + id + " could not be deleted");
-            else
-                System.out.println("Success: x509 with id " + id + " has been deleted");
+            System.out.println(x509 != null ? "Error: x509 with id " + id + " could not be deleted" : "Success: x509 with id " + id + " has been deleted");
 
         } catch (Exception e) {
             e.printStackTrace();

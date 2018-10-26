@@ -22,7 +22,7 @@ import net.bytemine.manager.db.ServerQueries;
 public class BatchUserSync {
     
     private static BatchUserSync instance = null;
-    private Vector<String> serversToSync = new Vector<String>();
+    private Vector<String> serversToSync = new Vector<>();
     
     private BatchUserSync() {
     }
@@ -37,15 +37,11 @@ public class BatchUserSync {
     
     public void startBatchSync() {
         Vector<String[]> servers = ServerQueries.getServerOverview();
-        for (Iterator<String[]> iterator = servers.iterator(); iterator.hasNext();) {
-            String[] server = (String[]) iterator.next();
-            String serverId = server[0];
-            serversToSync.add(serverId);
-        }
+        servers.stream().map(server -> server[0]).forEach(serverId -> serversToSync.add(serverId));
         startNextSync();
     }
 
-    public void startNextSync() {
+    void startNextSync() {
         if (serversToSync.isEmpty())
             return;
         

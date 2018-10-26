@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -36,19 +37,19 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
 
     private static final long serialVersionUID = 7254507708527347679L;
 
-    ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+    private ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-    protected int sortCol = 0;
-    protected boolean isSortAsc = true;
+    private int sortCol = 0;
+    private boolean isSortAsc = true;
 
     // the column names to display    
-    String[] columnNames = {
+    private String[] columnNames = {
             rb.getString("server.overview.column2"),
             rb.getString("server.overview.column3"),
             rb.getString("server.overview.column4")};
 
     // contains the data of a table row
-    Vector<String[]> rowData = ServerQueries.getServerOverviewForTable(this);
+    private Vector<String[]> rowData = ServerQueries.getServerOverviewForTable(this);
 
     // map in which row numbers and ids are stored as key-value-pairs
     private static HashMap<String, String> idRowMapping;
@@ -72,7 +73,7 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
      */
     public void reloadData() {
         rowData = ServerQueries.getServerOverviewForTable(this);
-        Collections.sort(rowData, new ServerComparator(isSortAsc, sortCol));
+        rowData.sort(new ServerComparator(isSortAsc, sortCol));
         refreshMapping();
         fireTableDataChanged();
     }
@@ -83,8 +84,7 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
      */
     public void refreshMapping() {
         int row = 0;
-        for (Iterator<String[]> iterator = rowData.iterator(); iterator.hasNext();) {
-            String[] rowData = (String[]) iterator.next();
+        for (String[] rowData : rowData) {
             addIdRowMapping(row + "", rowData[3]);
             row++;
         }
@@ -110,7 +110,7 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
 
 
     public Object getValueAt(int row, int col) {
-        Object[] rowStr = (Object[]) rowData.get(row);
+        Object[] rowStr = rowData.get(row);
         return rowStr[col];
     }
 
@@ -121,7 +121,7 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
 
 
     public void setValueAt(String value, int row, int col) {
-        Object[] rowStr = (Object[]) rowData.get(row);
+        Object[] rowStr = rowData.get(row);
         rowStr[col] = value;
         fireTableCellUpdated(row, col);
     }
@@ -137,7 +137,7 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
 
     public void addIdRowMapping(String key, String value) {
         if (idRowMapping == null)
-            idRowMapping = new HashMap<String, String>();
+            idRowMapping = new HashMap<>();
         idRowMapping.put(key, value);
     }
 
@@ -162,13 +162,10 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
             else
                 sortCol = modelIndex;
 
-            for (int i = 0; i < getColumnCount(); i++) {
-                TableColumn column = colModel.getColumn(i);
-                column.setHeaderValue(getColumnName(column.getModelIndex()));
-            }
+            IntStream.range(0, getColumnCount()).mapToObj(colModel::getColumn).forEach(column -> column.setHeaderValue(getColumnName(column.getModelIndex())));
             table.getTableHeader().repaint();
 
-            Collections.sort(rowData, new X509Comparator(isSortAsc, sortCol));
+            rowData.sort(new X509Comparator(isSortAsc, sortCol));
             // refresh the mapping
             refreshMapping();
             
@@ -182,35 +179,16 @@ public class ServerOverviewTableModel extends AbstractTableModel implements Abst
 
 
 class ServerComparator implements Comparator<String[]> {
-    protected boolean isSortAsc;
-    protected int sortCol;
+    private boolean isSortAsc;
+    private int sortCol;
 
-    public ServerComparator(boolean sortAsc, int sortCol) {
+    ServerComparator(boolean sortAsc, int sortCol) {
         this.isSortAsc = sortAsc;
         this.sortCol = sortCol;
     }
 
     public int compare(String[] s1, String[] s2) {
-        int result = 0;
-        String i1_str = s1[sortCol];
-        String i2_str = s2[sortCol];
-        if (i1_str == null)
-            i1_str = "";
-        if (i2_str == null)
-            i2_str = "";
-
-        if (StringUtils.isDigit(i1_str) && StringUtils.isDigit(i2_str)) {
-            Integer i1 = Integer.parseInt(i1_str);
-            Integer i2 = Integer.parseInt(i2_str);
-            result = i1.compareTo(i2);
-        } else {
-            result = i1_str.compareTo(i2_str);
-        }
-
-
-        if (!isSortAsc)
-            result = -result;
-        return result;
+        return compare(s1, s2);
     }
 
 

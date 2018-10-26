@@ -27,15 +27,8 @@ public class CertificateFilter extends FileFilter {
         }
 
         String extension = FileUtils.getExtension(file);
-        if (extension != null) {
-            if (extension.equals(Constants.DEFAULT_CERT_EXTENSION)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+        return extension.equals(Constants.DEFAULT_CERT_EXTENSION);
 
-        return false;
     }
 
 

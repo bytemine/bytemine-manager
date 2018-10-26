@@ -76,18 +76,16 @@ public class ConfigurationAction {
                     Configuration.getInstance().setPkcs12PasswordType(Constants.PKCS12_SINGLE_PASSWORD);
             }
 
-            if (!useDefaultDB && dbPath != null && !"".equals(dbPath)) {
-                if (!Configuration.getInstance().JDBC_PATH.equals(dbPath)) {
-                    logger.info("Setting new DB Path: " + dbPath);
-                    ConfigurationQueries.setValue(ConfigurationQueries.DB_PATH, dbPath);
-                    ConfigurationQueries.setValue(ConfigurationQueries.DB_UP_TO_DATE, Constants.DB_OUTDATED);
-                    
-                    // also store these settings in the internal database
-                    ConfigurationQueries.setValue(ConfigurationQueries.DB_PATH, dbPath, DBConnector.getInstance().getBaseConnection());
-                    ConfigurationQueries.setValue(ConfigurationQueries.DB_UP_TO_DATE, Constants.DB_OUTDATED, DBConnector.getInstance().getBaseConnection());
-                    skipFollowingDialogs = true;
-                    showRestartDialog = true;
-                }
+            if (!useDefaultDB && dbPath != null && !"".equals(dbPath) && !Configuration.getInstance().JDBC_PATH.equals(dbPath)) {
+                logger.info("Setting new DB Path: " + dbPath);
+                ConfigurationQueries.setValue(ConfigurationQueries.DB_PATH, dbPath);
+                ConfigurationQueries.setValue(ConfigurationQueries.DB_UP_TO_DATE, Constants.DB_OUTDATED);
+
+                // also store these settings in the internal database
+                ConfigurationQueries.setValue(ConfigurationQueries.DB_PATH, dbPath, DBConnector.getInstance().getBaseConnection());
+                ConfigurationQueries.setValue(ConfigurationQueries.DB_UP_TO_DATE, Constants.DB_OUTDATED, DBConnector.getInstance().getBaseConnection());
+                skipFollowingDialogs = true;
+                showRestartDialog = true;
             }
             
             // setting has changed, restart necessary
@@ -213,15 +211,9 @@ public class ConfigurationAction {
     ) throws Exception {
 
         Configuration.getInstance().setUpdateAutomatically(automaticUpdate);
-        if (!"".equals(serverPath))
-            Configuration.getInstance().setUpdateServerPath(serverPath);
-        else
-            Configuration.getInstance().setUpdateServerPath(Constants.UPDATE_HTTPS_SERVER);
+        Configuration.getInstance().setUpdateServerPath(!"".equals(serverPath) ? serverPath : Constants.UPDATE_HTTPS_SERVER);
 
-        if (!"".equals(repoPath))
-            Configuration.getInstance().setUpdateRepository(repoPath);
-        else
-            Configuration.getInstance().setUpdateRepository(Constants.UPDATE_REPOSITORY);
+        Configuration.getInstance().setUpdateRepository(!"".equals(repoPath) ? repoPath : Constants.UPDATE_REPOSITORY);
 
         if (proxy != null && !"".equals(proxy))
             Configuration.getInstance().setUpdateProxy(proxy);
@@ -238,11 +230,7 @@ public class ConfigurationAction {
 
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
             try {
-                KeystoreMgmt ksUtils;
-                if (pemSelected)
-                    ksUtils = new KeystoreMgmt(crtPath);
-                else
-                    ksUtils = new KeystoreMgmt(crtPath, keyPath);
+                KeystoreMgmt ksUtils = pemSelected ? new KeystoreMgmt(crtPath) : new KeystoreMgmt(crtPath, keyPath);
                 ksUtils.store();
 
             } catch (FileNotFoundException e) {
@@ -267,15 +255,14 @@ public class ConfigurationAction {
      * writes all configurations to filesystem
      */
     public static void dumpConfigurationToFile() {
-        StringBuffer dump = new StringBuffer();
-        dump.append(new Date() + "\n");
+        StringBuilder dump = new StringBuilder();
+        dump.append(new Date()).append("\n");
         
         if (ConfigurationQueries.areConfigurationsExisiting()) {
             Hashtable<String, String> configs = ConfigurationQueries.getConfigurations();
-            for (Iterator<String> iterator = configs.keySet().iterator(); iterator.hasNext();) {
-                String key = (String) iterator.next();
+            for (String key : configs.keySet()) {
                 String value = configs.get(key);
-                dump.append("\n" + key + ": " + value);
+                dump.append("\n").append(key).append(": ").append(value);
             }
         }
         try {

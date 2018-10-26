@@ -57,7 +57,7 @@ public class UserDetails {
 
     private static JScrollPane scroller = new JScrollPane();
 
-    private static final Vector<String> connectedServers = new Vector<String>();
+    private static final Vector<String> connectedServers = new Vector<>();
 
     private static JFrame parentFrame;
     private static JFrame userDetailsFrame = null;
@@ -76,7 +76,7 @@ public class UserDetails {
         userid = id;
     }
 
-    public UserDetails(JFrame parent, String id, String username, String x509id) {
+    UserDetails(JFrame parent, String id, String username, String x509id) {
         parentFrame = parent;
         userid = id;
         this.username = username;
@@ -84,11 +84,11 @@ public class UserDetails {
     }
     
 
-    public void showUserDetailsFrame() {
+    void showUserDetailsFrame() {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
@@ -152,13 +152,13 @@ public class UserDetails {
      * If there is no parent frame just pass null instead.
      * @return Jpanel with users details
      */
-    public JPanel createUserDetailsPanel(final JFrame parentFrame) {
+    private JPanel createUserDetailsPanel(final JFrame parentFrame) {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
         if (userid == null)
             userid = "-1";
         int uId = Integer.parseInt(userid);
-        final boolean newUser = (uId <= 0) ? true : false;
+        final boolean newUser = uId <= 0;
         
         // retrieve data from database
         final String[] details = UserQueries.getUserDetails(userid);
@@ -186,7 +186,7 @@ public class UserDetails {
                 }
                 
                 public void keyReleased(KeyEvent e) {
-                    if (!"".equals(newpasswordField.getText()))
+                    if (!newpasswordField.getText().isEmpty())
                         newpasswordField.setBackground(Color.WHITE);
                     ManagerGUI.serverUserTreeModel.setUnsavedData(true);
                     saveButton.setText(rb.getString("user.details.savebutton") + " *");
@@ -225,7 +225,7 @@ public class UserDetails {
         	
         mainPanel.add(usernameField, "span, growx, wrap");
 
-        JLabel passwordLabel = null;
+        JLabel passwordLabel;
         if (!newUser) {
             passwordLabel = new JLabel(rb.getString("user.details.newpassword"));
             passwordLabel.setFont(Constants.FONT_BOLD);
@@ -246,25 +246,7 @@ public class UserDetails {
                 ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
         );
         expandButton.setSize(20, 20);
-        expandButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            boolean expanded = false;
-
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (((JButton) evt.getSource()).isEnabled()) {
-                    extensionPanel.setVisible(!expanded);
-                    if (expanded)
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_EXPAND, "expand")
-                        );
-                    else
-                        expandButton.setIcon(
-                                ImageUtils.createImageIcon(Constants.ICON_COLLAPSE, "collapse")
-                        );
-                    mainPanel.revalidate();
-                    expanded = !expanded;
-                }
-            }
-        });
+        ServerDetails.onMouseClicked(mainPanel, extensionPanel, expandButton);
         JPanel expandTopPanel = new JPanel(new MigLayout("insets 0"));
         JLabel expandLabel = new JLabel(rb.getString("user.details.expandOptions"));
         expandLabel.setFont(Constants.FONT_PLAIN);
@@ -281,7 +263,7 @@ public class UserDetails {
             }
             
             public void keyReleased(KeyEvent e) {
-                if (!"".equals(usernameField.getText()))
+                if (!usernameField.getText().isEmpty())
                     usernameField.setBackground(Color.WHITE);
                 if (newUser && x509id==null)
                     cnField.setText(usernameField.getText());
@@ -319,7 +301,7 @@ public class UserDetails {
         clientValidForField.setHorizontalAlignment(JTextField.RIGHT);
         clientValidForField.setText(Configuration.getInstance().X509_CLIENT_VALID_FOR);
 
-        final JComboBox clientValidityUnitBox = new JComboBox();
+        final JComboBox<String> clientValidityUnitBox = new JComboBox<>();
         clientValidityUnitBox.addItem(rb.getString("units.days"));
         clientValidityUnitBox.addItem(rb.getString("units.weeks"));
         clientValidityUnitBox.addItem(rb.getString("units.years"));
@@ -336,39 +318,33 @@ public class UserDetails {
         final JPanel certPanel = new JPanel(new MigLayout("insets 0"));
         JButton reassignButton = new JButton(rb.getString("user.details.reassignbutton"));
         reassignButton.setToolTipText(rb.getString("user.details.assignbutton_tt"));
-        reassignButton.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent evt) {
-                User user = new User(userid);
-                user = UserDAO.getInstance().read(user);
+        reassignButton.addActionListener(evt -> {
+            User user = new User(userid);
+            user = UserDAO.getInstance().read(user);
 
-                X509Manager x509Manager = null;
-                if (parentFrame != null) {
-                    x509Manager = new X509Manager(parentFrame, user);
-                    x509Manager.showX509ManagerFrame();
-                } else {
-                    x509Manager = new X509Manager(mainPanel, user);
-                    JPanel x509Panel = x509Manager.createX509ManagerPanel();
-                    ManagerGUI.updateServerUserDetails(x509Panel);
-                }
+            X509Manager x509Manager;
+            if (parentFrame != null) {
+                x509Manager = new X509Manager(parentFrame, user);
+                x509Manager.showX509ManagerFrame();
+            } else {
+                x509Manager = new X509Manager(mainPanel, user);
+                JPanel x509Panel = x509Manager.createX509ManagerPanel();
+                ManagerGUI.updateServerUserDetails(x509Panel);
             }
         });
         
         JButton exportButton = new JButton(rb.getString("detailsFrame.exportbutton"));
         exportButton.setToolTipText(rb.getString("user.details.exportbutton_tt"));
-        exportButton.addActionListener(new ActionListener() {
-
-        	public void actionPerformed(ActionEvent evt)
-            {
-                try {
-                    String path = X509Action.exportToFilesystem(details[3]);
-                    CustomJOptionPane.showMessageDialog(mainPanel,
-                            rb.getString("detailsFrame.exportmessage") 
-                                +"\n" + path,
-                            rb.getString("detailsFrame.exporttitle"),
-                            CustomJOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception e) {
-                    new VisualException(rb.getString("detailsFrame.exporterror"));
-                }
+        exportButton.addActionListener(evt -> {
+            try {
+                String path = X509Action.exportToFilesystem(details[3]);
+                CustomJOptionPane.showMessageDialog(mainPanel,
+                        rb.getString("detailsFrame.exportmessage")
+                            +"\n" + path,
+                        rb.getString("detailsFrame.exporttitle"),
+                        CustomJOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                new VisualException(rb.getString("detailsFrame.exporterror"));
             }
         });
 
@@ -459,35 +435,29 @@ public class UserDetails {
 
                 try {
 
-                    if (newUser && x509id==null) {
+                    if (newUser && x509id == null) {
                         // save
                         if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText(), yubiField.getText())) {
                             String password = null;
                             if (Configuration.getInstance().PKCS12_PASSWORD_TYPE
-                                            == Constants.PKCS12_SINGLE_PASSWORD) {
+                                    == Constants.PKCS12_SINGLE_PASSWORD) {
                                 // show password input dialog
                                 while (password == null) {
                                     String dialogHeadline = rb.getString("dialog.pkcs12password.headline1");
                                     dialogHeadline += " " + usernameField.getText();
                                     dialogHeadline += " " + rb.getString("dialog.pkcs12password.headline2");
-                                    
+
                                     password = Dialogs.showPKCS12PasswordDialog(ManagerGUI.mainFrame, dialogHeadline);
-                                    if (password == null)
-                                       if (Dialogs.showReallySkipPkcs12Password(ManagerGUI.mainFrame))
-                                            break;
+                                    if (password == null && Dialogs.showReallySkipPkcs12Password(ManagerGUI.mainFrame))
+                                        break;
                                 }
                             }
-                            
-                            String clientValidFor= clientValidForField.getText();
-                            String clientValidityUnit= (String) clientValidityUnitBox.getSelectedItem();
-                            if(! clientValidityUnit.equals(rb.getString("units.days"))) {
-                                if (clientValidityUnit.equals(rb.getString("units.weeks"))) {
-                                    clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 7);
-                                } else if (clientValidityUnit.equals(rb.getString("units.years"))) {
-                                    clientValidFor= Integer.toString(Integer.parseInt(clientValidFor) * 365);
-                                }
-                            }
-                            
+
+                            String clientValidFor = clientValidForField.getText();
+                            String clientValidityUnit = (String) clientValidityUnitBox.getSelectedItem();
+                            assert clientValidityUnit != null;
+                            clientValidFor = Dialogs.getString(rb, clientValidFor, clientValidityUnit);
+
                             int userid = UserAction.createUserAndCertificate(
                                     usernameField.getText(),
                                     newpasswordField.getText(),
@@ -499,37 +469,37 @@ public class UserDetails {
                             );
                             // connect server and users
                             UserQueries.reconnectServersAndUser(userid, connectedServers);
-                            
+
                             // create vpn-config file
                             if (Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES)
                                 UserAction.createVPNConfigFile(User.getUserByID(userid));
-                            
+
                             // update synced servers
                             UserAction.updateSyncedServers(Integer.toString(userid));
                         }
-                    } else if(newUser && x509id!=null) {
-                    	// save
+                    } else if (newUser && x509id != null) {
+                        // save
                         if (ValidatorAction.validateUserCreation(usernameField.getText(), newpasswordField.getText(), yubiField.getText())) {
-                        	
-                            
-                            User user = new User(username, newpasswordField.getText(), 
-                            								Integer.parseInt(x509id), true,
-                            					cnField.getText(),
-                            					ouField.getText(),
-                            					yubiField.getText());
+
+
+                            User user = new User(username, newpasswordField.getText(),
+                                    Integer.parseInt(x509id), true,
+                                    cnField.getText(),
+                                    ouField.getText(),
+                                    yubiField.getText());
                             int userid = user.getUserid();
-                            
+
                             // connect server and users
                             UserQueries.reconnectServersAndUser(userid, connectedServers);
-                            
+
                             // create vpn-config file
                             if (Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES)
                                 UserAction.createVPNConfigFile(User.getUserByID(userid));
-                            
+
                             // update synced servers
                             UserAction.updateSyncedServers(Integer.toString(userid));
                         }
-                    } else {
+                    } else
                         //update
                         if (ValidatorAction.validateUserUpdate(usernameField.getText(), details[1], newpasswordField.getText(), yubiField.getText())) {
                             UserAction.updateUser(
@@ -542,16 +512,15 @@ public class UserDetails {
                             );
                             // connect server and users
                             UserQueries.reconnectServersAndUser(idField.getText(), connectedServers);
-                            
+
                             // create vpn-config file
                             if (Configuration.getInstance().CREATE_OPENVPN_CONFIG_FILES)
                                 UserAction.createVPNConfigFile(User.getUserByID(Integer.parseInt(idField.getText())));
-                            
+
                             // update synced servers
                             UserAction.updateSyncedServers(idField.getText());
                         }
-                    }
-                    
+
                     ManagerGUI.serverUserTreeModel.setUnsavedData(false);
                     saveButton.setText(rb.getString("user.details.savebutton"));
 
@@ -565,15 +534,15 @@ public class UserDetails {
                         }
 
                         CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                         rb.getString("dialog.newuser.success.save"));
+                                rb.getString("dialog.newuser.success.save"));
                     } else {
-                        if (parentFrame!= null)
+                        if (parentFrame != null)
                             parentFrame.dispose();
                         if (userDetailsFrame != null)
                             userDetailsFrame.setTitle(title);
 
                         CustomJOptionPane.showMessageDialog(ManagerGUI.mainFrame,
-                                        rb.getString("user.dialog.success.save"));
+                                rb.getString("user.dialog.success.save"));
                     }
 
                     ManagerGUI.reloadServerUserTree();
@@ -585,18 +554,25 @@ public class UserDetails {
                             ve.getMessage(),
                             ve.getTitle(),
                             CustomJOptionPane.ERROR_MESSAGE);
-                    
+
                     // set focus on error field
                     if (ve.getCode() > 0) {
                         int code = ve.getCode();
                         switch (code) {
-                        case 1: usernameField.setBackground(Constants.COLOR_ERROR);
-                        		usernameField.requestFocus(); break;
-                        case 2: newpasswordField.setBackground(Constants.COLOR_ERROR);
-                        		newpasswordField.requestFocus(); break;
-                        case 3: yubiField.setBackground(Constants.COLOR_ERROR);
-                                yubiField.requestFocus(); break;
-                        default: break;
+                            case 1:
+                                usernameField.setBackground(Constants.COLOR_ERROR);
+                                usernameField.requestFocus();
+                                break;
+                            case 2:
+                                newpasswordField.setBackground(Constants.COLOR_ERROR);
+                                newpasswordField.requestFocus();
+                                break;
+                            case 3:
+                                yubiField.setBackground(Constants.COLOR_ERROR);
+                                yubiField.requestFocus();
+                                break;
+                            default:
+                                break;
                         }
                     }
                 } catch (Exception e) {
@@ -616,17 +592,14 @@ public class UserDetails {
             buttonPanel2.add(deleteButton);
 
         JButton cancelButton = new JButton(rb.getString("dialog.updateconfiguration.cancelbutton"));
-        cancelButton.addActionListener(new ActionListener() {
+        cancelButton.addActionListener(e -> {
+            if (ManagerGUI.serverUserTreeModel != null)
+                ManagerGUI.serverUserTreeModel.setUnsavedData(false);
 
-            public void actionPerformed(ActionEvent e) {
-                if (ManagerGUI.serverUserTreeModel != null)
-                    ManagerGUI.serverUserTreeModel.setUnsavedData(false);
-
-                if (parentFrame != null)
-                    userDetailsFrame.dispose();
-                else
-                    ManagerGUI.clearRightPanel();
-            }
+            if (parentFrame != null)
+                userDetailsFrame.dispose();
+            else
+                ManagerGUI.clearRightPanel();
         });
 
         buttonPanel2.add(cancelButton);
@@ -665,29 +638,25 @@ public class UserDetails {
 
         Vector<String[]> allUsers = ServerQueries.getServerOverview(ServerQueries.order_name);
 
-        for (Iterator<String[]> it = allUsers.iterator(); it.hasNext();) {
-            String[] strings = it.next();
+        allUsers.forEach(strings -> {
             final String serverid = strings[0];
             JCheckBox box = new JCheckBox(strings[1] + ", " + strings[2]);
             if (connectedServers != null && connectedServers.contains(strings[0]))
                 box.setSelected(true);
             else
                 box.setSelected(false);
-
-            box.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    AbstractButton checkbox = (AbstractButton) e.getSource();
-                    boolean selected = checkbox.getModel().isSelected();
-                    if (selected && !connectedServers.contains(serverid))
-                        connectedServers.add(serverid);
-                    else if (!selected && connectedServers.contains(serverid))
-                        connectedServers.remove(serverid);
+            box.addActionListener(e -> {
+                AbstractButton checkbox = (AbstractButton) e.getSource();
+                boolean selected = checkbox.getModel().isSelected();
+                assert connectedServers != null;
+                if (selected && !connectedServers.contains(serverid))
+                    connectedServers.add(serverid);
+                else if (!selected) {
+                    connectedServers.remove(serverid);
                 }
             });
-
             serverMgrPanel.add(box, "wrap");
-        }
+        });
 
         return new JScrollPane(serverMgrPanel);
     }
@@ -697,7 +666,7 @@ public class UserDetails {
         return parentFrame;
     }
 
-    public JFrame getUserDetailsFrame() {
+    JFrame getUserDetailsFrame() {
         return userDetailsFrame;
     }
     

@@ -15,10 +15,10 @@ import net.bytemine.manager.bean.Server;
 import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import net.bytemine.manager.Configuration;
 import net.bytemine.utility.FileUtils;
+
+import static org.junit.Assert.*;
 
 public class ServerActionTest {
     
@@ -45,7 +45,7 @@ public class ServerActionTest {
         testServerRemoval(id);
     }
     
-    public int testServerCreation() throws Exception {
+    private int testServerCreation() throws Exception {
     	int id = ServerAction.createServerAndCertificate("username", "keyfile",
     			true, "servername", "server_cn", "server_ou", "hostname", "userfile", "exportpath", "123",
     			"0", "456", "22", 0, "", "90", "1190", 0, false, "ccd (vpn)",
@@ -72,14 +72,14 @@ public class ServerActionTest {
         assertEquals("0", Integer.toString(server.getStatusType()));
         assertEquals("22", Integer.toString(server.getSshPort()));
 
-        assertEquals(false, server.getVpncc());
+        assertFalse(server.getVpncc());
         assertEquals("ccd (vpn)", server.getVpnccpath());
         assertEquals("10.1.1.", server.getVpnNetworkAddress());
         assertEquals("24", Integer.toString(server.getVpnSubnetMask()));
         assertEquals("1", Integer.toString(server.getVpnDevice()));
-        
-        assertEquals(false, server.getVpnRedirectGateway());
-        assertEquals(false, server.getVpnDuplicateCN());
+
+        assertFalse(server.getVpnRedirectGateway());
+        assertFalse(server.getVpnDuplicateCN());
         assertEquals("c", server.getVpnUser());
         assertEquals("d", server.getVpnGroup());
         assertEquals("10 120", server.getVpnKeepAlive());
@@ -87,7 +87,7 @@ public class ServerActionTest {
         return id;
     }
     
-    public void testServerUpdate(int id) throws Exception {
+    private void testServerUpdate(int id) throws Exception {
     	ServerAction.updateServer(Integer.toString(id), "name", "cn_of_server", "ou_of_server",
     			"hostna", "userna", true, "keyfil", "userfil", "exportPat", "0",
     			"statusType", "1", "22", 1, "wrapperCommand",
@@ -114,27 +114,27 @@ public class ServerActionTest {
         assertEquals("1", Integer.toString(server.getAuthType()));
         assertEquals("0", Integer.toString(server.getStatusType()));
         assertEquals("22", Integer.toString(server.getSshPort()));
-        
-        assertEquals(true, server.getVpncc());
+
+        assertTrue(server.getVpncc());
         assertEquals("CCD", server.getVpnccpath());     
         assertEquals("10.1.2.", server.getVpnNetworkAddress());
         assertEquals("25", Integer.toString(server.getVpnSubnetMask()));
-        assertEquals("2", Integer.toString(server.getVpnDevice()));        
-        assertEquals(true, server.getVpnRedirectGateway());
-        assertEquals(true, server.getVpnDuplicateCN());
+        assertEquals("2", Integer.toString(server.getVpnDevice()));
+        assertTrue(server.getVpnRedirectGateway());
+        assertTrue(server.getVpnDuplicateCN());
         assertEquals("a", server.getVpnUser());
         assertEquals("b", server.getVpnGroup());
         assertEquals("11 121", server.getVpnKeepAlive());
     }
     
-    public void testServerRemoval(int id) throws Exception{
+    private void testServerRemoval(int id) throws Exception{
     	ServerAction.deleteServer(Integer.toString(id));
     	Server server = Server.getServerById(id);
     	if (server != null)
     		fail();
     }
     
-    public void checkForDirectory(Server server) {
+    private void checkForDirectory(Server server) {
         String exportPath = Configuration.getInstance().CERT_EXPORT_PATH;
 
         exportPath = FileUtils.unifyPath(exportPath);

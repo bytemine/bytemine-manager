@@ -62,21 +62,20 @@ public class X509Action {
             Thread t;
             int count = 0;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.certExport"));
 
                 Vector<String> ids = X509Queries.getAllX509Ids();
-                for (Iterator<String> iterator = ids.iterator(); iterator.hasNext();) {
-                    String id = (String) iterator.next();
+                ids.forEach(id -> {
                     try {
                         String result = exportToFilesystem(id);
                         if (result != null)
-                            count ++;
+                            count++;
                     } catch (Exception e) {
                         new VisualException(e.getMessage());
                     }
-                }
+                });
 
                 return "";
             }
@@ -105,7 +104,7 @@ public class X509Action {
      * @throws Exception
      */
     public static String exportToFilesystem(String x509idstr) throws Exception {
-        String friendlyName = null;
+        String friendlyName;
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         try {
             int x509id = Integer.parseInt(x509idstr);
@@ -172,12 +171,8 @@ public class X509Action {
                 }
             } else if (Configuration.getInstance().CERTIFICATE_TYPE == Constants.CERTIFICATE_TYPE_PKCS12) {
                 try {
-                    X509 signingX509 = null;
-                    if (ManagerApp.intermediate) {
-                        signingX509 = X509Utils.loadIntermediateX509();
-                    } else {
-                        signingX509 = X509Utils.loadRootX509();
-                    }
+                    X509 signingX509;
+                    signingX509 = ManagerApp.intermediate ? X509Utils.loadIntermediateX509() : X509Utils.loadRootX509();
                     X509Certificate signingCert = (X509Certificate)
                             X509Serializer.getInstance().fromXML(
                                     signingX509.getCertSerialized()

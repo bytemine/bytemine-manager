@@ -24,6 +24,7 @@ import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,15 +57,15 @@ public class SSHConnector {
 
     private Session sshSession = null;
 
-    Server server;
-    String username;
-    String keyfile;
-    String hostname;
-    int port;
-    int authType;
-    JSch jsch;
+    private Server server;
+    private String username;
+    private String keyfile;
+    private String hostname;
+    private int port;
+    private int authType;
+    private JSch jsch;
 
-    public SSHConnector(Server server) throws ConnectException {
+    public SSHConnector(Server server) {
         this.server = server;
         this.username = server.getUsername();
         this.keyfile = server.getKeyfilePath();
@@ -73,7 +74,7 @@ public class SSHConnector {
         this.authType = server.getAuthType();
     }
     
-    public SSHConnector(Server server, String username, String keyfile, int authType) throws ConnectException {
+    SSHConnector(Server server, String username, String keyfile, int authType) {
         this.server = server;
         this.username = username;
         this.keyfile = keyfile;
@@ -100,7 +101,7 @@ public class SSHConnector {
             String knownHostsFilename = "";
             try {
                 File knowHostsFile = null;
-                knownHostsFilename = FileUtils.getDirectoryFromFilename(Configuration.getInstance().JDBC_PATH).toString()+File.separator+"known_hosts"; // append known_hosts filename to path
+                knownHostsFilename = FileUtils.getDirectoryFromFilename(Configuration.getInstance().JDBC_PATH) +File.separator+"known_hosts"; // append known_hosts filename to path
                 knowHostsFile = new File(knownHostsFilename);
                 if(!knowHostsFile.exists())
                     knowHostsFile.createNewFile();
@@ -151,23 +152,20 @@ public class SSHConnector {
             Throwable cause = je.getCause();
             if (cause == null) {
                 logger.log(Level.SEVERE, je.getMessage(), je);
-                if (je.getMessage().indexOf("invalid privatekey") > -1)
+                if (je.getMessage().contains("invalid privatekey"))
                     throw new ConnectException(rb.getString("status.ssh.invalidkey"));
-                else if (je.getMessage().indexOf("timeout") > -1)
+                if (je.getMessage().contains("timeout"))
                     throw new ConnectException(rb.getString("status.ssh.timeout"));
-                else
-                    throw new ConnectException(rb.getString("status.ssh.invalidauth"));
-            } else {
-                logger.log(Level.SEVERE, cause.getMessage(), cause);
-                if (cause.getClass() == UnknownHostException.class)
-                    throw new ConnectException(rb.getString("status.ssh.unknownhost"));
-                else if (cause.getClass() == ConnectException.class)
-                    throw new ConnectException(rb.getString("status.ssh.noresponse"));
-                else if (cause.getClass() == FileNotFoundException.class)
-                    throw new ConnectException(rb.getString("status.ssh.keyfile_not_found"));
-                else
-                    throw new ConnectException(logMessage);
+                throw new ConnectException(rb.getString("status.ssh.invalidauth"));
             }
+            logger.log(Level.SEVERE, cause.getMessage(), cause);
+            if (cause.getClass() == UnknownHostException.class)
+                throw new ConnectException(rb.getString("status.ssh.unknownhost"));
+            if (cause.getClass() == ConnectException.class)
+                throw new ConnectException(rb.getString("status.ssh.noresponse"));
+            if (cause.getClass() == FileNotFoundException.class)
+                throw new ConnectException(rb.getString("status.ssh.keyfile_not_found"));
+            throw new ConnectException(logMessage);
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             throw new ConnectException(logMessage);
@@ -178,9 +176,8 @@ public class SSHConnector {
     /**
      * Creates a ssh session in a new thread
      *
-     * @throws java.net.ConnectException
      */
-    public void createSession() throws ConnectException {
+    public void createSession() {
         SwingWorker<String, Void> connectWorker = new SwingWorker<String, Void>() {
             private ConnectException exception = null;
 
@@ -267,7 +264,7 @@ public class SSHConnector {
         }
 
         String passwd;
-        JTextField passwordField = (JTextField) new JPasswordField(20);
+        JTextField passwordField = new JPasswordField(20);
 
         public String getPassphrase() {
             return null;
@@ -356,11 +353,7 @@ public class SSHConnector {
                     destination + ": " + name,
                     CustomJOptionPane.OK_CANCEL_OPTION,
                     CustomJOptionPane.QUESTION_MESSAGE) == CustomJOptionPane.OK_OPTION) {
-                String[] response = new String[prompt.length];
-                for (int i = 0; i < prompt.length; i++) {
-                    response[i] = texts[i].getText();
-                }
-                return response;
+                return IntStream.range(0, prompt.length).mapToObj(i -> texts[i].getText()).toArray(String[]::new);
             } else {
                 return null;  // cancel
 
@@ -400,7 +393,7 @@ public class SSHConnector {
         }
 
         String passphrase;
-        JTextField passphraseField = (JTextField) new JPasswordField(20);
+        JTextField passphraseField = new JPasswordField(20);
         
         public String getPassphrase() {
             return passphrase;
@@ -493,11 +486,7 @@ public class SSHConnector {
                     destination + ": " + name,
                     CustomJOptionPane.OK_CANCEL_OPTION,
                     CustomJOptionPane.QUESTION_MESSAGE) == CustomJOptionPane.OK_OPTION) {
-                String[] response = new String[prompt.length];
-                for (int i = 0; i < prompt.length; i++) {
-                    response[i] = texts[i].getText();
-                }
-                return response;
+                return IntStream.range(0, prompt.length).mapToObj(i -> texts[i].getText()).toArray(String[]::new);
             } else {
                 return null;  // cancel
 

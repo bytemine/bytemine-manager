@@ -72,7 +72,7 @@ public class X509FileImporter {
 
         String pathAndFilename = this.selectedFile.getPath();
         if (!this.selectedFile.isDirectory()) {
-            if (pathAndFilename.indexOf(File.separator) > -1)
+            if (pathAndFilename.contains(File.separator))
                 this.path = pathAndFilename.substring(0, pathAndFilename.lastIndexOf(File.separator));
             else
                 throw new Exception(rb.getString("error.importCert.noDirFound"));
@@ -133,50 +133,54 @@ public class X509FileImporter {
                             FileUtils.getExtension(rootKeyName);
 
             return X509.X509_TYPE_ROOT;
-        } else if (rootKeyName.equals(filename)) {
+        }
+        if (rootKeyName.equals(filename)) {
             currentKeyFilename = filename;
             currentCertFilename =
                     FileUtils.removeExtension(filename) +
                             "." +
                             FileUtils.getExtension(rootCertName);
             return X509.X509_TYPE_ROOT;
-        } else if (serverCertName.equals(filename)) {
+        }
+        if (serverCertName.equals(filename)) {
             currentCertFilename = filename;
             currentKeyFilename =
                     FileUtils.removeExtension(filename) +
                             "." +
                             FileUtils.getExtension(serverKeyName);
             return X509.X509_TYPE_SERVER;
-        } else if (serverKeyName.equals(filename)) {
+        }
+        if (serverKeyName.equals(filename)) {
             currentKeyFilename = filename;
             currentCertFilename =
                     FileUtils.removeExtension(filename) +
                             "." +
                             FileUtils.getExtension(serverCertName);
             return X509.X509_TYPE_SERVER;
-        } else {
-            String extension = FileUtils.getExtension(filename);
-            if (clientCertExtension.equals(extension)) {
-                currentCertFilename = filename;
-                currentKeyFilename =
-                        FileUtils.removeExtension(filename) +
-                                "." +
-                                clientKeyExtension;
-                return X509.X509_TYPE_CLIENT;
-            } else if (clientKeyExtension.equals(extension)) {
-                currentKeyFilename = filename;
-                currentCertFilename =
-                        FileUtils.removeExtension(filename) +
-                                "." +
-                                clientCertExtension;
-                return X509.X509_TYPE_CLIENT;
-            } else if (Constants.DEFAULT_PKCS12_EXTENSION.equals(extension)) {
-                currentKeyFilename = "";
-                currentCertFilename = filename;
-                return X509.X509_TYPE_PKCS12;
-            } else
-                return -1;
         }
+        String extension = FileUtils.getExtension(filename);
+        if (clientCertExtension.equals(extension)) {
+            currentCertFilename = filename;
+            currentKeyFilename =
+                    FileUtils.removeExtension(filename) +
+                            "." +
+                            clientKeyExtension;
+            return X509.X509_TYPE_CLIENT;
+        }
+        if (clientKeyExtension.equals(extension)) {
+            currentKeyFilename = filename;
+            currentCertFilename =
+                    FileUtils.removeExtension(filename) +
+                            "." +
+                            clientCertExtension;
+            return X509.X509_TYPE_CLIENT;
+        }
+        if (Constants.DEFAULT_PKCS12_EXTENSION.equals(extension)) {
+            currentKeyFilename = "";
+            currentCertFilename = filename;
+            return X509.X509_TYPE_PKCS12;
+        } else
+            return -1;
     }
 
 
@@ -188,10 +192,7 @@ public class X509FileImporter {
      */
     private boolean fileIsCertificate(String filename) {
         String ext = FileUtils.getExtension(filename);
-        if (certExtensions.contains(ext))
-            return true;
-        else
-            return false;
+        return certExtensions.contains(ext);
     }
 
 
@@ -206,19 +207,12 @@ public class X509FileImporter {
         if (selectedFile.isDirectory()) {
             if (!importRootCertAndKey()) {
                 boolean isRootExisting = Configuration.getInstance().isRootCertExisting();
-                if (!isRootExisting) {
-                    X509Generator gen = new X509Generator();
-                    try {
-                        gen.createRootCertImmediately();
-                        UserImport.incGeneratedCerts();
-                    } catch (Exception ex) {
-                        new VisualException(ex);
-                    }
-                }
+                createX509Generator(isRootExisting);
             }
 
 
             String[] filenames = selectedFile.list();
+            assert filenames != null;
             for (String filename : filenames) {
 
                 int type = detectType(filename);
@@ -236,15 +230,7 @@ public class X509FileImporter {
             }
 
             boolean isRootExisting = Configuration.getInstance().isRootCertExisting();
-            if (!isRootExisting) {
-                X509Generator gen = new X509Generator();
-                try {
-                    gen.createRootCertImmediately();
-                    UserImport.incGeneratedCerts();
-                } catch (Exception ex) {
-                    new VisualException(ex);
-                }
-            }
+            createX509Generator(isRootExisting);
 
         } else {
             throw new Exception(rb.getString("error.importCert.noDirSpecified"));
@@ -252,6 +238,18 @@ public class X509FileImporter {
 
         return importedX509ids;
 
+    }
+
+    private void createX509Generator(boolean isRootExisting) {
+        if (!isRootExisting) {
+            X509Generator gen = new X509Generator();
+            try {
+                gen.createRootCertImmediately();
+                UserImport.incGeneratedCerts();
+            } catch (Exception ex) {
+                new VisualException(ex);
+            }
+        }
     }
 
 
@@ -280,7 +278,7 @@ public class X509FileImporter {
      * @throws java.lang.Exception
      */
     private int importCertAndKey(int type, boolean createUsersFromCN) throws Exception {
-        String content = null;
+        String content;
         String keyContent = null;
         String password = "";
         X509Certificate cert = null;
@@ -329,10 +327,10 @@ public class X509FileImporter {
         }
 
 
-        String issuer = "";
-        String subject = "";
-        Date validFrom = null;
-        Date validTo = null;
+        String issuer;
+        String subject;
+        Date validFrom;
+        Date validTo;
         int x509id = -1;
         User user = null;
 
@@ -391,7 +389,7 @@ public class X509FileImporter {
                 exporter.exportCertToFile(contentStr, false);
                 if (type != X509.X509_TYPE_ROOT || exportRootKey)
                     // do not export empty keys
-                    if (keyWithHeader != null && !"".equals(keyWithHeader))
+                    if (!keyWithHeader.isEmpty())
                         exporter.exportKeyToFile(keyWithHeader);
             }
 
@@ -447,8 +445,7 @@ public class X509FileImporter {
             keyInputStream.read(encodedCert);
             keyInputStream.close();
 
-            String certContent = StringUtils.bytes2String(encodedCert);
-            return certContent;
+            return StringUtils.bytes2String(encodedCert);
         } catch (Exception e) {
             String errorMessage = rb.getString("error.importCert.readCert");
             logger.log(Level.SEVERE, errorMessage, e);
@@ -463,14 +460,13 @@ public class X509FileImporter {
      * @return String with the content of the crt file
      * @throws java.lang.Exception
      */
-    public String readCertificatePKCS12() throws Exception {
+    private String readCertificatePKCS12() throws Exception {
         try {
             String filename = this.path + File.separator + currentCertFilename;
             logger.info("Reading certificate: " + filename);
             File certFile = new File(filename);
 
-            String certContent = FileUtils.readFilePKCS12(certFile);
-            return certContent;
+            return FileUtils.readFilePKCS12(certFile);
         } catch (Exception e) {
             String errorMessage = rb.getString("error.importCert.readCert");
             logger.log(Level.SEVERE, errorMessage, e);
@@ -483,9 +479,8 @@ public class X509FileImporter {
      * Reads a PrivateKey from the given file
      *
      * @return String with the content of the key file
-     * @throws java.lang.Exception
      */
-    private String readKey() throws Exception {
+    private String readKey() {
         try {
             logger.info("Reading key: " + this.path + File.separator + currentKeyFilename);
             File keyFile = new File(this.path + File.separator + currentKeyFilename);
@@ -495,9 +490,7 @@ public class X509FileImporter {
             keyInputStream.read(encodedKey);
             keyInputStream.close();
 
-            String keyContent = StringUtils.bytes2String(encodedKey);
-
-            return keyContent;
+            return StringUtils.bytes2String(encodedKey);
         } catch (Exception e) {
             String errorMessage = "Key " + this.path + File.separator + currentKeyFilename + " could not be found";
             logger.warning(errorMessage);
@@ -516,6 +509,7 @@ public class X509FileImporter {
         // a directory was selected
         if (selectedFile.isDirectory()) {
             String[] filenames = selectedFile.list();
+            assert filenames != null;
             for (String filename : filenames) {
                 if (filename.equals(rootCertName))
                     certExisting = true;
@@ -541,10 +535,7 @@ public class X509FileImporter {
                 throw new Exception(rb.getString("error.importCert.keyNotFound"));
 
         }
-        if (certExisting && keyExisting)
-            return true;
-        else
-            return false;
+        return certExisting && keyExisting;
     }
 
 

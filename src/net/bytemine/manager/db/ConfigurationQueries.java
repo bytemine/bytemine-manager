@@ -10,6 +10,7 @@ package net.bytemine.manager.db;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -124,7 +125,7 @@ public class ConfigurationQueries {
 
             rs.close();
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error getting value from key: " + key, e);
         }
         return value;
@@ -165,7 +166,7 @@ public class ConfigurationQueries {
             }
 
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error setting value for key: " + key, e);
         }
     }
@@ -177,7 +178,7 @@ public class ConfigurationQueries {
      * @param key   The key
      * @param value The value
      */
-    public static void createKey(String key, String value) {
+    private static void createKey(String key, String value) {
         try {
             PreparedStatement pst = DBConnector.getInstance().getConnection().prepareStatement(
                     "INSERT INTO configuration (configurationid, key, value) VALUES (?,?,?)");
@@ -187,7 +188,7 @@ public class ConfigurationQueries {
             pst.executeUpdate();
 
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error creating key: " + key, e);
         }
     }
@@ -199,7 +200,7 @@ public class ConfigurationQueries {
      * @return Vector containing all values
      */
     public static Vector<String> getAllValues() {
-        Vector<String> values = new Vector<String>();
+        Vector<String> values = new Vector<>();
         try {
             PreparedStatement pst = DBConnector.getInstance().getConnection().prepareStatement(
                     "SELECT value FROM configuration ORDER BY configurationid");
@@ -211,7 +212,7 @@ public class ConfigurationQueries {
 
             rs.close();
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error getting all values", e);
         }
         return values;
@@ -224,7 +225,7 @@ public class ConfigurationQueries {
      * @return Hashtable containing all keys and values
      */
     public static Hashtable<String, String> getConfigurations() {
-        Hashtable<String, String> configs = new Hashtable<String, String>();
+        Hashtable<String, String> configs = new Hashtable<>();
         try {
             PreparedStatement pst = DBConnector.getInstance().getConnection().prepareStatement(
                     "SELECT key, value FROM configuration");
@@ -236,7 +237,7 @@ public class ConfigurationQueries {
 
             rs.close();
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error getting all configuration entries", e);
         }
         return configs;
@@ -260,7 +261,7 @@ public class ConfigurationQueries {
             rs.close();
             pst.close();
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error getting next configurationid", e);
         }
 
@@ -289,7 +290,7 @@ public class ConfigurationQueries {
             rs.close();
             pst.close();
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error detecting if configuration entries exist", e);
         }
 

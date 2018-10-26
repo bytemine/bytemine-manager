@@ -23,7 +23,7 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
 
     private int tunnelPort;
 
-    public SSLTunnelSocketFactory(String proxyhost, String proxyport) {
+    SSLTunnelSocketFactory(String proxyhost, String proxyport) {
         tunnelHost = proxyhost;
         tunnelPort = Integer.parseInt(proxyport);
         dfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -35,7 +35,7 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
     }
 
     public Socket createSocket(String host, int port, InetAddress clientHost,
-                               int clientPort) throws IOException, UnknownHostException {
+                               int clientPort) throws IOException {
         return createSocket(null, host, port, true);
     }
 
@@ -49,7 +49,7 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
     }
 
     public Socket createSocket(Socket s, String host, int port,
-                               boolean autoClose) throws IOException, UnknownHostException {
+                               boolean autoClose) throws IOException {
 
         Socket tunnel = new Socket(tunnelHost, tunnelPort);
 
@@ -58,14 +58,12 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
         SSLSocket result = (SSLSocket) dfactory.createSocket(tunnel, host,
                 port, autoClose);
 
-        result.addHandshakeCompletedListener(new HandshakeCompletedListener() {
-            public void handshakeCompleted(HandshakeCompletedEvent event) {
-                logger.fine("Handshake finished!");
-                logger.fine("\t CipherSuite:" + event.getCipherSuite());
-                logger.fine("\t SessionId " + event.getSession());
-                logger.fine("\t PeerHost "
-                        + event.getSession().getPeerHost());
-            }
+        result.addHandshakeCompletedListener(event -> {
+            logger.fine("Handshake finished!");
+            logger.fine("\t CipherSuite:" + event.getCipherSuite());
+            logger.fine("\t SessionId " + event.getSession());
+            logger.fine("\t PeerHost "
+                    + event.getSession().getPeerHost());
         });
 
         result.startHandshake();
@@ -139,7 +137,7 @@ public class SSLTunnelSocketFactory extends SSLSocketFactory {
         }
 
         /* Look for 200 connection established */
-        if (replyStr.toLowerCase().indexOf("200 connection established") == -1) {
+        if (!replyStr.toLowerCase().contains("200 connection established")) {
             throw new IOException("Unable to tunnel through " + tunnelHost
                     + ":" + tunnelPort + ".  Proxy returns \"" + replyStr
                     + "\"");

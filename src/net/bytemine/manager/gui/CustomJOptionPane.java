@@ -34,7 +34,7 @@ public class CustomJOptionPane extends JOptionPane {
     public static void showMessageDialog(Component parentComponent,
                                          Object message) {
         JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE);
-        JDialog dialog = null;
+        JDialog dialog;
         if (parentComponent != null)
             dialog = pane.createDialog(parentComponent, null);
         else
@@ -49,11 +49,7 @@ public class CustomJOptionPane extends JOptionPane {
     public static void showMessageDialog(Component parentComponent,
                                          Object message, String title) {
         JOptionPane pane = new JOptionPane(message);
-        JDialog dialog = null;
-        if (parentComponent != null)
-            dialog = pane.createDialog(parentComponent, title);
-        else
-            dialog = pane.createDialog(title);
+        JDialog dialog = parentComponent != null ? pane.createDialog(parentComponent, title) : pane.createDialog(title);
         CssRuleManager.getInstance().format(pane);
 
         dialog.pack();
@@ -66,11 +62,7 @@ public class CustomJOptionPane extends JOptionPane {
                                          int messageType) {
     	 JOptionPane pane = new JOptionPane(message, messageType);
 
-		 JDialog dialog = null;
-		 if (parentComponent != null)
-			 dialog = pane.createDialog(parentComponent, title);
-		else
-			dialog = pane.createDialog(title);
+		 JDialog dialog = parentComponent != null ? pane.createDialog(parentComponent, title) : pane.createDialog(title);
 		 CssRuleManager.getInstance().format(pane);
 		
 		 dialog.pack();
@@ -106,7 +98,7 @@ public class CustomJOptionPane extends JOptionPane {
         	try {
         		get_field = (Component)((Object[])message)[focusPosition];
         	} catch (ClassCastException e) {
-        		get_field = (Component)((JPanel)message).getComponent(focusPosition);
+        		get_field = ((JPanel)message).getComponent(focusPosition);
         	} catch (Exception e) {
         		logger.log(Level.WARNING, "Couldn't focus on element ", e);
         	}
@@ -129,7 +121,7 @@ public class CustomJOptionPane extends JOptionPane {
         pane.setInitialValue(initialValue);
         CssRuleManager.getInstance().format(pane);
 
-        JDialog dialog = null;
+        JDialog dialog;
         if (parentComponent != null)
             dialog = pane.createDialog(parentComponent, title);
         else
@@ -146,7 +138,7 @@ public class CustomJOptionPane extends JOptionPane {
         }
         if (options == null) {
             if (selectedValue instanceof Integer) {
-                return ((Integer) selectedValue).intValue();
+                return (Integer) selectedValue;
             }
             return JOptionPane.CLOSED_OPTION;
         }

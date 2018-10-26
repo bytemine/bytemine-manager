@@ -44,20 +44,20 @@ public class X509Details {
 
     private static String x509id;
     private static JFrame parentFrame = null;
-    public static JFrame detailsFrame = null;
+    static JFrame detailsFrame = null;
     
     private JComponent parent;
 
-    public final int mainWidth = Configuration.getInstance().X509_GUI_WIDTH;
-    public final int mainHeight = Configuration.getInstance().X509_GUI_HEIGHT;
-    public final int locationX = Configuration.getInstance().X509_GUI_LOCATION_X;
-    public final int locationY = Configuration.getInstance().X509_GUI_LOCATION_Y;
+    private final int mainWidth = Configuration.getInstance().X509_GUI_WIDTH;
+    private final int mainHeight = Configuration.getInstance().X509_GUI_HEIGHT;
+    private final int locationX = Configuration.getInstance().X509_GUI_LOCATION_X;
+    private final int locationY = Configuration.getInstance().X509_GUI_LOCATION_Y;
     
-    public X509Details(JFrame parent, String id) {
+    X509Details(JFrame parent, String id) {
         x509id = id;
         parentFrame = parent;
     }
-    public X509Details(JComponent parent, String id) {
+    X509Details(JComponent parent, String id) {
         x509id = id;
         this.parent = parent;
     }
@@ -71,7 +71,7 @@ public class X509Details {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
@@ -182,27 +182,20 @@ public class X509Details {
         contentLabel.setFont(Constants.FONT_PLAIN);
         mainPanel.add(contentLabel, "align left");
         int type = Integer.parseInt(details[11]);
-        if (displayPKCS12Content && type == X509.X509_TYPE_PKCS12) {
-            JTextArea contentArea = new JTextArea(details[6], 5, 60);
-            contentArea.setEditable(false);
-            JScrollPane scroll = new JScrollPane(contentArea);
-            mainPanel.add(scroll, "height 280!, width 610!");
-        } else {
-            JTextArea contentArea = new JTextArea(details[6]);
-            contentArea.setEditable(false);
-            JScrollPane scroll = new JScrollPane(contentArea);
-            mainPanel.add(scroll, "height 100:300:500, growx, growy");
+        JTextArea contentArea = new JTextArea(details[6]);
+        contentArea.setEditable(false);
+        JScrollPane scroll = new JScrollPane(contentArea);
+        mainPanel.add(scroll, "height 100:300:500, growx, growy");
 
-            JLabel keyContentLabel = new JLabel(rb.getString("detailsFrame.keyContent"));
-            keyContentLabel.setFont(Constants.FONT_PLAIN);
-            mainPanel.add(keyContentLabel, "align left");
-            JTextArea keyContentArea = new JTextArea(details[10]);
-            keyContentArea.setEditable(false);
-            JScrollPane scroll5 = new JScrollPane(keyContentArea);
-            mainPanel.add(scroll5, "height 100:300:500, growx, growy");
-        }
+        JLabel keyContentLabel = new JLabel(rb.getString("detailsFrame.keyContent"));
+        keyContentLabel.setFont(Constants.FONT_PLAIN);
+        mainPanel.add(keyContentLabel, "align left");
+        JTextArea keyContentArea = new JTextArea(details[10]);
+        keyContentArea.setEditable(false);
+        JScrollPane scroll5 = new JScrollPane(keyContentArea);
+        mainPanel.add(scroll5, "height 100:300:500, growx, growy");
 
-      //  final JFrame
+        //  final JFrame
         detailsFrame = new JFrame(
                 rb.getString("app.title") + " - " + rb.getString("detailsFrame.title")
         );
@@ -251,7 +244,8 @@ public class X509Details {
         		location = GuiUtils.getOffsetLocation(parentFrame);
         	else if (parent != null)
         		location = GuiUtils.getOffsetLocation(parent);
-        	detailsFrame.setLocation(location.x, location.y);
+            assert location != null;
+            detailsFrame.setLocation(location.x, location.y);
         } else {
         	detailsFrame.setLocation(locationX, locationY);
         	detailsFrame.setPreferredSize(new Dimension(mainWidth,mainHeight));

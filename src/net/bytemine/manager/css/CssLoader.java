@@ -48,7 +48,7 @@ public class CssLoader {
             String clss = rule.getAttribute("class");
             String propertyName = rule.getAttribute("property");
             String value = rule.getAttribute("value");
-            if (clss.indexOf(".") < 0)
+            if (!clss.contains("."))
                 clss = "javax.swing." + clss;
             
             if (clss.indexOf("CustomTableCellRenderer") > 0) {

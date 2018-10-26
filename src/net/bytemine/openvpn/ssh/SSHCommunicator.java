@@ -44,11 +44,11 @@ public class SSHCommunicator implements Runnable {
     private Session session;
     private String wrapperCommand;
     private ControlCenterTab ccTab;
-    private Hashtable<String, Channel> channelPool = new Hashtable<String, Channel>();
+    private Hashtable<String, Channel> channelPool = new Hashtable<>();
     private String channelToOpen;
     private String channelToClose;
     private String currentChannelNumber;
-    private Vector<String> openChannels = new Vector<String>();
+    private Vector<String> openChannels = new Vector<>();
     private boolean successfulInit = false;
     private boolean allClose = false;
 
@@ -116,7 +116,6 @@ public class SSHCommunicator implements Runnable {
         sendCommand("");
 
         sendCommand(this.wrapperCommand);
-        return;
     }
 
 
@@ -157,12 +156,10 @@ public class SSHCommunicator implements Runnable {
      */
     public void closeAllChannels() {
         allClose = true;
-        Vector<String> openChannelsCopy = new Vector<String>();
-        openChannelsCopy.addAll(openChannels);
+        Vector<String> openChannelsCopy = new Vector<>(openChannels);
         if (!openChannelsCopy.isEmpty()) {
             int i = 0;
-            for (Iterator<String> iterator = openChannelsCopy.iterator(); iterator.hasNext();) {
-                String channelNr = (String) iterator.next();
+            for (String channelNr : openChannelsCopy) {
                 closeChannel(channelNr);
 
                 while (channelToClose != null && !channel.isClosed()) {

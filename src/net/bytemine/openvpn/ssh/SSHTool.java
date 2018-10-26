@@ -21,6 +21,7 @@ import net.bytemine.manager.exception.VisualException;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.Session;
+import net.bytemine.openvpn.ScpTool;
 
 /**
  * is able to send commands via ssh
@@ -96,14 +97,7 @@ public class SSHTool {
     
     public void disconnectSession() {
         int i = 1;
-        while (this.sshSession != null && this.sshSession.isConnected() && i < 100) {
-            this.sshSession.disconnect();
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-            }
-            i++;
-        }
+        ScpTool.disconnectSSHSession(i, this.sshSession);
         SSHSessionPool.getInstance().removeSession(server.getHostname());
     }
 
@@ -126,22 +120,7 @@ public class SSHTool {
         if (b == 0 || b == -1)
             return b;
 
-        if (b == 1 || b == 2) {
-            StringBuffer sb = new StringBuffer();
-            int c;
-            do {
-                c = in.read();
-                sb.append((char) c);
-            } while (c != '\n');
-
-            if (b == 1)  {// error
-                logger.severe("Error: " + sb.toString());
-                throw new IOException(sb.toString());
-            } else if (b == 2)  {// fatal error
-                logger.severe("Fatal Error:" + sb.toString());
-                throw new IOException(sb.toString());
-            }
-        }
+        ScpTool.CheckAcceptConnection(in, b, logger);
         return b;
     }
 }

@@ -71,9 +71,8 @@ public class UserSync {
      * Method to sync users to the provided server.
      *
      * @param serverIdStr of the server to be synced.
-     * @throws Exception
      */
-    public UserSync(String serverIdStr) throws Exception {
+    public UserSync(String serverIdStr) {
         try {
             serverId = serverIdStr;
             server = new Server(serverId);
@@ -89,7 +88,7 @@ public class UserSync {
             SwingWorker<String, Void> copyWorker = new SwingWorker<String, Void>() {
                 Thread t;
 
-                protected String doInBackground() throws Exception {
+                protected String doInBackground() {
                     try {
                         t = Thread.currentThread();
                         ThreadMgmt.getInstance().addThread(t);
@@ -223,9 +222,7 @@ public class UserSync {
     private boolean isPasswdExisting() {
         if (server.getUserfilePath() == null)
             return false;
-        if ("".equals(server.getUserfilePath()))
-            return false;
-        return true;
+        return !"".equals(server.getUserfilePath());
     }
 
 
@@ -401,8 +398,7 @@ public class UserSync {
     private void pushToCCD() throws Exception {
         Vector<String> connectedUsers = UserQueries.getUsersForServer(server.getServerid());
 
-        for (Iterator<String> it = connectedUsers.iterator(); it.hasNext(); ) {
-            String userId = it.next();
+        for (String userId : connectedUsers) {
             String cn = User.getUserByID(Integer.parseInt(userId)).getCn();
             String file = createCC(Integer.toString(server.getServerid()), userId);
 
@@ -456,9 +452,8 @@ public class UserSync {
         Hashtable<String, String> existingUsers = UserQueries.getUserTable(true);
 
         String[] lines = content.split("\n");
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
-            if (line == null || line.indexOf(":") < 0)
+        for (String line : lines) {
+            if (line == null || !line.contains(":"))
                 continue;
             String username = line.substring(0, line.indexOf(":"));
             String password = line.substring(line.indexOf(":") + 1);
@@ -506,9 +501,8 @@ public class UserSync {
         Hashtable<String, String> existingUsers = UserQueries.getUserTableForServer(
                 server, false, false
         );
-        StringBuffer output = new StringBuffer();
-        for (Iterator<String> it = existingUsers.keySet().iterator(); it.hasNext(); ) {
-            String username = it.next();
+        StringBuilder output = new StringBuilder();
+        existingUsers.keySet().forEach(username -> {
             String password = existingUsers.get(username);
             if (password != null && !"".equals(password)) {
                 String newLine = username + ":" + password + "\n";
@@ -516,7 +510,7 @@ public class UserSync {
             } else {
                 // password is empty, do not export user!
             }
-        }
+        });
 
         return output.toString();
     }

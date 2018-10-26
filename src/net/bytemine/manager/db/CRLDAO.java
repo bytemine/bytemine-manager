@@ -128,12 +128,11 @@ public class CRLDAO {
                 pst.close();
 
                 return crl;
-            } else {
-                rs.close();
-                pst.close();
             }
+            rs.close();
+            pst.close();
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
             logger.log(Level.SEVERE, "error reading crl", e);
             new VisualException(rb.getString("error.db.crl") + rb.getString("error.db.read"));
@@ -172,7 +171,7 @@ public class CRLDAO {
             pst.setString(11, crl.getNextUpdate());
             pst.executeUpdate();
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
             logger.log(Level.SEVERE, "error updating crl", e);
             new VisualException(rb.getString("error.db.crl") + rb.getString("error.db.save"));
@@ -194,7 +193,7 @@ public class CRLDAO {
             pst.setInt(1, crl.getCrlid());
             pst.executeUpdate();
             pst.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
             logger.log(Level.SEVERE, "error deleting crl", e);
             new VisualException(rb.getString("error.db.crl") + rb.getString("error.db.delete"));
@@ -216,7 +215,11 @@ public class CRLDAO {
             pst.setInt(1, Integer.parseInt(crlId));
             pst.executeUpdate();
             pst.close();
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
+            ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+            logger.log(Level.SEVERE, "error deleting crl", e);
+            new VisualException(rb.getString("error.db.crl") + rb.getString("error.db.delete"));
+        } catch (SQLException e) {
             ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
             logger.log(Level.SEVERE, "error deleting crl", e);
             new VisualException(rb.getString("error.db.crl") + rb.getString("error.db.delete"));
@@ -239,7 +242,7 @@ public class CRLDAO {
 
             rs.close();
             st.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             logger.log(Level.SEVERE, "error getting next crlid", e);
             throw e;
         }

@@ -21,11 +21,11 @@ import net.bytemine.manager.db.GroupQueries;
 public class GroupToUserModel {
 
     // all user<->group connections
-    public Vector<GroupToUserEntry> originals = new Vector<GroupToUserEntry>();
+    private Vector<GroupToUserEntry> originals;
     // the new connections
-    public Vector<GroupToUserEntry> toAdd = new Vector<GroupToUserEntry>();
+    public Vector<GroupToUserEntry> toAdd = new Vector<>();
     // the connections to remove
-    public Vector<GroupToUserEntry> toRemove = new Vector<GroupToUserEntry>();
+    public Vector<GroupToUserEntry> toRemove = new Vector<>();
 
     public GroupToUserModel() {
         originals = GroupQueries.getAllUserToGroupConnections();
@@ -56,10 +56,7 @@ public class GroupToUserModel {
      */
     public boolean markChecked(String groupid, String userid) {
         GroupToUserEntry entry = new GroupToUserEntry(groupid, userid);
-        if ((toAdd.contains(entry) || originals.contains(entry)) && !toRemove.contains(entry))
-            return true;
-        else
-            return false;
+        return (toAdd.contains(entry) || originals.contains(entry)) && !toRemove.contains(entry);
     }
 
 
@@ -67,16 +64,10 @@ public class GroupToUserModel {
      */
     public void printDebug() {
         System.out.println("adding entries: ");
-        for (Iterator<GroupToUserEntry> iter = toAdd.iterator(); iter.hasNext();) {
-            GroupToUserEntry element = (GroupToUserEntry) iter.next();
-            System.out.println("  group: " + element.groupid + ", userid: " + element.userid);
-        }
+        toAdd.stream().map(element -> "  group: " + element.groupid + ", userid: " + element.userid).forEach(System.out::println);
 
         System.out.println("removing entries: ");
-        for (Iterator<GroupToUserEntry> iter = toRemove.iterator(); iter.hasNext();) {
-            GroupToUserEntry element = (GroupToUserEntry) iter.next();
-            System.out.println("  group: " + element.groupid + ", userid: " + element.userid);
-		}
+        toRemove.stream().map(element -> "  group: " + element.groupid + ", userid: " + element.userid).forEach(System.out::println);
 	}
 	
 }

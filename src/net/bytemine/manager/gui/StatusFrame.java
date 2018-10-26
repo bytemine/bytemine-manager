@@ -42,11 +42,11 @@ public class StatusFrame {
 
     public static final int TYPE_SYNC = 0;
     public static final int TYPE_IMPORT = 1;
-    public static final int TYPE_CONNTEST = 2;
+    private static final int TYPE_CONNTEST = 2;
     public static final int TYPE_LDAP = 3;
     public static final int TYPE_INFO = 4;
 
-    public JFrame statusFrame;
+    private JFrame statusFrame;
     private JFrame parentFrame;
     private int type;
     private Server server;
@@ -97,12 +97,17 @@ public class StatusFrame {
      */
     private void createFrame() {
         String title = rb.getString("status.title.general");
-        if (type == TYPE_SYNC)
-            title = rb.getString("status.title.sync");
-        else if (type == TYPE_IMPORT)
-            title = rb.getString("status.title.import");
-        else if (type == TYPE_CONNTEST)
-            title = rb.getString("status.title.connection");
+        switch (type) {
+            case TYPE_SYNC:
+                title = rb.getString("status.title.sync");
+                break;
+            case TYPE_IMPORT:
+                title = rb.getString("status.title.import");
+                break;
+            case TYPE_CONNTEST:
+                title = rb.getString("status.title.connection");
+                break;
+        }
 
         if (server != null) {
             title += " " + server.getName();
@@ -125,12 +130,7 @@ public class StatusFrame {
         mainPanel.add(detailsPanel, "wrap");
 
         okButton = new JButton("OK");
-        okButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                close();
-            }
-        });
+        okButton.addActionListener(e -> close());
         okButton.setEnabled(false);
         mainPanel.add(okButton, "align center");
         statusFrame.add(mainPanel, "align center");

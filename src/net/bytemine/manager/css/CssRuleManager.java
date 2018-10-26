@@ -9,6 +9,7 @@ package net.bytemine.manager.css;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -25,7 +26,7 @@ public class CssRuleManager {
     private Vector<CssRule> cssRules;
 
     private CssRuleManager() {
-        cssRules = new Vector<CssRule>();
+        cssRules = new Vector<>();
     }
 
     public static CssRuleManager getInstance() {
@@ -34,7 +35,7 @@ public class CssRuleManager {
         return instance;
     }
 
-    public void addCssRule(Class<?> c, String propertyName, String value) {
+    void addCssRule(Class<?> c, String propertyName, String value) {
         CssRule rule = new CssRule(c, propertyName, value);
         cssRules.add(rule);
     }
@@ -45,21 +46,13 @@ public class CssRuleManager {
      * @param component The component to style
      */
     public void format(Component component) {
-        Iterator<CssRule> it = cssRules.iterator();
-        while (it.hasNext()) {
-            CssRule rule = (CssRule) it.next();
-            if (rule.matches(component)) {
-                rule.apply(component);
-            }
-        }
+        cssRules.stream().filter(rule -> rule.matches(component)).forEach(rule -> rule.apply(component));
 
         if (!(component instanceof Container)) {
             return;
         }
 
         Component[] components = ((Container) component).getComponents();
-        for (int i = 0; i < components.length; i++) {
-            format(components[i]);
-        }
+        Arrays.stream(components).forEach(this::format);
     }
 }

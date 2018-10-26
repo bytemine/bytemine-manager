@@ -7,7 +7,6 @@
 package net.bytemine.manager;
 
 import java.io.File;
-import java.io.IOException;
 
 import net.bytemine.utility.StringUtils;
 
@@ -18,28 +17,29 @@ import net.bytemine.utility.StringUtils;
  */
 public class ManagerStarter {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         File appDir = new File(".");
-        String managerJar= "";
+        String managerJar;
         String majorVersion = "0";
         String minorVersion = "0";
 
         String[] dirContents = appDir.list();
 
-        for (int i = 0; i < dirContents.length; i++) {
-            if ((dirContents[i].startsWith("bytemine-manager") &&
-                        (dirContents[i].endsWith(".jar")))) {
-                String version = StringUtils.extractVersionFromString(dirContents[i]);
+        assert dirContents != null;
+        for (String dirContent : dirContents) {
+            if ((dirContent.startsWith("bytemine-manager") &&
+                    (dirContent.endsWith(".jar")))) {
+                String version = StringUtils.extractVersionFromString(dirContent);
                 if (version != null && version.length() > 2) {
                     String minorVersionT = version.substring(2);
-                    String majorVersionT = version.substring(0,1);
-    
+                    String majorVersionT = version.substring(0, 1);
+
                     if (majorVersionT.compareTo(majorVersion) > 0) {
                         majorVersion = majorVersionT;
                         minorVersion = minorVersionT;
                     } else if ((minorVersionT.compareTo(minorVersion) > 0) &&
-                               (majorVersionT.compareTo(majorVersion) >= 0)) {
+                            (majorVersionT.compareTo(majorVersion) >= 0)) {
                         minorVersion = minorVersionT;
                     }
                 }
@@ -48,9 +48,8 @@ public class ManagerStarter {
         
         managerJar = "bytemine-manager-"+ majorVersion +"."+ minorVersion +".jar";
 
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < args.length; i++)
-            sb.append(args[i] + " ");
+        StringBuilder sb = new StringBuilder();
+        for (String arg : args) sb.append(arg).append(" ");
 
         System.out.println("Starting: "+ managerJar);
 

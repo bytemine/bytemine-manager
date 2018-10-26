@@ -88,53 +88,43 @@ public class UpdateDialog {
 
 
         final JButton downloadButton = new JButton(rb.getString("dialog.update.downloadbutton"));
-        downloadButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    downloadButton.setEnabled(false);
+        downloadButton.addActionListener(e -> {
+            try {
+                downloadButton.setEnabled(false);
 
-                    textLabel.setText(rb.getString("dialog.update.downloading"));
+                textLabel.setText(rb.getString("dialog.update.downloading"));
 
-                    // download updates
-                    UpdateMgmt updateMgmt = UpdateMgmt.getInstance();
-                    updateMgmt.downloadUpdates();
-                } catch (Exception ex) {
-                    // show error dialog
-                    CustomJOptionPane.showMessageDialog(updateDialog,
-                            ex.getMessage(),
-                            rb.getString("dialog.update.errortitle"),
-                            CustomJOptionPane.ERROR_MESSAGE);
-                }
+                // download updates
+                UpdateMgmt updateMgmt1 = UpdateMgmt.getInstance();
+                updateMgmt1.downloadUpdates();
+            } catch (Exception ex) {
+                // show error dialog
+                CustomJOptionPane.showMessageDialog(updateDialog,
+                        ex.getMessage(),
+                        rb.getString("dialog.update.errortitle"),
+                        CustomJOptionPane.ERROR_MESSAGE);
             }
         });
 
 
         okButton = new JButton();
         okButton.setText(rb.getString("dialog.update.okbutton"));
-        okButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateDialog.dispose();
-            }
-        });
+        okButton.addActionListener(e -> updateDialog.dispose());
 
 
         cancelButton = new JButton();
         cancelButton.setText(rb.getString("dialog.update.cancelbutton"));
-        cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                UpdateMgmt updateMgmt = UpdateMgmt.getInstance();
-                updateMgmt.cancelUpdate();
-                updateDialog.dispose();
-            }
+        cancelButton.addActionListener(e -> {
+            UpdateMgmt updateMgmt12 = UpdateMgmt.getInstance();
+            updateMgmt12.cancelUpdate();
+            updateDialog.dispose();
         });
 
         changeLogButton = new JButton();
         changeLogButton.setText(rb.getString("dialog.update.changelogbutton"));
-        changeLogButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ChangeLog log = new ChangeLog(updateDialog, changeLog);
-                log.showDetails();
-            }
+        changeLogButton.addActionListener(e -> {
+            ChangeLog log = new ChangeLog(updateDialog, changeLog);
+            log.showDetails();
         });
 
 

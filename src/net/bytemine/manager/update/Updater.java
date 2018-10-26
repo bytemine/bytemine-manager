@@ -131,7 +131,7 @@ public class Updater {
      * @return A String cotaining the response
      * @throws IOException
      */
-    public String askForUpdate() throws Exception {
+    String askForUpdate() throws Exception {
         byte[] bytes = sendRequest(Constants.UPDATE_PAGE);
         if (bytes == null)
             return null;
@@ -146,7 +146,7 @@ public class Updater {
      * @return A String cotaining the response
      * @throws IOException
      */
-    public String askForChangelog(String filename) throws Exception {
+    String askForChangelog(String filename) throws Exception {
         byte[] bytes = sendRequest(filename);
         if (bytes == null)
             return null;
@@ -161,7 +161,7 @@ public class Updater {
      * @return The response
      * @throws IOException
      */
-    public byte[] downloadUpdate(String filename) throws Exception {
+    byte[] downloadUpdate(String filename) throws Exception {
         return sendRequest(filename);
     }
 
@@ -193,10 +193,7 @@ public class Updater {
         byte[] bytes = getBytesFromInputStream(is);
 
         String response = new String(bytes);
-        if (response != null && response.startsWith("HTTP/1.1 404"))
-            bytes = null;
-        else
-            bytes = removeHTTPHeader(bytes);
+        bytes = response.startsWith("HTTP/1.1 404") ? null : removeHTTPHeader(bytes);
 
         disconnect();
 
@@ -252,9 +249,8 @@ public class Updater {
 
             // create new byte array for the response without the http header
             byte[] returnBytes = new byte[response.length - headerLength];
-            for (int i = 0; i < returnBytes.length; i++) {
-                returnBytes[i] = response[i + headerLength];
-            }
+            if (returnBytes.length >= 0)
+                System.arraycopy(response, headerLength, returnBytes, 0, returnBytes.length);
             return returnBytes;
         }
         return response;

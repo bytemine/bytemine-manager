@@ -144,10 +144,7 @@ public class X509 {
      */
     public static String transformGenerationTypeToString(String generated) {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-        if (generated != null && "1".equals(generated))
-            return rb.getString("detailsFrame.generated");
-        else
-            return rb.getString("detailsFrame.imported");
+        return "1".equals(generated) ? rb.getString("detailsFrame.generated") : rb.getString("detailsFrame.imported");
     }
 
 
@@ -163,10 +160,7 @@ public class X509 {
         Date validFrom = Constants.parseDetailedFormat(validFromStr);
         Date validTo = Constants.parseDetailedFormat(validToStr);
         Date now = new Date();
-        if (validFrom.before(now) && validTo.after(now))
-            return rb.getString("x509.overview.valid");
-        else
-            return rb.getString("x509.overview.invalid");
+        return validFrom.before(now) && validTo.after(now) ? rb.getString("x509.overview.valid") : rb.getString("x509.overview.invalid");
     }
 
     /**
@@ -175,13 +169,10 @@ public class X509 {
      * @throws ParseException if the Date Strings in the x509 object could not be parsed properly
      */
     public String validForDays() throws ParseException {
-        long days = 0;
-        SimpleDateFormat dateFormat = null;
+        long days;
+        SimpleDateFormat dateFormat;
 
-        if (isFormatDe())
-            dateFormat = Constants.DETAILED_FORMAT_DE;
-        else
-            dateFormat = Constants.DETAILED_FORMAT_EN;
+        dateFormat = isFormatDe() ? Constants.DETAILED_FORMAT_DE : Constants.DETAILED_FORMAT_EN;
 
         try {
             Date validFromDate = dateFormat.parse(this.validFrom);

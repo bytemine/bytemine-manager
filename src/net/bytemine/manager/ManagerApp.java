@@ -9,6 +9,7 @@ package net.bytemine.manager;
 
 import java.io.File;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
 import java.util.Date;
@@ -18,8 +19,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import javax.swing.*;
 
 import net.bytemine.manager.action.ConfigurationAction;
 import net.bytemine.manager.css.CssLoader;
@@ -85,7 +85,7 @@ public class ManagerApp {
     }
     
     
-    public static void startup() {
+    private static void startup() {
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
@@ -96,7 +96,7 @@ public class ManagerApp {
                     }
                     InputStream is = getClass().getResourceAsStream(loggingProperties);
                     LogManager.getLogManager().readConfiguration(is);
-                } catch (Exception e) {
+                } catch (IOException | SecurityException e) {
                     System.err.println("!!! logging.properties could not be read !!!");
                     e.printStackTrace();
                 }
@@ -114,7 +114,7 @@ public class ManagerApp {
 
                 String osName = System.getProperty("os.name");
                 String userHome = System.getProperty("user.home");
-                String dbDirName = (osName.indexOf("Windows") > -1) ? "bytemine-manager" : ".bytemine-manager";
+                String dbDirName = (osName.contains("Windows")) ? "bytemine-manager" : ".bytemine-manager";
                 File dbDir = new File(userHome + "/" + dbDirName);
                 File newDB = new File(dbDir + "/manager.db");
                 try {
@@ -125,31 +125,22 @@ public class ManagerApp {
                         Configuration.getInstance().setJdbcPath(DBConnector.dbPath);
                     
                     // look for schema update and update if needed
-                    try {
-                        // update database schema
-                        SchemaUpdater schemaUpdater = new SchemaUpdater(Constants.UPDATE_SCHEMA_FILE);
-                        schemaUpdater.updateFromXml();
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "error while updating the database schema", e);
-                        new VisualException(
-                                rb.getString("dialog.switch_database.db_update_text"),
-                                rb.getString("dialog.switch_database.db_update_title"));
-                    }
-                
+                    updateSchema(rb);
+
                 } catch (Exception e) {
                     // database is not available
                     logger.log(Level.SEVERE, "the database file could not be found/created at "+newDB.toString(), e);
                     new VisualException(rb.getString("error.db.text"), rb.getString("error.db.title"));
                     System.exit(0);
                 }
-                    
+
                 try {
-                    if (osName.indexOf("Windows") > -1)
+                    if (osName.contains("Windows"))
                         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     else
                         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
 
-                } catch (Exception e) {
+                } catch (ClassNotFoundException | IllegalAccessException | UnsupportedLookAndFeelException | InstantiationException e) {
                     logger.log(Level.SEVERE, "could not set look and feel", e);
                 }
 
@@ -170,16 +161,7 @@ public class ManagerApp {
                     DBConnector.getInstance().switchToExternalDatabase();
                 
                 // look for schema update and update if needed
-                try {
-                    // update database schema
-                    SchemaUpdater schemaUpdater = new SchemaUpdater(Constants.UPDATE_SCHEMA_FILE);
-                    schemaUpdater.updateFromXml();
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "error while updating the database schema", e);
-                    new VisualException(
-                            rb.getString("dialog.switch_database.db_update_text"),
-                            rb.getString("dialog.switch_database.db_update_title"));
-                }
+                updateSchema(rb);
 
                 // register BouncyCastleProvider
                 // Usage: KeyFactory.getInstance("RSA", "BC");
@@ -208,6 +190,19 @@ public class ManagerApp {
                 
             }
         });
+    }
+
+    private static void updateSchema(ResourceBundle rb) {
+        try {
+            // update database schema
+            SchemaUpdater schemaUpdater = new SchemaUpdater(Constants.UPDATE_SCHEMA_FILE);
+            schemaUpdater.updateFromXml();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "error while updating the database schema", e);
+            new VisualException(
+                    rb.getString("dialog.switch_database.db_update_text"),
+                    rb.getString("dialog.switch_database.db_update_title"));
+        }
     }
 
 

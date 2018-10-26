@@ -35,11 +35,11 @@ import static org.junit.Assert.fail;
  */
 public class ServerUserTest {
     
-	final String networkAddress = "10.1.1.";
-	final String ipUser1 = "2";
-	final String ipUser2 = "3";
-	final String ccUser1 = "ifconfig-push 10.1.1.2 10.1.1.3\n";
-	final String ccUser2 = "ifconfig-push 10.1.1.3 10.1.1.4\n";
+	private final String networkAddress = "10.1.1.";
+	private final String ipUser1 = "2";
+	private final String ipUser2 = "3";
+	private final String ccUser1 = "ifconfig-push 10.1.1.2 10.1.1.3\n";
+	private final String ccUser2 = "ifconfig-push 10.1.1.3 10.1.1.4\n";
 	
     @BeforeClass
     public static void setUpBeforeClass() {
@@ -99,9 +99,8 @@ public class ServerUserTest {
     	}
     	
     	// check
-    	Vector<String> connectedUsers = new Vector<String>();
-    	
-        connectedUsers.addAll(UserQueries.getUsersForServer(serverId));   
+
+		Vector<String> connectedUsers = new Vector<>(UserQueries.getUsersForServer(serverId));
 
         if(!connectedUsers.containsAll(connectUsers))
         	fail();

@@ -19,10 +19,7 @@ import net.bytemine.manager.Constants;
 public class UserImporter {
 
     public static UserImport getUserImportImplementation(boolean createCertificatesForUsers) {
-        if (Configuration.getInstance().USER_IMPORT_TYPE == Constants.USER_IMPORT_TYPE_LDAP)
-            return UserImportLdap.getInstance(createCertificatesForUsers);
-        else
-            return UserImportFile.getInstance(createCertificatesForUsers);
+        return Configuration.getInstance().USER_IMPORT_TYPE == Constants.USER_IMPORT_TYPE_LDAP ? UserImportLdap.getInstance(createCertificatesForUsers) : UserImportFile.getInstance(createCertificatesForUsers);
     }
 
 }

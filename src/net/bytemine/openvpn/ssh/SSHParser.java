@@ -15,6 +15,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 import net.bytemine.manager.gui.ControlCenterTab;
@@ -217,7 +218,8 @@ public class SSHParser {
             channelSequence = false;
             tellAvailableChannelsToGUI();
             return;
-        } else if (t.countTokens() == 2) {
+        }
+        if (t.countTokens() == 2) {
             return;
         }
 
@@ -240,19 +242,19 @@ public class SSHParser {
      * a new client entry was detected
      */
     private void evaluateClientList() {
-        if (line.indexOf(SSHConstants.KEYWORD_VIRTUAL_ADDRESS) > -1)
+        if (line.contains(SSHConstants.KEYWORD_VIRTUAL_ADDRESS))
             routingSequence = true;
         
         // uninteresting, ignore these lines
-        if (line.indexOf(SSHConstants.KEYWORD_UPDATED) > -1
-                || line.indexOf(SSHConstants.KEYWORD_COMMON) > -1
-                || line.indexOf(SSHConstants.KEYWORD_ROUTING_TABLE) > -1
-                || line.indexOf(SSHConstants.KEYWORD_VIRTUAL_ADDRESS) > -1
-                || line.indexOf(SSHConstants.KEYWORD_STATUS) > -1) {
+        if (line.contains(SSHConstants.KEYWORD_UPDATED)
+                || line.contains(SSHConstants.KEYWORD_COMMON)
+                || line.contains(SSHConstants.KEYWORD_ROUTING_TABLE)
+                || line.contains(SSHConstants.KEYWORD_VIRTUAL_ADDRESS)
+                || line.contains(SSHConstants.KEYWORD_STATUS)) {
             return;
         }
         // status sequence ended, tell client list to GUI
-        if (line.indexOf(SSHConstants.KEYWORD_GLOBAL_STATS) > -1) {
+        if (line.contains(SSHConstants.KEYWORD_GLOBAL_STATS)) {
             statusSequence = false;
             routingSequence = false;
             
@@ -279,6 +281,7 @@ public class SSHParser {
             }
             
             // get the correct model
+            assert cn != null;
             SSHStatusModel model = statusModels.get(cn);
             if (model != null)
                 model.addRoutingInformation(line);
@@ -332,17 +335,17 @@ public class SSHParser {
         
         if (SSHConstants.KEYWORD_CHANNELS.equals(token)) {
             channelSequence = true;
-        } else if (line.indexOf(SSHConstants.KEYWORD_STATUS) > -1) {
+        } else if (line.contains(SSHConstants.KEYWORD_STATUS)) {
             // reset the status models
-            statusModels = new Hashtable<String, SSHStatusModel>();
+            statusModels = new Hashtable<>();
             statusSequence = true;
-        } else if (line.indexOf(SSHConstants.KEYWORD_KILL_SUCCESS) > -1) {
+        } else if (line.contains(SSHConstants.KEYWORD_KILL_SUCCESS)) {
             updateStatus();
         } else if (mKill.matches()) {
             tellKillUnsuccesfulMessageToGUI(line);
-        } else if (line.indexOf(SSHConstants.KEYWORD_LOG) > -1) {
+        } else if (line.contains(SSHConstants.KEYWORD_LOG)) {
             tellNewLogMessageToGUI(line);
-        } else if (line.indexOf(SSHConstants.KEYWORD_VERSION) > -1) {
+        } else if (line.contains(SSHConstants.KEYWORD_VERSION)) {
             tellVersionToGUI(line);
         } else {
             detectStatus(token);
@@ -358,16 +361,23 @@ public class SSHParser {
      * @param token The token to analyze
      */
     private void detectStatus(String token) {
-        if (SSHConstants.KEYWORD_OK.equals(token))
-            status = SSHConstants.STATUS_CODE_OK;
-        else if (SSHConstants.KEYWORD_READY.equals(token))
-            status = SSHConstants.STATUS_CODE_READY;
-        else if (SSHConstants.KEYWORD_WAIT.equals(token))
-            status = SSHConstants.STATUS_CODE_WAIT;
-        else if (SSHConstants.KEYWORD_FAIL.equals(token))
-            status = SSHConstants.STATUS_CODE_FAIL;
-        else
-            status = SSHConstants.STATUS_CODE_UNDEFINED;
+        switch (token) {
+            case SSHConstants.KEYWORD_OK:
+                status = SSHConstants.STATUS_CODE_OK;
+                break;
+            case SSHConstants.KEYWORD_READY:
+                status = SSHConstants.STATUS_CODE_READY;
+                break;
+            case SSHConstants.KEYWORD_WAIT:
+                status = SSHConstants.STATUS_CODE_WAIT;
+                break;
+            case SSHConstants.KEYWORD_FAIL:
+                status = SSHConstants.STATUS_CODE_FAIL;
+                break;
+            default:
+                status = SSHConstants.STATUS_CODE_UNDEFINED;
+                break;
+        }
     }
 
 
@@ -400,14 +410,9 @@ public class SSHParser {
      * tell a client list to the GUI
      */
     private void tellClientListToGUI() {
-        Vector<String[]> clientList = new Vector<String[]>();
-        for (Iterator<String> iterator = statusModels.keySet().iterator(); iterator.hasNext();) {
-            String key = (String)iterator.next();
-            SSHStatusModel sshStatusModel = (SSHStatusModel) statusModels.get(key);
-            clientList.add(sshStatusModel.toStringArray());
-        }
+        Vector<String[]> clientList = statusModels.keySet().stream().map(key -> statusModels.get(key)).map(SSHStatusModel::toStringArray).collect(Collectors.toCollection(Vector::new));
 
-        
+
         ControlCenterTab ccTab = ManagerGUI.getOpenCCTab(
                 this.communicator.getSession().getHost());
         ccTab.updateClientTable(clientList, channel);

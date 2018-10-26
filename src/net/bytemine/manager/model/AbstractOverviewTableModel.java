@@ -13,21 +13,21 @@ import java.util.HashMap;
 
 interface AbstractOverviewTableModel
 {
-    public void reinit();
-    public void reloadData();
-    public void refreshMapping();
+    void reinit();
+    void reloadData();
+    void refreshMapping();
     
-    public String getColumnName(int col);
-    public int getRowCount();
-    public int getColumnCount();
-    public Object getValueAt(int row, int col);
-    public boolean isCellEditable(int row, int col);
-    public void setValueAt(String value, int row, int col);
-    public HashMap<String, String> getIdRowMapping();
-    public void setIdRowMapping(HashMap<String, String> idRowMap);
-    public void addIdRowMapping(String key, String value);
+    String getColumnName(int col);
+    int getRowCount();
+    int getColumnCount();
+    Object getValueAt(int row, int col);
+    boolean isCellEditable(int row, int col);
+    void setValueAt(String value, int row, int col);
+    HashMap<String, String> getIdRowMapping();
+    void setIdRowMapping(HashMap<String, String> idRowMap);
+    void addIdRowMapping(String key, String value);
     
-    public abstract class ColumnListener {
+    abstract class ColumnListener {
         public abstract void mouseClicked(MouseEvent e);
     }
 }

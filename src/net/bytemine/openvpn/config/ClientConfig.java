@@ -8,9 +8,7 @@
 package net.bytemine.openvpn.config;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,13 +32,13 @@ import net.bytemine.utility.FileUtils;
 public class ClientConfig {
 
     private static Logger logger = Logger.getLogger(ClientConfig.class.getName());
-    private User user = null;
-    private X509 clientX509 = null;
+    private User user;
+    private X509 clientX509;
     private HashMap<String, String> params = null;
     private String content = null;
-    private String exportPath = null;
+    private String exportPath;
     private String configFilename = null;
-    private Vector<String> serverlist = null;
+    private Vector<String> serverlist;
 
     public ClientConfig(User user, Vector<String> serverlist) throws Exception {
         this.user = user;
@@ -63,7 +61,7 @@ public class ClientConfig {
      * Retrieves all necessary data and puts it into a HashMap
      */
     private void prepareParams() throws Exception {
-        this.params = new HashMap<String, String>();
+        this.params = new HashMap<>();
 
         try {
             X509 rootX509 = X509Utils.loadRootX509();
@@ -139,14 +137,8 @@ public class ClientConfig {
         necessaryData[1] = server[2];
         necessaryData[2] = server[15];
         necessaryData[3] = server[16];
-        
-        for (int i = 0; i < necessaryData.length; i++) {
-            String data = necessaryData[i];
-            if (data == null)
-                return false;
-        }
-        
-        return true;
+
+        return Arrays.stream(necessaryData).noneMatch(Objects::isNull);
     }
 
     /**

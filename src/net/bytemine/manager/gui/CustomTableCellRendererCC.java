@@ -32,18 +32,12 @@ public class CustomTableCellRendererCC extends DefaultTableCellRenderer {
                 isSelected, hasFocus, row, column);
         if (cell instanceof JLabel) {
             JLabel label = (JLabel) cell;
-            if (StringUtils.isDigit(label.getText()))
-                label.setHorizontalAlignment(JLabel.RIGHT);
-            else
-                label.setHorizontalAlignment(JLabel.LEFT);
+            label.setHorizontalAlignment(StringUtils.isDigit(label.getText()) ? JLabel.RIGHT : JLabel.LEFT);
             
             label.setText(" " + label.getText() + " ");
             cell = label;
         }
-        if (row % 2 == 0) {
-            cell.setBackground(Constants.COLOR_ROW1);
-        } else
-            cell.setBackground(Constants.COLOR_ROW2);
+        cell.setBackground(row % 2 == 0 ? Constants.COLOR_ROW1 : Constants.COLOR_ROW2);
         return cell;
     }
 }

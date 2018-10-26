@@ -9,7 +9,9 @@ package net.bytemine.manager.utility;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.security.PrivateKey;
+import java.security.cert.CertificateEncodingException;
 import java.util.Date;
 import java.security.cert.X509Certificate;
 import java.util.MissingResourceException;
@@ -48,7 +50,7 @@ public class X509Exporter {
     private boolean exportBinary = false;
 
     
-    public X509Exporter(int type, String certFilename, String keyFilename, String path, X509Certificate cert, User user)
+    X509Exporter(int type, String certFilename, String keyFilename, String path, X509Certificate cert, User user)
             throws Exception {
         this(type, certFilename, keyFilename, path, cert, user, -1);
     }
@@ -67,40 +69,44 @@ public class X509Exporter {
         this.newKeyFilename = keyFilename;
 
         // add sequential number
-        if (this.type == X509.X509_TYPE_CLIENT) {
-            if (user != null) {
-                this.path = this.path + user.getUsername() + File.separator;
-                generateNewClientFilenames(user);
-            } else {
-                this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
-                this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
-                this.newCertFilename = generateNewFilename(certFilename);
-                this.newKeyFilename = generateNewFilename(keyFilename);
-                logger.info("storing client certificate without user: " + this.path + File.separator + newCertFilename);
-                logger.info("storing client key without user: " + this.path + File.separator + newKeyFilename);
-            }
-        } else if (this.type == X509.X509_TYPE_PKCS12) {
-            if (user != null) {
-                this.path = this.path + user.getUsername() + File.separator;
-                generateNewPKCS12ClientFilenames(user);
-            } else {
-                this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
-                this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
-                this.newCertFilename = generateNewFilename(certFilename);
-                this.newKeyFilename = "";
-                logger.info("storing PKCS#12 client certificate without user: " + this.path + File.separator + newCertFilename);
-                logger.info("storing PKCS#12 client key without user: " + this.path + File.separator + newKeyFilename);
-            }
-        } else if (this.type == X509.X509_TYPE_SERVER) {
-            this.seqNumber = serverid + "";
-            this.path = this.path + "_" + Server.getServerById(serverid).getName() + File.separator;
-            String prefix = certFilename;
-            if (prefix.indexOf("_") > -1)
-                prefix = prefix.substring(0, prefix.indexOf("_"));
-            if (prefix.indexOf(".") > -1)
-                prefix = prefix.substring(0, prefix.indexOf("."));
-            this.newCertFilename = generateNewFilename(certFilename, prefix + "_");
-            this.newKeyFilename = generateNewFilename(keyFilename, prefix + "_");
+        switch (this.type) {
+            case X509.X509_TYPE_CLIENT:
+                if (user != null) {
+                    this.path = this.path + user.getUsername() + File.separator;
+                    generateNewClientFilenames(user);
+                } else {
+                    this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
+                    this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
+                    this.newCertFilename = generateNewFilename(certFilename);
+                    this.newKeyFilename = generateNewFilename(keyFilename);
+                    logger.info("storing client certificate without user: " + this.path + File.separator + newCertFilename);
+                    logger.info("storing client key without user: " + this.path + File.separator + newKeyFilename);
+                }
+                break;
+            case X509.X509_TYPE_PKCS12:
+                if (user != null) {
+                    this.path = this.path + user.getUsername() + File.separator;
+                    generateNewPKCS12ClientFilenames(user);
+                } else {
+                    this.path = this.path + File.separator + Constants.EXPORT_UNASSIGNED_DIRECTORY;
+                    this.seqNumber = X509Queries.retrieveCurrentSeqNumber(this.type);
+                    this.newCertFilename = generateNewFilename(certFilename);
+                    this.newKeyFilename = "";
+                    logger.info("storing PKCS#12 client certificate without user: " + this.path + File.separator + newCertFilename);
+                    logger.info("storing PKCS#12 client key without user: " + this.path + File.separator + newKeyFilename);
+                }
+                break;
+            case X509.X509_TYPE_SERVER:
+                this.seqNumber = serverid + "";
+                this.path = this.path + "_" + Server.getServerById(serverid).getName() + File.separator;
+                String prefix = certFilename;
+                if (prefix.contains("_"))
+                    prefix = prefix.substring(0, prefix.indexOf("_"));
+                if (prefix.contains("."))
+                    prefix = prefix.substring(0, prefix.indexOf("."));
+                this.newCertFilename = generateNewFilename(certFilename, prefix + "_");
+                this.newKeyFilename = generateNewFilename(keyFilename, prefix + "_");
+                break;
         }
         preparePath(this.path);
 
@@ -175,7 +181,7 @@ public class X509Exporter {
      * @throws java.security.cert.CertificateEncodingException
      *
      */
-    public int storeCertificate(
+    int storeCertificate(
             long currentTime, String issuer, String subject,
             String content, PrivateKey privKey, String keyContent,
             Date validFrom, Date validTo, boolean generated) {
@@ -203,7 +209,7 @@ public class X509Exporter {
      * @throws java.security.cert.CertificateEncodingException
      *
      */
-    public int storeCertificate(
+    int storeCertificate(
             long currentTime, String issuer, String subject,
             String content, PrivateKey privKey, String keyContent,
             Date validFrom, Date validTo, boolean generated, int x509id) {
@@ -232,7 +238,7 @@ public class X509Exporter {
      * @throws java.security.cert.CertificateEncodingException
      *
      */
-    public int storeCertificate(
+    private int storeCertificate(
             int version, long currentTime, String issuer, String subject,
             String content, PrivateKey privKey, String keyContent,
             Date validFrom, Date validTo, boolean generated) {
@@ -259,7 +265,7 @@ public class X509Exporter {
      * @throws java.security.cert.CertificateEncodingException
      *
      */
-    public int storeCertificate(
+    private int storeCertificate(
             int version, long currentTime, String issuer, String subject,
             String content, PrivateKey privKey, String keyContent,
             Date validFrom, Date validTo, boolean generated, int x509id) {
@@ -278,7 +284,7 @@ public class X509Exporter {
         issuer = issuer.replaceAll(", ", ",");
         subject = subject.replaceAll(", ", ",");
 
-        X509 x509 = null;
+        X509 x509;
         if (x509id == -1) {
             // create new x509 and store it to db
             x509 = new X509(String.valueOf(currentTime));
@@ -343,7 +349,7 @@ public class X509Exporter {
                 fw.write(content);
             }
             fw.close();
-        } catch (Exception e) {
+        } catch (IOException | CertificateEncodingException e) {
             logger.log(Level.SEVERE, "Error writing key to filesystem", e);
             throw new Exception(rb.getString("dialog.cert.exporterror"));
         }
@@ -359,9 +365,9 @@ public class X509Exporter {
      * @return The certificates content
      * @throws Exception
      */
-    public String generateContent(boolean exportBinary, boolean exportText) throws Exception {
+    String generateContent(boolean exportBinary, boolean exportText) throws Exception {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
-        StringBuffer contentBuffer = new StringBuffer();
+        StringBuilder contentBuffer = new StringBuilder();
         try {
             if (exportText)
                 contentBuffer.append(certificate.toString());
@@ -405,7 +411,7 @@ public class X509Exporter {
      * @param keyStrength The keyStrength to test for
      * @return true, if the file is existing. false if not
      */
-    public static boolean isDHParametersExisting(int keyStrength) {
+    static boolean isDHParametersExisting(int keyStrength) {
         String exportPath = Configuration.getInstance().CERT_EXPORT_PATH;
 
         String filename = "dh" + keyStrength + ".pem";
@@ -422,7 +428,7 @@ public class X509Exporter {
      * @param keyStrength The keyStrength
      * @throws Exception
      */
-    public static void exportDHParameters(String content, int keyStrength) throws Exception {
+    static void exportDHParameters(String content, int keyStrength) throws Exception {
         ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         String exportPath = Configuration.getInstance().CERT_EXPORT_PATH;
 

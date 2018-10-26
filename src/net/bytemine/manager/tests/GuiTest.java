@@ -30,11 +30,7 @@ public class GuiTest extends TestCase {
     	
     	DBTasks.resetDB(false);
     	
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new ManagerGUI();
-            }
-        });
+        SwingUtilities.invokeLater(ManagerGUI::new);
 
         // configuration dialog should pop up
         JDialog configurationDialog = null;
@@ -48,18 +44,19 @@ public class GuiTest extends TestCase {
         
         // Test configuration dialog
         JTextField export_path = (JTextField)TestUtils.getChildNamed(configurationDialog, "export_path");
+        assert export_path != null;
         export_path.setText("/tmp/export_tmp");
         final JButton saveButton = (JButton)TestUtils.getChildNamed(configurationDialog, "config_save");
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                saveButton.doClick();
-            }
-        });        
+        SwingUtilities.invokeLater(() -> {
+            assert saveButton != null;
+            saveButton.doClick();
+        });
         Thread.sleep(300);
         assertEquals("/tmp/export_tmp", Configuration.getInstance().CERT_EXPORT_PATH);
         
         // Test if all tabs were rendered
         JTabbedPane tabs = (JTabbedPane)TestUtils.getChildNamed(ManagerGUI.mainFrame, "main_tabs");
+        assert tabs != null;
         assertEquals(tabs.getComponentCount(), 4);
         
     }
