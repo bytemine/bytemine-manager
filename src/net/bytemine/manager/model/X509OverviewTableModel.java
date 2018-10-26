@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -40,20 +41,20 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
 
     private static final long serialVersionUID = 1L;
 
-    ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+    private ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-    protected int sortCol = 2;
-    protected boolean isSortAsc = true;
+    private int sortCol = 2;
+    private boolean isSortAsc = true;
 
     // the column names to display    
-    String[] columnNames = {
+    private String[] columnNames = {
             rb.getString("x509.overview.column2"),
             rb.getString("x509.overview.column3"),
             rb.getString("x509.overview.column4"),
             rb.getString("x509.overview.column5")};
 
     // contains the data of a table row
-    Vector<String[]> rowData = X509Queries.getX509Overview(this);
+    private Vector<String[]> rowData = X509Queries.getX509Overview(this);
 
     // map in which row numbers and ids are stored as key-value-pairs
     private static HashMap<String, String> idRowMapping;
@@ -78,7 +79,7 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
      */
     public void reloadData() {
         rowData = X509Queries.getX509Overview(this);
-        Collections.sort(rowData, new X509Comparator(isSortAsc, sortCol));
+        rowData.sort(new X509Comparator(isSortAsc, sortCol));
         refreshMapping();
         fireTableDataChanged();
     }
@@ -89,8 +90,7 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
      */
     public void refreshMapping() {
     	int row = 0;
-        for (Iterator<String[]> iterator = rowData.iterator(); iterator.hasNext();) {
-            String[] rowData = (String[]) iterator.next();
+        for (String[] rowData : rowData) {
             addIdRowMapping(row + "", rowData[4]);
             row++;
         }
@@ -116,7 +116,7 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
 
 
     public Object getValueAt(int row, int col) {
-        String[] rowStr = (String[]) rowData.get(row);
+        String[] rowStr = rowData.get(row);
         return rowStr[col];
     }
 
@@ -127,7 +127,7 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
 
 
     public void setValueAt(String value, int row, int col) {
-        String[] rowStr = (String[]) rowData.get(row);
+        String[] rowStr = rowData.get(row);
         rowStr[col] = value;
         fireTableCellUpdated(row, col);
     }
@@ -143,7 +143,7 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
 
     public void addIdRowMapping(String key, String value) {
         if (idRowMapping == null)
-            idRowMapping = new HashMap<String, String>();
+            idRowMapping = new HashMap<>();
         idRowMapping.put(key, value);
     }
 
@@ -168,13 +168,10 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
             else
                 sortCol = modelIndex;
 
-            for (int i = 0; i < getColumnCount(); i++) {
-                TableColumn column = colModel.getColumn(i);
-                column.setHeaderValue(getColumnName(column.getModelIndex()));
-            }
+            IntStream.range(0, getColumnCount()).mapToObj(colModel::getColumn).forEach(column -> column.setHeaderValue(getColumnName(column.getModelIndex())));
             table.getTableHeader().repaint();
 
-            Collections.sort(rowData, new X509Comparator(isSortAsc, sortCol));
+            rowData.sort(new X509Comparator(isSortAsc, sortCol));
             
             // refresh the mapping
             refreshMapping();
@@ -188,10 +185,10 @@ public class X509OverviewTableModel extends AbstractTableModel implements Abstra
 
 
 class X509Comparator implements Comparator<String[]> {
-    protected boolean isSortAsc;
-    protected int sortCol;
+    private boolean isSortAsc;
+    private int sortCol;
 
-    public X509Comparator(boolean sortAsc, int sortCol) {
+    X509Comparator(boolean sortAsc, int sortCol) {
         this.isSortAsc = sortAsc;
         this.sortCol = sortCol;
     }
