@@ -53,12 +53,7 @@ public class ResourceBundleMgmt {
      * @return the requested ResourceBundle or the default Bundle
      */
     public ResourceBundle getBundle(String languageCode) {
-        if (languageCode != null && Constants.LANGUAGE_CODE_GERMAN.equals(languageCode))
-            return germanBundle;
-        else if (languageCode != null && Constants.LANGUAGE_CODE_ENGLISH.equals(languageCode))
-            return englishBundle;
-        else
-            return getDefaultBundle();
+        return Constants.LANGUAGE_CODE_GERMAN.equals(languageCode) ? germanBundle : Constants.LANGUAGE_CODE_ENGLISH.equals(languageCode) ? englishBundle : getDefaultBundle();
     }
 
 
@@ -70,14 +65,12 @@ public class ResourceBundleMgmt {
     public ResourceBundle getUserBundle() {
         if (userBundle != null)
             return userBundle;
-        else {
-            String lang = Configuration.getInstance().LANGUAGE;
-            if (lang != null) {
-                setUserBundle(lang);
-                return userBundle;
-            } else
-                return getDefaultBundle();
+        String lang = Configuration.getInstance().LANGUAGE;
+        if (lang != null) {
+            setUserBundle(lang);
+            return userBundle;
         }
+        return getDefaultBundle();
 
     }
 
@@ -88,7 +81,7 @@ public class ResourceBundleMgmt {
      * @return the default ResourceBundle
      */
     private ResourceBundle getDefaultBundle() {
-        ResourceBundle b = null;
+        ResourceBundle b;
         if (Locale.getDefault().getLanguage().equals(Constants.LANGUAGE_CODE_GERMAN) || 
                 Locale.getDefault().getLanguage().equals(Constants.LANGUAGE_CODE_ENGLISH)) {
             b = ResourceBundle.getBundle(Constants.BUNDLE_PACKAGE, Locale.getDefault());
@@ -117,10 +110,10 @@ public class ResourceBundleMgmt {
      *
      * @param languageCode Defined in Configuration-LANGUAGE_CODE
      */
-    public void setUserBundle(String languageCode) {
-        if (languageCode != null && Constants.LANGUAGE_CODE_GERMAN.equals(languageCode))
+    private void setUserBundle(String languageCode) {
+        if (Constants.LANGUAGE_CODE_GERMAN.equals(languageCode))
             userBundle = germanBundle;
-        else if (languageCode != null && Constants.LANGUAGE_CODE_ENGLISH.equals(languageCode))
+        else if (Constants.LANGUAGE_CODE_ENGLISH.equals(languageCode))
             userBundle = englishBundle;
         else
             userBundle = getDefaultBundle();
@@ -134,10 +127,7 @@ public class ResourceBundleMgmt {
      * @return true if language was selected, false if not
      */
     public static boolean isLanguageSelected() {
-        if (Configuration.getInstance().LANGUAGE == null)
-            return false;
-        else
-            return true;
+        return Configuration.getInstance().LANGUAGE != null;
     }
 
 
