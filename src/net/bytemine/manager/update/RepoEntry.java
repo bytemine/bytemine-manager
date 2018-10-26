@@ -30,7 +30,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
     private String changelog;
 
 
-    public RepoEntry(HashMap<String, Object> map) {
+    RepoEntry(HashMap<String, Object> map) {
         DebugPrinter.printMap(map);
         if (map != null) {
             version = map.get("version").toString();
@@ -54,7 +54,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
         return filename;
     }
 
-    public String[] getJars() {
+    String[] getJars() {
         return jars;
     }
 
@@ -62,7 +62,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
         return size;
     }
 
-    public String getChecksum() {
+    String getChecksum() {
         return checksum;
     }
 
@@ -74,7 +74,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
         this.timestamp = timestamp;
     }
 
-    public String getChangelog() {
+    String getChangelog() {
         return changelog;
     }
 
@@ -85,10 +85,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
 
     public int compareTo(RepoEntry re) {
         String[] tokens = StringUtils.tokenize(re.getVersion());
-        if (isNewerThanCurrentVersion(tokens))
-            return -1;
-        else
-            return 1;
+        return isNewerThanCurrentVersion(tokens) ? -1 : 1;
     }
 
 
@@ -98,7 +95,7 @@ public class RepoEntry implements Comparable<RepoEntry> {
      * @param currentTokens String[] with the tokens from the current version
      * @return true, if the new version is newer than the current
      */
-    public boolean isNewerThanCurrentVersion(String[] currentTokens) {
+    boolean isNewerThanCurrentVersion(String[] currentTokens) {
         int result = 0;
         String[] newTokens = StringUtils.tokenize(version);
         for (int i = 0; i < newTokens.length; i++) {
@@ -106,22 +103,14 @@ public class RepoEntry implements Comparable<RepoEntry> {
             if (currentTokens.length < i + 1) {
                 // if last comparison ended for the newer version or equality, it is newer
                 // e.g.: 1.0 to 1.0.4 => 1.0 is equal to 1.0, but the newer version is longer
-                if (result >= 0)
-                    return true;
-                else
-                    return false;
+                return result >= 0;
             }
 
             String string = newTokens[i];
             int newNr = Integer.parseInt(string);
 
             int currentNr = Integer.parseInt(currentTokens[i]);
-            if (newNr > currentNr)
-                result = 1;
-            else if (newNr == currentNr)
-                result = 0;
-            else
-                result = -1;
+            result = Integer.compare(newNr, currentNr);
         }
         return result>0;
     }
