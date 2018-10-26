@@ -10,10 +10,7 @@ package net.bytemine.openvpn;
 import java.io.File;
 import java.security.Security;
 import java.security.cert.X509Certificate;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -66,10 +63,9 @@ public class UserImportLdap extends UserImport {
     /**
      * Does all the import job
      *
-     * @throws java.lang.Exception
      */
 
-    public void importUsers() throws Exception {
+    public void importUsers() {
         try {
             // status frame
             final StatusFrame statusFrame = new StatusFrame(StatusFrame.TYPE_LDAP, ManagerGUI.mainFrame);
@@ -78,7 +74,7 @@ public class UserImportLdap extends UserImport {
             SwingWorker<String, Void> importWorker = new SwingWorker<String, Void>() {
                 Thread t;
 
-                protected String doInBackground() throws Exception {
+                protected String doInBackground() {
                     try {
                         t = Thread.currentThread();
                         ThreadMgmt.getInstance().addThread(t);
@@ -179,8 +175,7 @@ public class UserImportLdap extends UserImport {
             Hashtable<String, byte[]> usersAndCertificates
     ) throws Exception {
 
-        for (Iterator<String> it = usersAndCertificates.keySet().iterator(); it.hasNext();) {
-            String username = it.next();
+        for (String username : usersAndCertificates.keySet()) {
             byte[] cert = usersAndCertificates.get(username);
 
             String userid = users.get(username);
@@ -215,9 +210,7 @@ public class UserImportLdap extends UserImport {
         Hashtable<String, String> cnAndContent = readCertificates(importDir);
 
         // iterate over loaded users
-        for (Iterator<String> it = users.keySet().iterator(); it.hasNext();) {
-            String username = it.next();
-
+        for (String username : users.keySet()) {
             try {
                 String userid = users.get(username);
                 User user = new User(userid);
@@ -258,7 +251,7 @@ public class UserImportLdap extends UserImport {
         if (!importDirectory.exists() || !importDirectory.isDirectory())
             throw new Exception(rb.getString("error.ldap.importdirectory"));
 
-        for (File file : importDirectory.listFiles()) {
+        Arrays.stream(Objects.requireNonNull(importDirectory.listFiles())).forEach(file -> {
             try {
                 X509FileImporter importer = new X509FileImporter(file);
                 String content = importer.readCertificate();
@@ -272,7 +265,7 @@ public class UserImportLdap extends UserImport {
             } catch (Exception e) {
                 logger.warning("potential certificate file could not be processed: " + file.getName());
             }
-        }
+        });
 
         return returnTable;
     }
@@ -288,9 +281,7 @@ public class UserImportLdap extends UserImport {
         Hashtable<String, String> existingUsers = UserQueries.getUserTable(true);
         Hashtable<String, String> returnTable = new Hashtable<String, String>();
 
-        for (Iterator<String> it = ldapUsers.iterator(); it.hasNext();) {
-            String username = it.next();
-
+        for (String username : ldapUsers) {
             User user;
             if (!existingUsers.containsKey(username)) {
                 // user is not existing in database
