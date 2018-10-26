@@ -17,6 +17,8 @@ import com.jcraft.jsch.HostKey;
 import com.jcraft.jsch.HostKeyRepository;
 import com.jcraft.jsch.JSch;
 
+import java.util.Arrays;
+
 
 /**
  * Known host management for the ssh servers
@@ -33,11 +35,10 @@ public class SSHKnownHostsMGMT {
         if (repo != null) {
             HostKey[] keys = repo.getHostKey();
             if (keys != null) {
-                for (int i = 0; i < keys.length; i++) {
-                    HostKey key = keys[i];
+                Arrays.stream(keys).forEach(key -> {
                     this.hostname = key.getHost();
                     this.fingerprint = key.getFingerPrint(jsch);
-                }
+                });
             }
         }
     }
