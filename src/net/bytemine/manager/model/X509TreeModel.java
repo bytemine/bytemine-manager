@@ -255,17 +255,7 @@ public class X509TreeModel {
      * Tries to restore the tree state
      */
     public void restoreState() {
-        String expandedStr = TreeStateQueries.getTreestate(TREENAME);
-        if (expandedStr == null)
-            return;
-        
-        String[] nodeStrings = StringUtils.tokenize(expandedStr, "#");
-        if (nodeStrings == null)
-            return;
-        for (int i = 0; i < nodeStrings.length; i++) {
-            String node = nodeStrings[i];
-            expandedTreeObjects.add(node);
-        }
+        ServerUserTreeModel.restareTreeState(TREENAME, expandedTreeObjects);
     }
     
     

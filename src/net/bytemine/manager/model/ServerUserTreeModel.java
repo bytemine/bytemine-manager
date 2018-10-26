@@ -16,11 +16,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ResourceBundle;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -67,11 +63,11 @@ public class ServerUserTreeModel {
     private String topNodeName = null;
     private String topServerNodeName = null;
     private String topUserNodeName = null;
-    private ServerUserTreeModel treeModel = null;
+    private ServerUserTreeModel treeModel;
     private String filterString = "";
     
     //all expanded tree nodes
-    private LinkedList<String> expandedTreeObjects = new LinkedList<String>();
+    private LinkedList<String> expandedTreeObjects = new LinkedList<>();
     // has to be suppressed for the expansion
     private boolean supressExpansionEvent = false;
     
@@ -100,7 +96,7 @@ public class ServerUserTreeModel {
         topNodeName = rb.getString("serverUserTree.topNode.name");
         topUserNodeName = rb.getString("serverUserTree.userTopNode.name");
         topServerNodeName = rb.getString("serverUserTree.serverTopNode.name");
-        
+
         topNode = new DefaultMutableTreeNode(topNodeName);
         topNode.add(createUserNodes());
         topNode.add(createServerNodes());
@@ -119,7 +115,7 @@ public class ServerUserTreeModel {
                 if (selRow != -1) {
                     if (e.getButton() != MouseEvent.BUTTON1) {
                         // right click
-                        String[] pathStrings = null;
+                        String[] pathStrings;
                         
                         TreePath[] paths = tree.getSelectionPaths();
                         if (paths!=null && paths.length > 1) {
@@ -131,7 +127,7 @@ public class ServerUserTreeModel {
                             DefaultMutableTreeNode parentNode = null;
                             int level = -1;
                             boolean areServerNodes = false;
-                            Vector<String> ids = new Vector<String>();
+                            Vector<String> ids = new Vector<>();
                             for (int i = 0; i < paths.length; i++) {
                                 TreePath path = paths[i];
                                 DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
@@ -157,31 +153,29 @@ public class ServerUserTreeModel {
                                     ServerNode sNode = (ServerNode)(parentNode).getUserObject();
                                     ManagerGUI.showMultipleConnectionsContextFromTree(position, sNode.getId(), ids);
                                 }
-                            } else {
-                                if (areServerNodes)
-                                    ManagerGUI.showMultipleServersContextFromTree(position, ids);
-                                else
-                                    ManagerGUI.showMultipleUsersContextFromTree(position, ids);
-                            }
-                        } else {
+                            } else if (areServerNodes)
+                                ManagerGUI.showMultipleServersContextFromTree(position, ids);
+                            else
+                                ManagerGUI.showMultipleUsersContextFromTree(position, ids);
+                        } else
                             // single select
-                            
+
                             // is there unsaved data the user wants to store?
                             if (handleUnsavedData(selPath)) {
-                                
-                                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selPath.getLastPathComponent();
+
+                                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selPath.getLastPathComponent();
                                 // select this node
                                 tree.setSelectionPath(selPath);
-                                
+
                                 if (selPath.getPathCount() == 4) {
                                     // connected objects, only manage the assignments
                                     if (isServerNode(selectedNode)) {
-                                        ServerNode sNode = (ServerNode)selectedNode.getUserObject();
-                                        UserNode uNode = (UserNode)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
+                                        ServerNode sNode = (ServerNode) selectedNode.getUserObject();
+                                        UserNode uNode = (UserNode) ((DefaultMutableTreeNode) selectedNode.getParent()).getUserObject();
                                         ManagerGUI.showConnectionContextFromTree(position, sNode.getId(), uNode.getId());
                                     } else if (isUserNode(selectedNode)) {
-                                        UserNode uNode = (UserNode)selectedNode.getUserObject();
-                                        ServerNode sNode = (ServerNode)((DefaultMutableTreeNode)selectedNode.getParent()).getUserObject();
+                                        UserNode uNode = (UserNode) selectedNode.getUserObject();
+                                        ServerNode sNode = (ServerNode) ((DefaultMutableTreeNode) selectedNode.getParent()).getUserObject();
                                         ManagerGUI.showConnectionContextFromTree(position, sNode.getId(), uNode.getId());
                                     }
                                 } else if (selPath.getPathCount() == 2) {
@@ -191,18 +185,16 @@ public class ServerUserTreeModel {
                                     } else if (isTopUserNode(selectedNode)) {
                                         ManagerGUI.showTopUserContextFromTree(position);
                                     }
-                                } else {
+                                } else
                                     // manage the object itself
                                     if (isServerNode(selectedNode)) {
-                                        ServerNode sNode = (ServerNode)selectedNode.getUserObject();
+                                        ServerNode sNode = (ServerNode) selectedNode.getUserObject();
                                         ManagerGUI.showServerContextFromTree(position, sNode.getId());
                                     } else if (isUserNode(selectedNode)) {
-                                        UserNode uNode = (UserNode)selectedNode.getUserObject();
+                                        UserNode uNode = (UserNode) selectedNode.getUserObject();
                                         ManagerGUI.showUserContextFromTree(position, uNode.getId());
                                     }
-                                }
                             }
-                        }
                     } else if (e.getClickCount() == 1) {
                         // left click
                         
@@ -246,26 +238,19 @@ public class ServerUserTreeModel {
             private boolean isServerNode(DefaultMutableTreeNode node) {
                 if (node.getPath().length <= 2)
                     return false;
-                if (node.getUserObject() instanceof ServerNode)
-                    return true;
-                else
-                    return false;
+                return node.getUserObject() instanceof ServerNode;
             }
             
             private boolean isUserNode(DefaultMutableTreeNode node) {
                 if (node.getPath().length <= 2)
                     return false;
-                if (node.getUserObject() instanceof UserNode)
-                    return true;
-                else
-                    return false;
+                return node.getUserObject() instanceof UserNode;
             }
             
             private boolean isTopServerNode(DefaultMutableTreeNode node) {
                 if (node.getUserObject() instanceof ServerNode) {
                     ServerNode sNode = (ServerNode)node.getUserObject();
-                    if (sNode.getId() == null)
-                        return true;
+                    return sNode.getId() == null;
                 }
                 return false;
             }
@@ -273,8 +258,7 @@ public class ServerUserTreeModel {
             private boolean isTopUserNode(DefaultMutableTreeNode node) {
                 if (node.getUserObject() instanceof UserNode) {
                     UserNode uNode = (UserNode)node.getUserObject();
-                    if (uNode.getId() == null)
-                        return true;
+                    return uNode.getId() == null;
                 }
                 return false;
             }
@@ -290,11 +274,10 @@ public class ServerUserTreeModel {
                     if (!saveData) {
                         unsavedData = false;
                         return true;
-                    } else {
-                        return false;
                     }
-                } else
-                    return true;
+                    return false;
+                }
+                return true;
             }
             
         };
@@ -313,10 +296,8 @@ public class ServerUserTreeModel {
                         DefaultMutableTreeNode targetNode = (DefaultMutableTreeNode) targetPath
                                 .getLastPathComponent();
 
-                        if (selectionPaths != null && selectionPaths.length > -1) {
-                            for (int i = 0; i < selectionPaths.length; i++) {
-                                TreePath path = selectionPaths[i];
-
+                        if (selectionPaths != null) {
+                            for (TreePath path : selectionPaths) {
                                 DefaultMutableTreeNode sourceNode = (DefaultMutableTreeNode) path
                                         .getLastPathComponent();
 
@@ -325,22 +306,22 @@ public class ServerUserTreeModel {
                                     if (TreeConfiguration.DRAG_MEANS_MOVE)
                                         sourceNode.remove(sourceNode);
 
-                                    String serverid = null;
-                                    String userid = null;
+                                    String serverid;
+                                    String userid;
                                     if (sourceNode.getUserObject() instanceof ServerNode) {
-                                        serverid = ((ServerNode)sourceNode.getUserObject()).getId();
-                                        userid = ((UserNode)targetNode.getUserObject()).getId();
+                                        serverid = ((ServerNode) sourceNode.getUserObject()).getId();
+                                        userid = ((UserNode) targetNode.getUserObject()).getId();
                                     } else {
-                                        userid = ((UserNode)sourceNode.getUserObject()).getId();
-                                        serverid = ((ServerNode)targetNode.getUserObject()).getId();
+                                        userid = ((UserNode) sourceNode.getUserObject()).getId();
+                                        serverid = ((ServerNode) targetNode.getUserObject()).getId();
                                     }
-                                    
+
                                     // save this relationship
                                     ServerQueries.addUserToServer(serverid, userid);
-                                    
+
                                     // expand the target node
                                     tree.expandPath(targetPath);
-                                    
+
                                     // reload the tree
                                     treeModel.reload(filterString);
 
@@ -362,23 +343,11 @@ public class ServerUserTreeModel {
                      */
                     private boolean isDropAllowed(DefaultMutableTreeNode sourceNode, 
                             DefaultMutableTreeNode targetNode) {
-                        if (sourceNode.getUserObject() instanceof ServerNode &&
-                                targetNode.getUserObject() instanceof UserNode)
-                            if (((ServerNode)sourceNode.getUserObject()).getId() == null ||
-                                    ((UserNode)targetNode.getUserObject()).getId() == null)
-                                // do not DnD the user/server top nodes
-                                return false;
-                            else
-                                return true;
-                        if (sourceNode.getUserObject() instanceof UserNode &&
-                                targetNode.getUserObject() instanceof ServerNode)
-                            if (((UserNode)sourceNode.getUserObject()).getId() == null ||
-                                    ((ServerNode)targetNode.getUserObject()).getId() == null)
-                                // do not DnD the user/server top nodes
-                                return false;
-                            else
-                                return true;
-                        return false;
+                        return sourceNode.getUserObject() instanceof ServerNode &&
+                                targetNode.getUserObject() instanceof UserNode ? ((ServerNode) sourceNode.getUserObject()).getId() != null &&
+                                ((UserNode) targetNode.getUserObject()).getId() != null : sourceNode.getUserObject() instanceof UserNode &&
+                                targetNode.getUserObject() instanceof ServerNode && ((UserNode) sourceNode.getUserObject()).getId() != null &&
+                                ((ServerNode) targetNode.getUserObject()).getId() != null;
                     }
 
                 }));
@@ -393,18 +362,16 @@ public class ServerUserTreeModel {
      */
     private DefaultMutableTreeNode createUserNodes() {
         DefaultMutableTreeNode userTopNode = new DefaultMutableTreeNode(new UserNode(null, topUserNodeName));
-        DefaultMutableTreeNode userNode = null;
-        DefaultMutableTreeNode serverNode = null;
+        DefaultMutableTreeNode userNode;
+        DefaultMutableTreeNode serverNode;
 
         Vector<String[]> users = UserQueries.getAllUsersFilteredByUsername(filterString);
-        for (Iterator<String[]> iter = users.iterator(); iter.hasNext();) {
-            String[] user = iter.next();
+        for (String[] user : users) {
             UserNode uNode = new UserNode(user[0], user[1]);
             userNode = new DefaultMutableTreeNode(uNode);
-            
+
             Vector<String> serverIds = ServerQueries.getServersForUser(user[0]);
-            for (Iterator<String> iterator = serverIds.iterator(); iterator.hasNext();) {
-                String serverId = iterator.next();
+            for (String serverId : serverIds) {
                 String serverName = ServerQueries.getServerDetails(serverId)[1];
                 if (serverName != null) {
                     serverNode = new DefaultMutableTreeNode(new ServerNode(serverId, serverName));
@@ -424,18 +391,16 @@ public class ServerUserTreeModel {
      */
     private DefaultMutableTreeNode createServerNodes() {
         DefaultMutableTreeNode serverTopNode = new DefaultMutableTreeNode(new ServerNode(null, topServerNodeName));
-        DefaultMutableTreeNode serverNode = null;
-        DefaultMutableTreeNode userNode = null;
+        DefaultMutableTreeNode serverNode;
+        DefaultMutableTreeNode userNode;
 
         Vector<String[]> servers = ServerQueries.getServersFilteredByName(filterString);
-        for (Iterator<String[]> iter = servers.iterator(); iter.hasNext();) {
-            String[] server = iter.next();
+        for (String[] server : servers) {
             ServerNode sNode = new ServerNode(server[0], server[1]);
             serverNode = new DefaultMutableTreeNode(sNode);
-            
+
             Vector<String> userIds = UserQueries.getUsersForServer(server[0]);
-            for (Iterator<String> iterator = userIds.iterator(); iterator.hasNext();) {
-                String userId = iterator.next();
+            for (String userId : userIds) {
                 String userName = UserQueries.getUserDetails(userId)[1];
                 if (userName != null) {
                     userNode = new DefaultMutableTreeNode(new UserNode(userId, userName));
@@ -541,8 +506,8 @@ public class ServerUserTreeModel {
      * @param e The ExpansionEvent
      */
     private void processTreeExpansion(TreeExpansionEvent e){
-        if (supressExpansionEvent == false) {
-            TreePath p = (TreePath) e.getPath();
+        if (!supressExpansionEvent) {
+            TreePath p = e.getPath();
             Object[] Objs = p.getPath();
             DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
             String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
@@ -555,7 +520,7 @@ public class ServerUserTreeModel {
      * @param e The ExpansionEvent
      */
     private void processTreeCollapse(TreeExpansionEvent e){
-        TreePath p = (TreePath) e.getPath();
+        TreePath p = e.getPath();
         Object[] Objs = p.getPath();
         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
         String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
@@ -567,9 +532,9 @@ public class ServerUserTreeModel {
      * Save the actual tree state to DB
      */
     public void saveState() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Iterator<String> iterator = expandedTreeObjects.iterator(); iterator.hasNext();) {
-            String nodePath = (String) iterator.next();
+            String nodePath = iterator.next();
             sb.append(nodePath);
             if (iterator.hasNext())
                 sb.append("#");
@@ -581,21 +546,20 @@ public class ServerUserTreeModel {
     /**
      * Tries to restore the tree state
      */
-    public void restoreState() {
-        String expandedStr = TreeStateQueries.getTreestate(TREENAME);
+    private void restoreState() {
+        restareTreeState(TREENAME, expandedTreeObjects);
+    }
+
+    static void restareTreeState(String treename, LinkedList<String> expandedTreeObjects) {
+        String expandedStr = TreeStateQueries.getTreestate(treename);
         if (expandedStr == null)
             return;
-        
+
         String[] nodeStrings = StringUtils.tokenize(expandedStr, "#");
-        if (nodeStrings == null)
-            return;
-        for (int i = 0; i < nodeStrings.length; i++) {
-            String node = nodeStrings[i];
-            expandedTreeObjects.add(node);
-        }
+        Collections.addAll(expandedTreeObjects, nodeStrings);
     }
-    
-    
+
+
     public JTree getServerUserTree() {
         return tree;
     }
@@ -615,7 +579,7 @@ class UserNode {
         this.name = name;
     }
     
-    public UserNode(String id, String name) {
+    UserNode(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -638,7 +602,7 @@ class ServerNode {
     private String id;
     private String name;
     
-    public ServerNode(String id, String name) {
+    ServerNode(String id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -660,16 +624,16 @@ class ServerNode {
 class ServerUserRenderer extends DefaultTreeCellRenderer {
     private static final long serialVersionUID = 3214945233939488408L;
 
-    ImageIcon usersIcon = ImageUtils.createImageIcon(Constants.ICON_USERS,
+    private ImageIcon usersIcon = ImageUtils.createImageIcon(Constants.ICON_USERS,
         "users");
-    ImageIcon userIcon = ImageUtils.createImageIcon(Constants.ICON_USER,
+    private ImageIcon userIcon = ImageUtils.createImageIcon(Constants.ICON_USER,
         "user");
-    ImageIcon serverIcon = ImageUtils.createImageIcon(Constants.ICON_SERVER,
+    private ImageIcon serverIcon = ImageUtils.createImageIcon(Constants.ICON_SERVER,
         "server");
-    ImageIcon serversIcon = ImageUtils.createImageIcon(Constants.ICON_SERVERS,
+    private ImageIcon serversIcon = ImageUtils.createImageIcon(Constants.ICON_SERVERS,
         "servers");
 
-    public ServerUserRenderer() {}
+    ServerUserRenderer() {}
 
     public Component getTreeCellRendererComponent(
             JTree tree,
@@ -686,30 +650,19 @@ class ServerUserRenderer extends DefaultTreeCellRenderer {
                 hasFocus);
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
         if (node.getPath().length != 2) {
-            if (isServerNode(value))
-                setIcon(serverIcon);
-            else
-                setIcon(userIcon);
-        } else {
-            if (isServerNode(value))
-                if (node.getChildCount() > 0)
-                    setIcon(serversIcon);
-                else
-                    setIcon(serverIcon);
-            else
-                if (node.getChildCount() > 0)
-                    setIcon(usersIcon);
-                else
-                    setIcon(userIcon);
-        }
+            setIcon(isServerNode(value) ? serverIcon : userIcon);
+        } else if (isServerNode(value))
+            setIcon(node.getChildCount() > 0 ? serversIcon : serverIcon);
+        else if (node.getChildCount() > 0)
+            setIcon(usersIcon);
+        else
+            setIcon(userIcon);
 
         return this;
     }
 
-    protected boolean isServerNode(Object value) {
+    private boolean isServerNode(Object value) {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-        if (node.getUserObject() instanceof ServerNode)
-            return true;
-        return false;
+        return node.getUserObject() instanceof ServerNode;
     }
 }
