@@ -81,7 +81,7 @@ public class LdapConnector {
      *
      * @throws java.lang.Exception
      */
-    public void setInitialContext() throws Exception {
+    private void setInitialContext() throws Exception {
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, INIT_CTX);
         env.put(Context.PROVIDER_URL, url);
@@ -89,8 +89,6 @@ public class LdapConnector {
         try {
             dirContext = new InitialDirContext(env);
 
-            if (dirContext == null)
-                throw new Exception(rb.getString("error.ldap.context"));
         } catch (Exception e) {
             logger.log(Level.SEVERE, "error initializing LDAP Context", e);
             throw new Exception(rb.getString("error.ldap.context"));
@@ -106,7 +104,7 @@ public class LdapConnector {
      * @return A String with the cn of the person, or null if the person was not found
      * @throws java.lang.Exception
      */
-    public String searchByUID(String uid) throws Exception {
+    private String searchByUID(String uid) throws Exception {
         SearchControls controls = new SearchControls();
         controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         NamingEnumeration<SearchResult> results = dirContext.search(
@@ -114,11 +112,10 @@ public class LdapConnector {
                 "(&" + objectclass + "(uid=" + uid + "))",
                 controls);
         while (results.hasMore()) {
-            SearchResult searchResult = (SearchResult) results.next();
+            SearchResult searchResult = results.next();
             Attributes attributes = searchResult.getAttributes();
             Attribute attr = attributes.get("cn");
-            String cn = (String) attr.get();
-            return cn;
+            return (String) attr.get();
         }
         return null;
 
@@ -132,14 +129,13 @@ public class LdapConnector {
     private void writeCertToFile(byte[] cert, String filename) {
         try {
             FileOutputStream os = new FileOutputStream(filename);
-            StringBuffer contentBuffer = new StringBuffer();
-            contentBuffer.append("-----BEGIN CERTIFICATE-----\n");
-            contentBuffer.append(Base64.encodeBytes(cert));
-            contentBuffer.append("\n-----END CERTIFICATE-----\n");
 
             // write to file
             Writer wr = new OutputStreamWriter(os, Charset.forName("UTF-8"));
-            wr.write(contentBuffer.toString());
+            String contentBuffer = "-----BEGIN CERTIFICATE-----\n" +
+                    Base64.encodeBytes(cert) +
+                    "\n-----END CERTIFICATE-----\n";
+            wr.write(contentBuffer);
             wr.flush();
 
             os.close();
@@ -156,14 +152,14 @@ public class LdapConnector {
      * @throws java.lang.Exception
      */
     public Hashtable<String, byte[]> getAllPersonWithCertificates() throws Exception {
-        Hashtable<String, byte[]> returnTable = new Hashtable<String, byte[]>();
+        Hashtable<String, byte[]> returnTable = new Hashtable<>();
 
         SearchControls controls = new SearchControls();
         controls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         try {
             NamingEnumeration<SearchResult> results = dirContext.search(filterDN, objectclass, controls);
             while (results.hasMore()) {
-                SearchResult searchResult = (SearchResult) results.next();
+                SearchResult searchResult = results.next();
                 Attributes attributes = searchResult.getAttributes();
                 Attribute attr = attributes.get("cn");
                 String cn = (String) attr.get();
