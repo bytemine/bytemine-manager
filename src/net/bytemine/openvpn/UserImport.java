@@ -30,7 +30,7 @@ public abstract class UserImport {
     
     private boolean createCertificatesForUsers = true;
 
-    protected UserImport(boolean createCertificatesForUsers) {
+    UserImport(boolean createCertificatesForUsers) {
         this.createCertificatesForUsers = createCertificatesForUsers;
     }
 
@@ -41,7 +41,7 @@ public abstract class UserImport {
         generatedUsers++;
     }
 
-    public static void incImportedUsers() {
+    static void incImportedUsers() {
         importedUsers++;
     }
 
@@ -49,7 +49,7 @@ public abstract class UserImport {
         notLinkedUsers++;
     }
 
-    public static void incNotLinkedUsers(int number) {
+    static void incNotLinkedUsers(int number) {
         notLinkedUsers += number;
     }
 
@@ -65,7 +65,7 @@ public abstract class UserImport {
         notLinkedCerts++;
     }
     
-    public static void decNotLinkedCerts() {
+    static void decNotLinkedCerts() {
         notLinkedCerts--;
     }
 
@@ -85,14 +85,11 @@ public abstract class UserImport {
      * @param number The number to format
      * @return a formatted String
      */
-    protected String formatStatusNumber(int number) {
-        if (number < 10)
-            return "  " + number;
-        else
-            return "" + number;
+    String formatStatusNumber(int number) {
+        return number < 10 ? "  " + number : "" + number;
     }
 
-    public boolean isCreateCertificatesForUsers() {
+    boolean isCreateCertificatesForUsers() {
         return createCertificatesForUsers;
     }
 
