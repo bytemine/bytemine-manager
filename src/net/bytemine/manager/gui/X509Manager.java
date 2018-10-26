@@ -54,24 +54,24 @@ public class X509Manager {
     private JFrame parentFrame = null;
     private JComponent parent = null;
 
-    private Vector<Integer> types = new Vector<Integer>();
+    private Vector<Integer> types = new Vector<>();
     private Server server = null;
     private User user = null;
     private int connectedX509 = -1;
-    private Vector<Integer> assignedX509Ids = new Vector<Integer>();
+    private Vector<Integer> assignedX509Ids = new Vector<>();
     private UserDetails userDetails = null;
     private ServerDetails serverDetails = null;
     private JFrame mgmtFrame = null;
 
 
-    public X509Manager(JFrame parent, Server s) {
+    X509Manager(JFrame parent, Server s) {
         parentFrame = parent;
         server = s;
         types.add(X509.X509_TYPE_SERVER);
         connectedX509 = server.getX509id();
     }
 
-    public X509Manager(JFrame parent, User u) {
+    X509Manager(JFrame parent, User u) {
         parentFrame = parent;
         user = u;
         types.add(X509.X509_TYPE_CLIENT);
@@ -99,7 +99,7 @@ public class X509Manager {
     }
     
     
-    public X509Manager(JComponent parent, Server s) {
+    X509Manager(JComponent parent, Server s) {
         serverDetails = null;
         this.parent = parent;
         server = s;
@@ -108,7 +108,7 @@ public class X509Manager {
         connectedX509 = server.getX509id();
     }
     
-    public X509Manager(JComponent parent, User u) {
+    X509Manager(JComponent parent, User u) {
         userDetails = null;
         this.parent = parent;
         user = u;
@@ -119,24 +119,24 @@ public class X509Manager {
     
     public X509Manager(Server s) {
         server = s;
-        types = new Vector<Integer>();
+        types = new Vector<>();
         types.add(X509.X509_TYPE_SERVER);
         connectedX509 = server.getX509id();
     }
     
     public X509Manager(User u) {
         user = u;
-        types = new Vector<Integer>();
+        types = new Vector<>();
         types.add(X509.X509_TYPE_SERVER);
         connectedX509 = user.getX509id();
     }
 
 
-    public void showX509ManagerFrame() {
+    void showX509ManagerFrame() {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
@@ -176,6 +176,7 @@ public class X509Manager {
             location = GuiUtils.getOffsetLocation(parentFrame);
         else if (parent != null)
             location = GuiUtils.getOffsetLocation(parent);
+        assert location != null;
         mgmtFrame.setLocation(location.x, location.y);
         CssRuleManager.getInstance().format(mgmtFrame);
 
@@ -185,7 +186,7 @@ public class X509Manager {
     
     
     
-    public JPanel createX509ManagerPanel() {
+    JPanel createX509ManagerPanel() {
         final ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
         
         JPanel mainPanel = new JPanel(new MigLayout("fill"));
@@ -208,70 +209,52 @@ public class X509Manager {
         noCertificate[2] = "";
         allCertificates.add(noCertificate);
 
-        for (Iterator<Integer> iterator = types.iterator(); iterator.hasNext();) {
-            int type = iterator.next();
+        types.forEach(type -> {
             allCertificates.addAll(X509Queries.getX509TypeOverview(type));
             assignedX509Ids.addAll(X509Queries.getAssignedX509Ids(type));
-        }
+        });
 
         JPanel textPanel = new JPanel(new MigLayout("fillx"));
         ButtonGroup group = new ButtonGroup();
-        for (Iterator<String[]> it = allCertificates.iterator(); it.hasNext();) {
-            String[] strings = it.next();
+        allCertificates.forEach(strings -> {
             final int x509id = Integer.parseInt(strings[0]);
-
             JLabel availability = new JLabel(rb.getString("x509.mgmt.available"));
             if (assignedX509Ids.contains(x509id)) {
                 availability.setText(rb.getString("x509.mgmt.assigned"));
                 availability.setForeground(Color.RED);
             }
-
             JLabel text = new JLabel(
                     strings[1] + ", " + strings[2]);
             text.setFont(Constants.FONT_PLAIN);
-
             JRadioButton radio = new JRadioButton();
             if (connectedX509 == x509id)
                 radio.setSelected(true);
             else
                 radio.setSelected(false);
             group.add(radio);
+            radio.addActionListener(e -> {
+                AbstractButton radio1 = (AbstractButton) e.getSource();
+                boolean selected = radio1.getModel().isSelected();
+                if (selected)
+                    connectedX509 = x509id;
 
-            radio.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    AbstractButton radio = (AbstractButton) e.getSource();
-                    boolean selected = radio.getModel().isSelected();
-                    if (selected)
-                        connectedX509 = x509id;
-                    
-                    ManagerGUI.serverUserTreeModel.setUnsavedData(true);
-                    saveButton.setText(rb.getString("x509.mgmt.savebutton") + " *");
-                }
+                ManagerGUI.serverUserTreeModel.setUnsavedData(true);
+                saveButton.setText(rb.getString("x509.mgmt.savebutton") + " *");
             });
-
             textPanel.add(radio);
             textPanel.add(text);
             textPanel.add(availability, "gapleft 12, wrap");
-        }
+        });
         JScrollPane scrollPane = new JScrollPane(textPanel);
 
         JButton closeButton = new JButton();
-        closeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                mgmtFrame.dispose();
-            }
-        });
+        closeButton.addActionListener(e -> mgmtFrame.dispose());
         closeButton.setText(rb.getString("x509.mgmt.closebutton"));
 
-        saveButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                saveButton.setText(rb.getString("x509.mgmt.savebutton"));
-                ManagerGUI.serverUserTreeModel.setUnsavedData(false);
-                apply(mgmtFrame);
-            }
+        saveButton.addActionListener(e -> {
+            saveButton.setText(rb.getString("x509.mgmt.savebutton"));
+            ManagerGUI.serverUserTreeModel.setUnsavedData(false);
+            apply(mgmtFrame);
         });
         saveButton.setText(rb.getString("x509.mgmt.savebutton"));
 
@@ -299,9 +282,7 @@ public class X509Manager {
                 return;
             else
                 try {
-                    for (Iterator<Integer> iterator = types.iterator(); iterator
-                            .hasNext();) {
-                        int type = iterator.next();
+                    for (Integer type : types) {
                         // delete previous assignment
                         X509Queries.deleteX509Assignment(connectedX509, type);
                     }
