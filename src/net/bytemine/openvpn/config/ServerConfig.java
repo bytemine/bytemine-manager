@@ -9,6 +9,7 @@
 package net.bytemine.openvpn.config;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -34,8 +35,8 @@ import net.bytemine.utility.StringUtils;
 public class ServerConfig {
     
     private static Logger logger = Logger.getLogger(ClientConfig.class.getName());
-    private String exportPath = null;
-    private String configFilename = null;
+    private String exportPath;
+    private String configFilename;
     private HashMap<String, String> params = null;
     private String content = null;
     private Server server;
@@ -51,14 +52,10 @@ public class ServerConfig {
      * Retrieves all necessary data and puts it into a HashMap
      */
     private void prepareParams() throws Exception {
-        this.params = new HashMap<String, String>();
+        this.params = new HashMap<>();
 
-        X509 rootX509 = X509Utils.loadRootX509();       
-        if (rootX509 == null)
-            this.params.put(VPNConfigurationConstants.ROOT_CA, "");
-        else
-            this.params.put(VPNConfigurationConstants.ROOT_CA, 
-                    FileUtils.appendPathSeparator(server.getExportPath()) + rootX509.getFileName());    
+        X509 rootX509 = X509Utils.loadRootX509();
+        this.params.put(VPNConfigurationConstants.ROOT_CA, rootX509 == null ? "" : FileUtils.appendPathSeparator(server.getExportPath()) + rootX509.getFileName());
 
         String keyfilepath = FileUtils.appendPathSeparator(server.getExportPath());
         this.params.put(VPNConfigurationConstants.CRT,
@@ -84,20 +81,11 @@ public class ServerConfig {
         }
         
         // determine whether cc should be activated and if, set the path
-        if (server.getVpncc())
-            this.params.put(VPNConfigurationConstants.CCD, "client-config-dir "+server.getVpnccpath());
-        else
-            this.params.put(VPNConfigurationConstants.CCD, ";client-config-dir ccd");
-        
-        if (server.getVpnRedirectGateway())
-            this.params.put(VPNConfigurationConstants.SERVER_GATEWAY, "push \"redirect-gateway\"");
-        else
-            this.params.put(VPNConfigurationConstants.SERVER_GATEWAY, ";push \"redirect-gateway\"");
-        
-        if (server.getVpnDuplicateCN())
-            this.params.put(VPNConfigurationConstants.DUPLICATE_CN, "duplicate-cn");
-        else
-            this.params.put(VPNConfigurationConstants.DUPLICATE_CN, ";duplicate-cn");
+        this.params.put(VPNConfigurationConstants.CCD, server.getVpncc() ? "client-config-dir " + server.getVpnccpath() : ";client-config-dir ccd");
+
+        this.params.put(VPNConfigurationConstants.SERVER_GATEWAY, server.getVpnRedirectGateway() ? "push \"redirect-gateway\"" : ";push \"redirect-gateway\"");
+
+        this.params.put(VPNConfigurationConstants.DUPLICATE_CN, server.getVpnDuplicateCN() ? "duplicate-cn" : ";duplicate-cn");
         
         this.params.put(VPNConfigurationConstants.SERVER_USER, "user "+server.getVpnUser());
         this.params.put(VPNConfigurationConstants.SERVER_GROUP, "group "+server.getVpnGroup());
@@ -118,14 +106,8 @@ public class ServerConfig {
         necessaryData[2] = server.getVpnNetworkAddress();
         necessaryData[3] = server.getVpnDevice() + "";
         necessaryData[4] = server.getUserfilePath();
-        
-        for (int i = 0; i < necessaryData.length; i++) {
-            String data = necessaryData[i];
-            if (StringUtils.isEmptyOrWhitespaces(data))
-                return false;
-        }
-        
-        return true;
+
+        return Arrays.stream(necessaryData).noneMatch(StringUtils::isEmptyOrWhitespaces);
     }
     
     
