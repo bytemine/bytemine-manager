@@ -188,7 +188,7 @@ class ServerComparator implements Comparator<String[]> {
     }
 
     public int compare(String[] s1, String[] s2) {
-        return compare(s1, s2, sortCol, isSortAsc);
+        return compare(s1, s2);
     }
 
 
