@@ -20,7 +20,7 @@ public class StatusWatcher extends TimerTask {
 
     private Socket connectionSocket;
 
-    public StatusWatcher(Socket socket) {
+    StatusWatcher(Socket socket) {
         this.connectionSocket = socket;
     }
 
@@ -28,7 +28,7 @@ public class StatusWatcher extends TimerTask {
     public final void run() {
         try {
             InputStream stream = this.connectionSocket.getInputStream();
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
 
             int c;
 
