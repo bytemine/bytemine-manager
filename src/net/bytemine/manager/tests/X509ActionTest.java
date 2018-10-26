@@ -208,7 +208,7 @@ public class X509ActionTest {
         assertFileExists(Configuration.getInstance().CERT_EXPORT_PATH + File.separator + "_"+server.getName() + File.separator + serverCert.getFileName());
     }
     
-    private void testRootCreation() throws Exception {
+    private void testRootCreation() {
         X509Generator gen = new X509Generator();
         try {
             gen.createRootCertImmediately();
@@ -234,8 +234,9 @@ public class X509ActionTest {
             e1.printStackTrace();
         }
         
-        X509Certificate cert = null;
+        X509Certificate cert;
         try {
+            assert path != null;
             File certFile = new File(path);
 
             byte[] encodedCert = new byte[(int) certFile.length()];
@@ -247,38 +248,29 @@ public class X509ActionTest {
             cert = X509Utils.regainX509Certificate(certContent);
             
             assertEquals(cert.getType(), "X.509");
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        } catch (CertificateException e1) {
-            e1.printStackTrace();
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
     
     private void testExportAllToFilesystem() {
-        String path = null;
+        String path;
         try {
             X509Action.exportAllCertificatesToFilesystem();
         } catch (Exception e1) {
             e1.printStackTrace();
         }
         
-        X509Certificate cert = null;
+        X509Certificate cert;
         try {
             path = Configuration.getInstance().CERT_EXPORT_PATH;
             X509FileImporter im = new X509FileImporter(new File(path+"/"+username));
             Vector<String> ids = im.importClientCertsAndKeys(false);
-            for (Iterator<String> iterator = ids.iterator(); iterator.hasNext();) {
-                String x509id = (String) iterator.next();
+            for (String x509id : ids) {
                 X509 x509 = X509.getX509ById(Integer.parseInt(x509id));
                 cert = X509Utils.regainX509Certificate(x509.getContent());
                 assertEquals(cert.getType(), "X.509");
             }
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        } catch (CertificateException e1) {
-            e1.printStackTrace();
         } catch(Exception e) {
             e.printStackTrace();
         }
