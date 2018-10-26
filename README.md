@@ -4,8 +4,7 @@ The *bytemine manager* is a graphical Desktop-Application
 to manage OpenVPN Servers as well as users and certificates
 involved in the process.
 
-The *bytemine manager* requires a Java 1.6 or 1.7 (or to use Sun
-versioning, 6 or 7) runtime environment.
+The *bytemine manager* requires a Java 8 or newer runtime environment.
 
 ## New bytemine manager repository
 
@@ -16,7 +15,7 @@ inconvenience.
 
 ### General requirements:
 
-* JDK, at least version 6
+* JDK, at least version 8
 * ant
 * ant-optional package
 
