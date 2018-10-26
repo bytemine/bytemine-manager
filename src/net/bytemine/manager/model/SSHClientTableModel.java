@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -37,14 +38,14 @@ public class SSHClientTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = -5940231640180913764L;
 
-    ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
+    private ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-    protected int sortCol = 0;
-    protected boolean isSortAsc = true;
+    private int sortCol = 0;
+    private boolean isSortAsc = true;
     private boolean isMac = false;
 
     // the column names to display    
-    String[] columnNames = {rb.getString("ssh_client.overview.column1"),
+    private String[] columnNames = {rb.getString("ssh_client.overview.column1"),
             rb.getString("ssh_client.overview.column2"),
             rb.getString("ssh_client.overview.column2a"),
             rb.getString("ssh_client.overview.column3"),
@@ -53,7 +54,7 @@ public class SSHClientTableModel extends AbstractTableModel {
     };
 
     // contains the data of a table row
-    Vector<String[]> rowData = new Vector<String[]>();
+    private Vector<String[]> rowData = new Vector<>();
 
     // map in which row numbers and usernames are stored as key-value-pairs
     private static HashMap<String, String> nameRowMapping;
@@ -68,25 +69,22 @@ public class SSHClientTableModel extends AbstractTableModel {
      * Reinitializes the model by translating the column names
      * using the users resource bundle
      */
-    public void reinit() {
+    private void reinit() {
         rb = ResourceBundleMgmt.getInstance().getUserBundle();
-        if (isMac)
-            // third column is a MAC address, not an IP
-            columnNames = new String[]{rb.getString("ssh_client.overview.column1"),
-                    rb.getString("ssh_client.overview.column2"),
-                    rb.getString("ssh_client.overview.column2b"),
-                    rb.getString("ssh_client.overview.column3"),
-                    rb.getString("ssh_client.overview.column4"),
-                    rb.getString("ssh_client.overview.column5")
-            };
-        else
-            columnNames = new String[]{rb.getString("ssh_client.overview.column1"),
+        // third column is a MAC address, not an IP
+        columnNames = isMac ? new String[]{rb.getString("ssh_client.overview.column1"),
+                rb.getString("ssh_client.overview.column2"),
+                rb.getString("ssh_client.overview.column2b"),
+                rb.getString("ssh_client.overview.column3"),
+                rb.getString("ssh_client.overview.column4"),
+                rb.getString("ssh_client.overview.column5")
+        } : new String[]{rb.getString("ssh_client.overview.column1"),
                 rb.getString("ssh_client.overview.column2"),
                 rb.getString("ssh_client.overview.column2a"),
                 rb.getString("ssh_client.overview.column3"),
                 rb.getString("ssh_client.overview.column4"),
                 rb.getString("ssh_client.overview.column5")
-            };
+        };
     }
 
 
@@ -95,12 +93,9 @@ public class SSHClientTableModel extends AbstractTableModel {
      */
     public void reloadData(Vector<String[]> data) {
         rowData = data;
-        
-        if (!data.isEmpty()) {
-            if (StringUtils.isMACAddress(((String[])data.get(0))[2]))
-                // value is not an IP but a MAC address
-                isMac = true;
-        }
+
+        // value is not an IP but a MAC address
+        if (!data.isEmpty() && StringUtils.isMACAddress(data.get(0)[2])) isMac = true;
 
         refreshMapping();
         
@@ -117,8 +112,7 @@ public class SSHClientTableModel extends AbstractTableModel {
      */
     private void refreshMapping() {
         int rowNr = 0;
-        for (Iterator<String[]> iterator = rowData.iterator(); iterator.hasNext();) {
-            String[] row = (String[]) iterator.next();
+        for (String[] row : rowData) {
             this.addNameRowMapping(rowNr + "", row[0]);
             rowNr++;
         }
@@ -144,7 +138,7 @@ public class SSHClientTableModel extends AbstractTableModel {
 
 
     public Object getValueAt(int row, int col) {
-        String[] rowStr = (String[]) rowData.get(row);
+        String[] rowStr = rowData.get(row);
         if (col == 3 || col == 4) {
             String bytes = rowStr[col];
             return StringUtils.formatBytes(bytes);
@@ -161,9 +155,9 @@ public class SSHClientTableModel extends AbstractTableModel {
         nameRowMapping = nameRowMap;
     }
 
-    public void addNameRowMapping(String key, String value) {
+    private void addNameRowMapping(String key, String value) {
         if (nameRowMapping == null)
-            nameRowMapping = new HashMap<String, String>();
+            nameRowMapping = new HashMap<>();
         nameRowMapping.put(key, value);
     }
 
@@ -188,13 +182,10 @@ public class SSHClientTableModel extends AbstractTableModel {
             else
                 sortCol = modelIndex;
 
-            for (int i = 0; i < getColumnCount(); i++) {
-                TableColumn column = colModel.getColumn(i);
-                column.setHeaderValue(getColumnName(column.getModelIndex()));
-            }
+            IntStream.range(0, getColumnCount()).mapToObj(colModel::getColumn).forEach(column -> column.setHeaderValue(getColumnName(column.getModelIndex())));
             table.getTableHeader().repaint();
 
-            Collections.sort(rowData, new SSHClientComparator(isSortAsc, sortCol));
+            rowData.sort(new SSHClientComparator(isSortAsc, sortCol));
             // refresh the mapping
             refreshMapping();
             
@@ -207,16 +198,16 @@ public class SSHClientTableModel extends AbstractTableModel {
 
 
 class SSHClientComparator implements Comparator<String[]> {
-    protected boolean isSortAsc;
-    protected int sortCol;
+    private boolean isSortAsc;
+    private int sortCol;
 
-    public SSHClientComparator(boolean sortAsc, int sortCol) {
+    SSHClientComparator(boolean sortAsc, int sortCol) {
         this.isSortAsc = sortAsc;
         this.sortCol = sortCol;
     }
 
     public int compare(String[] s1, String[] s2) {
-        int result = 0;
+        int result;
         String i1_str = s1[sortCol];
         String i2_str = s2[sortCol];
         if (i1_str == null)
@@ -236,16 +227,12 @@ class SSHClientComparator implements Comparator<String[]> {
             } catch(Exception e2) {}
         }
 
+        // compare the dates
         if (StringUtils.isDigit(i1_str) && StringUtils.isDigit(i2_str)) {
             Integer i1 = Integer.parseInt(i1_str);
             Integer i2 = Integer.parseInt(i2_str);
             result = i1.compareTo(i2);
-        } else if(d1 != null && d2 != null) {
-            // compare the dates
-            result = d1.compareTo(d2);
-        } else {
-            result = i1_str.compareTo(i2_str);
-        }
+        } else result = d1 != null && d2 != null ? d1.compareTo(d2) : i1_str.compareTo(i2_str);
 
 
         if (!isSortAsc)
