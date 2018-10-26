@@ -58,13 +58,13 @@ public class X509Generator {
     private static Logger logger = Logger.getLogger(X509Generator.class.getName());
     private static ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-    net.bytemine.crypto.x509.X509Generator generator = null;
+    private net.bytemine.crypto.x509.X509Generator generator;
 
     // the bundles to load data from
-    ResourceBundle rootCertBundle = null;
-    ResourceBundle interCertBundle = null;
-    ResourceBundle serverCertBundle = null;
-    ResourceBundle clientCertBundle = null;
+    private ResourceBundle rootCertBundle = null;
+    private ResourceBundle interCertBundle = null;
+    private ResourceBundle serverCertBundle = null;
+    private ResourceBundle clientCertBundle = null;
 
     // export to file?
     private boolean exportCert = true;
@@ -75,7 +75,7 @@ public class X509Generator {
     // export plain text additionally?
     private boolean exportText = false;
     // key strength
-    int keyStrength = 1024;
+    private int keyStrength;
 
 
     public X509Generator() {
@@ -113,6 +113,7 @@ public class X509Generator {
             keyStrength = Integer.parseInt(Configuration.getInstance().X509_KEY_STRENGTH);
         } catch (NumberFormatException nfe) {
             logger.warning("no valid key strength specified. using default value");
+            assert rootCertBundle != null;
             keyStrength = Integer.parseInt(rootCertBundle.getString("key_strength"));
         }
 
@@ -127,13 +128,12 @@ public class X509Generator {
      * Creates a root certificate
      * can export it to file system
      *
-     * @throws java.lang.Exception
      */
-    public void createRootCert() throws Exception {
+    void createRootCert() {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.rootcert.tooltip"));
 
@@ -162,9 +162,8 @@ public class X509Generator {
     /**
      * Creates a root certificate in a new Thread
      *
-     * @throws java.lang.Exception
      */
-    public void createRootCertImmediately() throws Exception {
+    public void createRootCertImmediately() {
         try {
             String subject = Configuration.getInstance().X509_ROOT_SUBJECT;
             String validFrom = Configuration.getInstance().X509_ROOT_VALID_FROM;
@@ -182,8 +181,8 @@ public class X509Generator {
             exportText = Boolean.parseBoolean(rootCertBundle.getString("export_text"));
             exportKey = Boolean.parseBoolean(rootCertBundle.getString("export_key"));
 
-            String contentStr = null;
-            String keyStr = null;
+            String contentStr;
+            String keyStr;
             String issuer = PrincipalUtil.getIssuerX509Principal(cert).toString();
 
             X509Exporter exporter = new X509Exporter(
@@ -234,13 +233,12 @@ public class X509Generator {
      * can export it to file system
      *
      * @param rootCert The root certificate
-     * @throws java.lang.Exception
      */
-    public void createIntermediateCert(final X509Certificate rootCert) throws Exception {
+    private void createIntermediateCert(final X509Certificate rootCert) {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.intercert.tooltip"));
 
@@ -263,9 +261,8 @@ public class X509Generator {
      * can export it to file system
      *
      * @param rootCert The root certificate
-     * @throws java.lang.Exception
      */
-    public void createIntermediateCertImmediately(final X509Certificate rootCert) throws Exception {
+    private void createIntermediateCertImmediately(final X509Certificate rootCert) {
         try {
             X509 rootX509 = X509Utils.loadRootX509();
             PrivateKey rootPrivKey = X509Utils.extractRootPrivateKey(rootX509);
@@ -276,8 +273,8 @@ public class X509Generator {
             
             PrivateKey privKey = generator.getPrivateKey();
 
-            String contentStr = null;
-            String keyStr = null;
+            String contentStr;
+            String keyStr;
             String issuer = PrincipalUtil.getIssuerX509Principal(cert).toString();
             String subject = PrincipalUtil.getSubjectX509Principal(cert).toString();
 
@@ -328,13 +325,12 @@ public class X509Generator {
      *
      * @param server The server to create a certificate for
      * @param validFor Number of days the certificate will be valid
-     * @throws java.lang.Exception
      */
-    public void createServerCert(final Server server, final String validFor) throws Exception {
+    public void createServerCert(final Server server, final String validFor) {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.servercert.tooltip"));
 
@@ -357,9 +353,8 @@ public class X509Generator {
      *
      * @param server The server to create a certificate for
      * @param validFor Number of days the certificate will be valid
-     * @throws java.lang.Exception
      */
-    public void createServerCertImmediately(Server server, String validFor) throws Exception {
+    public void createServerCertImmediately(Server server, String validFor) {
         try {
             X509 rootX509 = X509Utils.loadRootX509();
             X509Certificate rootCert = (X509Certificate)
@@ -389,8 +384,8 @@ public class X509Generator {
             PrivateKey privKey = generator.getPrivateKey();
 
             String issuer = PrincipalUtil.getIssuerX509Principal(rootCert).toString();
-            String contentStr = null;
-            String keyStr = null;
+            String contentStr;
+            String keyStr;
 
             exportBinary = Boolean.parseBoolean(serverCertBundle.getString("export_binary"));
             exportText = Boolean.parseBoolean(serverCertBundle.getString("export_text"));
@@ -442,14 +437,13 @@ public class X509Generator {
      * Creates Diffie Hellman parameters
      * Runs in own Thread
      *
-     * @throws Exception
      */
-    public void createAndExportDHParameters() throws Exception {
+    public void createAndExportDHParameters() {
 
         SwingWorker<String, Void> generatorWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 try {
                     t = Thread.currentThread();
                     ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.dhparameters.tooltip"));
@@ -480,9 +474,8 @@ public class X509Generator {
      * can export it to file system
      *
      * @param u The user to create the certificate for
-     * @throws java.lang.Exception
      */
-    public void createClientCert(final User u) throws Exception {
+    public void createClientCert(final User u) {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
@@ -522,9 +515,7 @@ public class X509Generator {
                 
                 password = Dialogs.showPKCS12PasswordDialog(ManagerGUI.mainFrame, dialogHeadline);
 
-                if (password == null)
-                    if (Dialogs.showReallySkipPkcs12Password(ManagerGUI.mainFrame))
-                        break;
+                if (password == null && Dialogs.showReallySkipPkcs12Password(ManagerGUI.mainFrame)) break;
             }
         }
         
@@ -538,9 +529,8 @@ public class X509Generator {
      *
      * @param user The user to create the certificate for
      * @param pkcs12Password The PKCS12 password or null
-     * @throws java.lang.Exception
      */
-    public void createClientCertImmediately(User user, String pkcs12Password) throws Exception {
+    private void createClientCertImmediately(User user, String pkcs12Password) {
         createClientCertImmediately(user, pkcs12Password, null);
     }
 
@@ -552,16 +542,10 @@ public class X509Generator {
      * @param user The user to create the certificate for
      * @param pkcs12Password The PKCS12 password or null
      * @param validFor Number of days the certificate will be valid
-     * @throws java.lang.Exception
      */
-    public void createClientCertImmediately(User user, String pkcs12Password, String validFor) throws Exception {
+    public void createClientCertImmediately(User user, String pkcs12Password, String validFor) {
         try {
-            X509 signingX509 = null;
-            if (ManagerApp.intermediate) {
-                signingX509 = X509Utils.loadIntermediateX509();
-            } else {
-                signingX509 = X509Utils.loadRootX509();
-            }
+            X509 signingX509 = ManagerApp.intermediate ? X509Utils.loadIntermediateX509() : X509Utils.loadRootX509();
             X509Certificate signingCert = (X509Certificate)
                     X509Serializer.getInstance().fromXML(
                             signingX509.getCertSerialized()
@@ -591,8 +575,8 @@ public class X509Generator {
             
             PrivateKey privKey = generator.getPrivateKey();
 
-            String contentStr = null;
-            String keyStr = null;
+            String contentStr;
+            String keyStr;
 
             exportBinary = Boolean.parseBoolean(clientCertBundle.getString("export_binary"));
             exportText = Boolean.parseBoolean(clientCertBundle.getString("export_text"));
@@ -670,9 +654,8 @@ public class X509Generator {
     /**
      * Renews an existing certificate
      * @param x509 The certificate to renew
-     * @throws Exception
      */
-    public void renewCertificate(final X509 x509) throws Exception {
+    void renewCertificate(final X509 x509) {
 
         SwingWorker<String, Void> renewWorker = new SwingWorker<String, Void>() {
             Thread currentThread;
@@ -756,8 +739,7 @@ public class X509Generator {
             dnUtil.setCn(username);
             if (ou != null)
                 dnUtil.setOu(ou);
-            String newDN = dnUtil.merge();
-            return newDN;
+            return dnUtil.merge();
         } catch (Exception e) {
             logger.warning("unable to modify client subject String, 'cn=' not found: " + subject);
             return subject;
@@ -772,7 +754,7 @@ public class X509Generator {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t, rb.getString("statusBar.crl.tooltip"));
 
