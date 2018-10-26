@@ -51,10 +51,10 @@ public class UpdateMgmt {
     private String[] jars;
 
     private static UpdateMgmt instance;
-    private boolean displayNoUpdate = true;
+    private boolean displayNoUpdate;
     private boolean emptyYaml = false;
     private Updater updater;
-    private List<RepoEntry> repoEntries = new ArrayList<RepoEntry>();
+    private List<RepoEntry> repoEntries = new ArrayList<>();
     private String changeLog = null;
 
 
@@ -95,7 +95,7 @@ public class UpdateMgmt {
             Thread t;
             boolean errorOccurred = false;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 try {
                     ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
                     t = Thread.currentThread();
@@ -134,20 +134,15 @@ public class UpdateMgmt {
                     Object yaml = reader.read();
                     if (yaml instanceof List<?>) {
                         List<Object> list = (List<Object>) yaml;
-                        for (Iterator<Object> iterator = list.iterator(); iterator.hasNext();) {
-                            Object obj = iterator.next();
-                            HashMap<String, Object> map = (HashMap<String, Object>) obj;
-                            RepoEntry entry = new RepoEntry(map);
-
+                        list.stream().map(obj -> (HashMap<String, Object>) obj).map(RepoEntry::new).forEach(entry -> {
                             repoEntries.add(entry);
-
-                            if(entry.getFilename().startsWith("bytemine-manager")) {
+                            if (entry.getFilename().startsWith("bytemine-manager")) {
                                 newVersion = entry.getVersion();
                                 downloadFilename = entry.getFilename();
                                 checksumFromYaml = entry.getChecksum();
                                 jars = entry.getJars();
                             }
-                        }
+                        });
                     } else {
                         throw new Exception(rb.getString("dialog.update.error_update_location"));
                     }
@@ -209,20 +204,17 @@ public class UpdateMgmt {
                         jarDir.mkdir();
                     
                     // new jars to grab
-                    for (int i = 0; i < jars.length; i++) {
+                    for (String jar : jars) {
                         boolean entryFound = false;
-                        byte[] downloadJar = updater.downloadUpdate(jars[i]);
-                        Iterator<RepoEntry> e = repoEntries.iterator();
+                        byte[] downloadJar = updater.downloadUpdate(jar);
 
-                        while (e.hasNext()) {
-                            RepoEntry entry = (RepoEntry) e.next();
-
-                            if (entry.getFilename().equals(jars[i])) {
+                        for (RepoEntry entry : repoEntries) {
+                            if (entry.getFilename().equals(jar)) {
                                 entryFound = true;
                                 if (ChecksumUtils.checkSHA1Checksum(downloadJar, entry.getChecksum())) {
                                     FileUtils.writeBytesToFile(file, Constants.UPDATE_JAR_PATH +
-                                                                System.getProperty("file.separator") +
-                                                                entry.getFilename());
+                                            System.getProperty("file.separator") +
+                                            entry.getFilename());
                                 } else {
                                     // throw Exception
                                 }
@@ -232,7 +224,7 @@ public class UpdateMgmt {
                         if (!entryFound) {
                             // throw exception
                         }
-                        
+
                     }
 
                 }
@@ -268,11 +260,8 @@ public class UpdateMgmt {
      */
     public boolean isUpdateAvailable() {
         String currentVersion = Configuration.getInstance().MANAGER_VERSION;
-        if (!currentVersion.equals(newVersion) && !emptyYaml) {
-            return true;
-        }
+        return !currentVersion.equals(newVersion) && !emptyYaml;
 
-        return false;
     }
 
 
@@ -282,16 +271,15 @@ public class UpdateMgmt {
      * @throws Exception
      */
     private void getAllChangeLogs() throws Exception {
-        StringBuffer changeLogs = new StringBuffer();
+        StringBuilder changeLogs = new StringBuilder();
         String currentVersion = Configuration.getInstance().MANAGER_VERSION;
         String[] currentTokens = StringUtils.tokenize(currentVersion);
 
         Collections.sort(repoEntries);
 
-        for (Iterator<RepoEntry> iter = repoEntries.iterator(); iter.hasNext();) {
-            RepoEntry entry = (RepoEntry) iter.next();
+        for (RepoEntry entry : repoEntries) {
             if ((entry.isNewerThanCurrentVersion(currentTokens)) &&
-                (entry.getChangelog() != null))
+                    (entry.getChangelog() != null))
                 changeLogs.append(updater.askForChangelog(entry.getChangelog()));
         }
 
@@ -306,10 +294,7 @@ public class UpdateMgmt {
      */
     public boolean isUpdateKeystoreExisting() {
         byte[] keystore = LicenceQueries.getKeystore();
-        if (keystore == null)
-            return false;
-        else
-            return true;
+        return keystore != null;
     }
 
 
