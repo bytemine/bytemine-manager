@@ -51,10 +51,9 @@ public class X509TreeModel {
     private JTree tree;
     private X509 x509;
     private DefaultMutableTreeNode topNode = null;
-    private String topNodeName = null;
-    
+
     //all expanded tree nodes
-    private LinkedList<String> expandedTreeObjects = new LinkedList<String>();
+    private LinkedList<String> expandedTreeObjects = new LinkedList<>();
     // has to be suppressed for the expansion
     private boolean supressExpansionEvent = false;
     
@@ -78,7 +77,7 @@ public class X509TreeModel {
     }
 
     private void initialize() {
-        topNodeName = X509Utils.getCnFromSubject(x509.getSubject());
+        String topNodeName = X509Utils.getCnFromSubject(x509.getSubject());
         
         topNode = new DefaultMutableTreeNode(topNodeName);
         createNodes();
@@ -137,7 +136,7 @@ public class X509TreeModel {
      *
      * @param filterString A String to filter the nodes
      */
-    public void reload(String filterString) {
+    private void reload(String filterString) {
         
         DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
         DefaultMutableTreeNode topNode = (DefaultMutableTreeNode)model.getRoot();
@@ -214,35 +213,43 @@ public class X509TreeModel {
      * @param e The ExpansionEvent
      */
     private void processTreeExpansion(TreeExpansionEvent e){
-        if (supressExpansionEvent == false) {
-            TreePath p = (TreePath) e.getPath();
+        processTreeExpansion(e, supressExpansionEvent, expandedTreeObjects);
+    }
+
+    static void processTreeExpansion(TreeExpansionEvent e, boolean supressExpansionEvent, LinkedList<String> expandedTreeObjects) {
+        if (!supressExpansionEvent) {
+            TreePath p = e.getPath();
             Object[] Objs = p.getPath();
             DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
             String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
             expandedTreeObjects.add(myString);
         }
     }
-    
+
     /**
      * Remove the current node from the expanded nodes
      * @param e The ExpansionEvent
      */
     private void processTreeCollapse(TreeExpansionEvent e){
-        TreePath p = (TreePath) e.getPath();
+        processTreeCollapse(e, expandedTreeObjects);
+    }
+
+    static void processTreeCollapse(TreeExpansionEvent e, LinkedList<String> expandedTreeObjects) {
+        TreePath p = e.getPath();
         Object[] Objs = p.getPath();
         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
         String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
         expandedTreeObjects.remove(myString);
     }
-    
-    
+
+
     /**
      * Save the actual tree state to DB
      */
     public void saveState() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Iterator<String> iterator = expandedTreeObjects.iterator(); iterator.hasNext();) {
-            String nodePath = (String) iterator.next();
+            String nodePath = iterator.next();
             sb.append(nodePath);
             if (iterator.hasNext())
                 sb.append("#");
@@ -254,7 +261,7 @@ public class X509TreeModel {
     /**
      * Tries to restore the tree state
      */
-    public void restoreState() {
+    private void restoreState() {
         ServerUserTreeModel.restareTreeState(TREENAME, expandedTreeObjects);
     }
     
@@ -270,7 +277,7 @@ class AttributeNode {
     private String title;
     private String value;
     
-    public AttributeNode(String name, String title, String value) {
+    AttributeNode(String name, String title, String value) {
         this.name = name;
         this.title = title;
         this.value = value;

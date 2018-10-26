@@ -506,13 +506,7 @@ public class ServerUserTreeModel {
      * @param e The ExpansionEvent
      */
     private void processTreeExpansion(TreeExpansionEvent e){
-        if (!supressExpansionEvent) {
-            TreePath p = e.getPath();
-            Object[] Objs = p.getPath();
-            DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
-            String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
-            expandedTreeObjects.add(myString);
-        }
+        X509TreeModel.processTreeExpansion(e, supressExpansionEvent, expandedTreeObjects);
     }
     
     /**
@@ -520,11 +514,7 @@ public class ServerUserTreeModel {
      * @param e The ExpansionEvent
      */
     private void processTreeCollapse(TreeExpansionEvent e){
-        TreePath p = e.getPath();
-        Object[] Objs = p.getPath();
-        DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode) Objs[Objs.length - 1];
-        String myString = TreeUtils.getUserObjectPath(dmtn.getUserObjectPath());
-        expandedTreeObjects.remove(myString);
+        X509TreeModel.processTreeCollapse(e, expandedTreeObjects);
     }
     
     
