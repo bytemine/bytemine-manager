@@ -27,11 +27,11 @@ public class TemplateEngine {
     private Logger logger = Logger.getLogger(TemplateEngine.class.getName());
 
     private String content = null;
-    private String templateDir = null;
-    private HashMap<String, String> params = null;
+    private String templateDir;
+    private HashMap<String, String> params;
 
     public TemplateEngine(String templateFilename) throws Exception {
-        params = new HashMap<String, String>();
+        params = new HashMap<>();
         templateDir = VPNConfigurationConstants.TEMPLATE_PATH;
         
         loadTemplate(templateFilename);
@@ -59,12 +59,9 @@ public class TemplateEngine {
      * @throws Exception
      */
     public String processTemplate() throws Exception {
-        for (Iterator<String> iter = params.keySet().iterator(); iter.hasNext();) {
-            String key = (String) iter.next();
-            content = content.replaceAll("\\$\\{" + key + "}", params.get(key));
-        }
+        params.keySet().forEach(key -> content = content.replaceAll("\\$\\{" + key + "}", params.get(key)));
 
-        if (content.indexOf("${") > -1) {
+        if (content.contains("${")) {
             logger.severe("after processing the template there are still unreplaced marks left");
             throw new Exception("processTemplate - unreplaced marks left");
         }
@@ -77,13 +74,13 @@ public class TemplateEngine {
      * @param key   The param key
      * @param value The param value
      */
-    public void addParam(String key, String value) {
+    private void addParam(String key, String value) {
         params.put(key, value);
     }
 
     public void setParams(HashMap<String, String> params) {
         if (params == null)
-            params = new HashMap<String, String>();
+            params = new HashMap<>();
         this.params = params;
     }
 
