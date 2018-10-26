@@ -71,7 +71,7 @@ public class X509Details {
         SwingWorker<String, Void> generateWorker = new SwingWorker<String, Void>() {
             Thread t;
 
-            protected String doInBackground() throws Exception {
+            protected String doInBackground() {
                 t = Thread.currentThread();
                 ThreadMgmt.getInstance().addThread(t);
 
