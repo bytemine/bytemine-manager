@@ -188,26 +188,7 @@ class ServerComparator implements Comparator<String[]> {
     }
 
     public int compare(String[] s1, String[] s2) {
-        int result = 0;
-        String i1_str = s1[sortCol];
-        String i2_str = s2[sortCol];
-        if (i1_str == null)
-            i1_str = "";
-        if (i2_str == null)
-            i2_str = "";
-
-        if (StringUtils.isDigit(i1_str) && StringUtils.isDigit(i2_str)) {
-            Integer i1 = Integer.parseInt(i1_str);
-            Integer i2 = Integer.parseInt(i2_str);
-            result = i1.compareTo(i2);
-        } else {
-            result = i1_str.compareTo(i2_str);
-        }
-
-
-        if (!isSortAsc)
-            result = -result;
-        return result;
+        return compare(s1, s2, sortCol, isSortAsc);
     }
 
 

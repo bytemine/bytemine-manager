@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -38,18 +39,18 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
 
     ResourceBundle rb = ResourceBundleMgmt.getInstance().getUserBundle();
 
-    protected int sortCol = 0;
-    protected boolean isSortAsc = true;
+    private int sortCol = 0;
+    private boolean isSortAsc = true;
 
     // the column names to display    
-    String[] columnNames = {
+    private String[] columnNames = {
             rb.getString("user.overview.column2"),
             rb.getString("user.overview.column3"),
             rb.getString("user.overview.column4")
     };
 
     // contains the data of a table row
-    Vector<String[]> rowData = UserQueries.getAllUsersAsVectorForTable(this);
+    private Vector<String[]> rowData = UserQueries.getAllUsersAsVectorForTable(this);
 
     // map in which row numbers and ids are stored as key-value-pairs
     private static HashMap<String, String> idRowMapping;
@@ -74,7 +75,7 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
      */
     public void reloadData() {
         rowData = UserQueries.getAllUsersAsVectorForTable(this);
-        Collections.sort(rowData, new UserComparator(isSortAsc, sortCol));
+        rowData.sort(new UserComparator(isSortAsc, sortCol));
         refreshMapping();
         fireTableDataChanged();
     }
@@ -85,11 +86,10 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
      */
     public void refreshMapping() {
     	 int row = 0;
-         for (Iterator<String[]> iterator = rowData.iterator(); iterator.hasNext();) {
-             String[] rowData = (String[]) iterator.next();
-             addIdRowMapping(row + "", rowData[3]);
-             row++;
-         }
+        for (String[] rowData : rowData) {
+            addIdRowMapping(row + "", rowData[3]);
+            row++;
+        }
     }
 
 
@@ -112,13 +112,13 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
 
 
     public Object getValueAt(int row, int col) {
-        String[] rowStr = (String[]) rowData.get(row);
+        String[] rowStr = rowData.get(row);
         return rowStr[col];
     }
 
 
     public void setValueAt(String value, int row, int col) {
-        Object[] rowStr = (Object[]) rowData.get(row);
+        Object[] rowStr = rowData.get(row);
         rowStr[col] = value;
         fireTableCellUpdated(row, col);
     }
@@ -134,7 +134,7 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
 
     public void addIdRowMapping(String key, String value) {
         if (idRowMapping == null)
-            idRowMapping = new HashMap<String, String>();
+            idRowMapping = new HashMap<>();
         idRowMapping.put(key, value);
     }
 
@@ -159,13 +159,10 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
             else
                 sortCol = modelIndex;
 
-            for (int i = 0; i < getColumnCount(); i++) {
-                TableColumn column = colModel.getColumn(i);
-                column.setHeaderValue(getColumnName(column.getModelIndex()));
-            }
+            IntStream.range(0, getColumnCount()).mapToObj(colModel::getColumn).forEach(column -> column.setHeaderValue(getColumnName(column.getModelIndex())));
             table.getTableHeader().repaint();
 
-            Collections.sort(rowData, new UserComparator(isSortAsc, sortCol));
+            rowData.sort(new UserComparator(isSortAsc, sortCol));
             // refresh the mapping
             refreshMapping();
             
@@ -179,16 +176,20 @@ public class UserOverviewTableModel extends AbstractTableModel implements Abstra
 
 
 class UserComparator implements Comparator<String[]> {
-    protected boolean isSortAsc;
-    protected int sortCol;
+    private boolean isSortAsc;
+    private int sortCol;
 
-    public UserComparator(boolean sortAsc, int sortCol) {
+    UserComparator(boolean sortAsc, int sortCol) {
         this.isSortAsc = sortAsc;
         this.sortCol = sortCol;
     }
 
     public int compare(String[] s1, String[] s2) {
-        int result = 0;
+        return compare(s1, s2, sortCol, isSortAsc);
+    }
+
+    private static int compare(String[] s1, String[] s2, int sortCol, boolean isSortAsc) {
+        int result;
         String i1_str = s1[sortCol];
         String i2_str = s2[sortCol];
         if (i1_str == null)
